@@ -1,16 +1,21 @@
 // UI Microcomponents Barrel Export
 // Facilita imports: import { BaseButton, BaseCard } from '@/components/ui'
 
-export { default as BaseButton } from './BaseButton.vue'
-export { default as BaseInput } from './BaseInput.vue'
-export { default as BaseCard } from './BaseCard.vue'
-export { default as BaseModal } from './BaseModal.vue'
-export { default as ProgressBar } from './ProgressBar.vue'
-export { default as ToastContainer } from './ToastContainer.vue'
-export { default as Badge } from './Badge.vue'
-export { default as Spinner } from './Spinner.vue'
-export { default as Avatar } from './Avatar.vue'
-export { default as Skeleton } from './Skeleton.vue'
-export { default as Dropdown } from './Dropdown.vue'
-export { default as DropdownItem } from './DropdownItem.vue'
-export { default as ImageGallery } from './ImageGallery.vue'
+export { default as BaseButton } from "./BaseButton.vue";
+export { default as BaseInput } from "./BaseInput.vue";
+export { default as BaseCard } from "./BaseCard.vue";
+export { default as BaseModal } from "./BaseModal.vue";
+export { default as ProgressBar } from "./ProgressBar.vue";
+export { default as ProgressSteps } from "./ProgressSteps.vue";
+export { default as ToastContainer } from "./ToastContainer.vue";
+export { default as Badge } from "./Badge.vue";
+export { default as Spinner } from "./Spinner.vue";
+export { default as Avatar } from "./Avatar.vue";
+export { default as Skeleton } from "./Skeleton.vue";
+export { default as Dropdown } from "./Dropdown.vue";
+export { default as DropdownItem } from "./DropdownItem.vue";
+export { default as ImageGallery } from "./ImageGallery.vue";
+export { default as ImageUpload } from "./ImageUpload.vue";
+export { default as ProductImageManager } from "./ProductImageManager.vue";
+export { default as SimpleImageManager } from "./SimpleImageManager.vue";
+export { default as UnifiedImageUpload } from "./UnifiedImageUpload.vue";

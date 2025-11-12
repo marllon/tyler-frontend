@@ -1,154 +1,549 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
-import type { Product, ApiResponse } from "@/types";
-import { api } from "@/utils/api";
-
-// Dados dummy para demonstração
-const DUMMY_PRODUCTS: Product[] = [
-  {
-    id: "1",
-    name: "Camiseta Projeto Tyler",
-    description: "Camiseta 100% algodão com logo do projeto. Disponível em várias cores e tamanhos.",
-    price: 59.90,
-    imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
-    stock: 50,
-    active: true,
-    category: "Vestuário",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "2",
-    name: "Caneca",
-    description: "Caneca de porcelana personalizada com mensagem inspiradora.",
-    price: 35.00,
-    imageUrl: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400",
-    stock: 30,
-    active: true,
-    category: "Casa",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "3",
-    name: "Boné Tyler",
-    description: "Boné ajustável bordado com logo do projeto.",
-    price: 45.00,
-    imageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400",
-    stock: 25,
-    active: true,
-    category: "Vestuário",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "4",
-    name: "Ecobag Sustentável",
-    description: "Ecobag reutilizável em lona com estampa exclusiva.",
-    price: 39.90,
-    imageUrl: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400",
-    stock: 40,
-    active: true,
-    category: "Acessórios",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "5",
-    name: "Adesivo Pack",
-    description: "Kit com 5 adesivos personalizados do projeto.",
-    price: 15.00,
-    imageUrl: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400",
-    stock: 100,
-    active: true,
-    category: "Acessórios",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "6",
-    name: "Caderno Tyler",
-    description: "Caderno universitário 96 folhas com capa personalizada.",
-    price: 28.50,
-    imageUrl: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=400",
-    stock: 0,
-    active: true,
-    category: "Papelaria",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "7",
-    name: "Moletom Solidário",
-    description: "Moletom de algodão com capuz e bolso canguru.",
-    price: 89.90,
-    imageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400",
-    stock: 20,
-    active: true,
-    category: "Vestuário",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: "8",
-    name: "Squeeze Personalizada",
-    description: "Garrafa térmica 500ml com logo do projeto.",
-    price: 42.00,
-    imageUrl: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400",
-    stock: 35,
-    active: true,
-    category: "Casa",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
+import { ref, computed } from "vue";
+import type {
+  Product,
+  ProductCreateRequest,
+  ProductPaginationResponse,
+  ProductFilters,
+} from "@/types";
+import { productsService } from "@/utils/services";
+import { useToast } from "@/composables/useToast";
 
 export const useProductsStore = defineStore("products", () => {
+  // ============================================
+  // STATE
+  // ============================================
   const products = ref<Product[]>([]);
+  const currentProduct = ref<Product | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  async function fetchProducts() {
+  // Paginação
+  const pagination = ref<{
+    hasNext: boolean;
+    nextCursor?: string;
+    hasPrevious: boolean;
+    previousCursor?: string;
+    pageSize: number;
+  }>({
+    hasNext: false,
+    hasPrevious: false,
+    pageSize: 20,
+  });
+
+  // Filtros ativos
+  const currentFilters = ref<ProductFilters>({
+    limit: 20,
+    sortBy: "CREATED_AT",
+    sortDirection: "DESC",
+    activeOnly: true,
+  });
+
+  // ============================================
+  // COMPUTED
+  // ============================================
+  const activeProducts = computed(() =>
+    products.value.filter((product) => product.active)
+  );
+
+  const productsByCategory = computed(() => {
+    const grouped: Record<string, Product[]> = {};
+    products.value.forEach((product) => {
+      if (!grouped[product.category]) {
+        grouped[product.category] = [];
+      }
+      grouped[product.category].push(product);
+    });
+    return grouped;
+  });
+
+  const availableCategories = computed(() =>
+    [...new Set(products.value.map((product) => product.category))].sort()
+  );
+
+  // ============================================
+  // ACTIONS - LISTAGEM
+  // ============================================
+
+  /**
+   * Busca produtos com cursor pagination (RECOMENDADO)
+   */
+  async function fetchProductsPaginated(
+    filters: ProductFilters = {},
+    resetList: boolean = true
+  ) {
     loading.value = true;
     error.value = null;
+
     try {
-      // Simular delay de rede
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Usar dados dummy por enquanto
-      products.value = DUMMY_PRODUCTS;
-      
-      // TODO: Quando o backend estiver pronto, descomentar:
-      // const response = await api.get<ApiResponse<Product[]>>("/products");
-      // if (response.success && response.data) {
-      //   products.value = response.data;
-      // }
+      const mergedFilters = { ...currentFilters.value, ...filters };
+
+      // Tentar primeiro cursor pagination, se falhar usar paginação tradicional
+      let response: any;
+      try {
+        response = await productsService.getProductsPaginated(mergedFilters);
+        console.log("Response from paginated API:", response);
+      } catch (paginatedError) {
+        console.warn(
+          "Cursor pagination failed, falling back to traditional pagination:",
+          paginatedError
+        );
+
+        // Fallback para paginação tradicional
+        const page = 1; // Para simplificar, sempre primeira página
+        const pageSize = mergedFilters.limit || 20;
+        const traditionalResponse = await productsService.getProducts(
+          page,
+          pageSize,
+          mergedFilters.activeOnly,
+          mergedFilters.category
+        );
+
+        // Converter para formato de cursor pagination
+        response = {
+          products: traditionalResponse.products,
+          pageSize: pageSize,
+          hasNext: traditionalResponse.products.length === pageSize,
+          hasPrevious: false,
+          nextCursor:
+            traditionalResponse.products.length > 0
+              ? traditionalResponse.products[
+                  traditionalResponse.products.length - 1
+                ].id
+              : undefined,
+        };
+      }
+
+      if (!response || !response.products) {
+        throw new Error("Resposta da API inválida ou vazia");
+      }
+
+      // Debug: verificar produtos recebidos
+      console.log("Produtos recebidos no store:", response.products);
+      response.products.forEach((product, index) => {
+        console.log(`Produto ${index}:`, {
+          id: product.id,
+          name: product.name,
+          images: product.images,
+          hasImages: !!(product.images && product.images.length > 0),
+        });
+      });
+
+      if (resetList) {
+        products.value = response.products;
+      } else {
+        // Adicionar produtos na lista (para scroll infinito)
+        products.value.push(...response.products);
+      }
+
+      // Atualizar paginação
+      pagination.value = {
+        hasNext: response.hasNext,
+        nextCursor: response.nextCursor,
+        hasPrevious: response.hasPrevious,
+        previousCursor: response.previousCursor,
+        pageSize: response.pageSize,
+      };
+
+      // Salvar filtros ativos
+      currentFilters.value = mergedFilters;
     } catch (err: any) {
       error.value = err.message || "Erro ao carregar produtos";
+      console.error("Erro ao carregar produtos:", err);
     } finally {
       loading.value = false;
     }
   }
 
-  async function fetchProduct(id: string): Promise<Product | null> {
+  /**
+   * Busca próxima página (cursor pagination)
+   */
+  async function fetchNextPage() {
+    if (!pagination.value.hasNext || !pagination.value.nextCursor) return;
+
+    await fetchProductsPaginated(
+      {
+        ...currentFilters.value,
+        cursor: pagination.value.nextCursor,
+        direction: "NEXT",
+      },
+      false
+    );
+  }
+
+  /**
+   * Busca página anterior (cursor pagination)
+   */
+  async function fetchPreviousPage() {
+    if (!pagination.value.hasPrevious || !pagination.value.previousCursor)
+      return;
+
+    await fetchProductsPaginated(
+      {
+        ...currentFilters.value,
+        cursor: pagination.value.previousCursor,
+        direction: "PREVIOUS",
+      },
+      true
+    );
+  }
+
+  /**
+   * Busca produtos com paginação tradicional (compatibilidade)
+   */
+  async function fetchProducts(
+    page: number = 1,
+    pageSize: number = 20,
+    activeOnly?: boolean,
+    category?: string
+  ) {
+    loading.value = true;
+    error.value = null;
+
     try {
-      // Usar dados dummy por enquanto
-      const product = DUMMY_PRODUCTS.find(p => p.id === id);
-      return product || null;
-      
-      // TODO: Quando o backend estiver pronto, descomentar:
-      // const response = await api.get<ApiResponse<Product>>(`/products/${id}`);
-      // return response.data || null;
-    } catch (err) {
-      return null;
+      const response = await productsService.getProducts(
+        page,
+        pageSize,
+        activeOnly,
+        category
+      );
+      console.log("Response from products service:", response);
+
+      if (!response || !response.products) {
+        throw new Error("Resposta da API inválida ou sem produtos");
+      }
+
+      products.value = response.products;
+    } catch (err: any) {
+      error.value = err.message || "Erro ao carregar produtos";
+      console.error("Erro ao carregar produtos:", err);
+    } finally {
+      loading.value = false;
     }
   }
 
+  // ============================================
+  // ACTIONS - PRODUTO INDIVIDUAL
+  // ============================================
+
+  /**
+   * Busca produto por ID
+   */
+  async function fetchProduct(id: string): Promise<Product | null> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const product = await productsService.getProductById(id);
+      currentProduct.value = product;
+      return product;
+    } catch (err: any) {
+      error.value = err.message || "Produto não encontrado";
+      currentProduct.value = null;
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Cria novo produto (sem imagens)
+   */
+  async function createProduct(
+    productData: ProductCreateRequest
+  ): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await productsService.createProduct(productData);
+      console.log("Produto criado com sucesso!");
+
+      // Recarregar lista
+      await fetchProductsPaginated(currentFilters.value);
+      return true;
+    } catch (err: any) {
+      error.value = err.message || "Erro ao criar produto";
+      console.log(" Toast message ");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Cria novo produto com imagens
+   * CACHE BUST: v2.0
+   */
+  async function createProductWithImages(
+    productData: ProductCreateRequest,
+    images: File[],
+    onProgress?: (progress: {
+      step: string;
+      current: number;
+      total: number;
+      percentage: number;
+      message: string;
+    }) => void
+  ): Promise<boolean> {
+    console.log(
+      "🏪 [STORE] createProductWithImages called - UNIFIED METHOD ONLY"
+    );
+    console.log("📦 [STORE] Product data:", productData);
+    console.log("🖼️ [STORE] Images count:", images.length);
+    loading.value = true;
+    error.value = null;
+    const { success, error: showError } = useToast();
+
+    try {
+      const response = await productsService.createProductWithImages(
+        productData,
+        images,
+        onProgress
+      );
+
+      success(
+        `Produto "${productData.name}" criado com sucesso! ${response.imagesUploaded} imagem(ns) enviada(s).`
+      );
+
+      // Recarregar lista
+      await fetchProductsPaginated(currentFilters.value);
+      return true;
+    } catch (err: any) {
+      error.value = err.message || "Erro ao criar produto";
+      showError(`Erro ao criar produto: ${err.message || "Erro desconhecido"}`);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Atualiza produto existente
+   */
+  async function updateProduct(
+    id: string,
+    productData: Partial<ProductCreateRequest>
+  ): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const updatedProduct = await productsService.updateProduct(
+        id,
+        productData
+      );
+
+      // Atualizar na lista local
+      const index = products.value.findIndex((p) => p.id === id);
+      if (index !== -1) {
+        products.value[index] = updatedProduct;
+      }
+
+      // Atualizar produto atual se for o mesmo
+      if (currentProduct.value?.id === id) {
+        currentProduct.value = updatedProduct;
+      }
+
+      console.log(" Toast message ");
+      return true;
+    } catch (err: any) {
+      error.value = err.message || "Erro ao atualizar produto";
+      console.log(" Toast message ");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Atualiza produto com gerenciamento completo de imagens
+   */
+  async function updateProductWithImages(
+    id: string,
+    productData: Partial<ProductCreateRequest>,
+    imageChanges: {
+      newImages?: File[];
+      existingImages?: ProductImage[];
+      imagesToDelete?: string[];
+      primaryImageId?: string | null;
+    }
+  ): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const updatedProduct = await productsService.updateProductWithImages(
+        id,
+        productData,
+        imageChanges
+      );
+
+      // Atualizar na lista local
+      const index = products.value.findIndex((p) => p.id === id);
+      if (index !== -1) {
+        products.value[index] = updatedProduct;
+      }
+
+      // Atualizar produto atual se for o mesmo
+      if (currentProduct.value?.id === id) {
+        currentProduct.value = updatedProduct;
+      }
+
+      console.log(" Toast message ");
+      return true;
+    } catch (err: any) {
+      error.value = err.message || "Erro ao atualizar produto com imagens";
+      console.log(" Toast message ");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Remove produto
+   */
+  async function deleteProduct(id: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      await productsService.deleteProduct(id);
+
+      // Remover da lista local
+      products.value = products.value.filter((p) => p.id !== id);
+
+      // Limpar produto atual se for o mesmo
+      if (currentProduct.value?.id === id) {
+        currentProduct.value = null;
+      }
+
+      console.log(" Toast message ");
+      return true;
+    } catch (err: any) {
+      error.value = err.message || "Erro ao remover produto";
+      console.log(" Toast message ");
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  // ============================================
+  // ACTIONS - GERENCIAMENTO DE IMAGENS
+  // ============================================
+
+  /**
+   * Adiciona imagem a produto
+   */
+  async function uploadImageToProduct(
+    productId: string,
+    image: File,
+    isPrimary: boolean = false
+  ): Promise<boolean> {
+    try {
+      const response = await productsService.uploadImageToProduct(
+        productId,
+        image,
+        isPrimary
+      );
+      console.log(" Toast message ");
+
+      // Atualizar produto atual
+      if (currentProduct.value?.id === productId) {
+        await fetchProduct(productId);
+      }
+
+      return true;
+    } catch (err: any) {
+      console.log(" Toast message ");
+      return false;
+    }
+  }
+
+  /**
+   * Remove imagem de produto
+   */
+  async function removeImageFromProduct(
+    productId: string,
+    imageId: string
+  ): Promise<boolean> {
+    try {
+      await productsService.removeImageFromProduct(productId, imageId);
+      console.log(" Toast message ");
+
+      // Atualizar produto atual
+      if (currentProduct.value?.id === productId) {
+        await fetchProduct(productId);
+      }
+
+      return true;
+    } catch (err: any) {
+      console.log(" Toast message ");
+      return false;
+    }
+  }
+
+  // ============================================
+  // UTILITIES
+  // ============================================
+
+  /**
+   * Limpa estado
+   */
+  function clearState() {
+    products.value = [];
+    currentProduct.value = null;
+    error.value = null;
+    pagination.value = {
+      hasNext: false,
+      hasPrevious: false,
+      pageSize: 20,
+    };
+  }
+
+  /**
+   * Busca produto local por ID (sem fazer request)
+   */
+  function findProductById(id: string): Product | undefined {
+    return products.value.find((product) => product.id === id);
+  }
+
   return {
+    // State
     products,
+    currentProduct,
     loading,
     error,
+    pagination,
+    currentFilters,
+
+    // Computed
+    activeProducts,
+    productsByCategory,
+    availableCategories,
+
+    // Actions - Listagem
+    fetchProductsPaginated,
+    fetchNextPage,
+    fetchPreviousPage,
     fetchProducts,
+
+    // Actions - Produto Individual
     fetchProduct,
+    createProduct,
+    createProductWithImages,
+    updateProduct,
+    updateProductWithImages,
+    deleteProduct,
+
+    // Actions - Imagens
+    uploadImageToProduct,
+    removeImageFromProduct,
+
+    // Utilities
+    clearState,
+    findProductById,
   };
 });

@@ -7,15 +7,25 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
-      headers: {
-        "Content-Type": "application/json",
-      },
       timeout: 30000, // 30 segundos
     });
 
     // Request interceptor
     this.client.interceptors.request.use(
       async (config) => {
+        // Definir Content-Type apenas se não foi definido e não for FormData
+        if (
+          !config.headers["Content-Type"] &&
+          !(config.data instanceof FormData)
+        ) {
+          config.headers["Content-Type"] = "application/json";
+        }
+
+        // Remover Content-Type se foi explicitamente definido como undefined
+        if (config.headers["Content-Type"] === undefined) {
+          delete config.headers["Content-Type"];
+        }
+
         // Primeiro tentar token do localStorage (mais rápido)
         let token = localStorage.getItem("admin_token");
 
@@ -35,7 +45,7 @@ class ApiClient {
         // Log request in development
         if (import.meta.env.DEV) {
           console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
-            data: config.data,
+            data: config.data instanceof FormData ? "FormData" : config.data,
             params: config.params,
           });
         }
@@ -112,8 +122,8 @@ class ApiClient {
     return response.data;
   }
 
-  async post<T>(url: string, data?: any): Promise<T> {
-    const response = await this.client.post<T>(url, data);
+  async post<T>(url: string, data?: any, config?: any): Promise<T> {
+    const response = await this.client.post<T>(url, data, config);
     return response.data;
   }
 

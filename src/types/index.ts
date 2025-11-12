@@ -13,19 +13,89 @@ export interface HealthResponse {
   version: string;
 }
 
+// Product Image
+export interface ProductImage {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  uploadedAt: string;
+}
+
 // Product
 export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number; // em centavos
-  imageUrl?: string;
-  active: boolean;
+  price: number; // em reais (não centavos como estava antes)
   category: string;
-  stock?: number; // null = estoque ilimitado
+  stock: number;
+  active: boolean;
+  brand?: string;
+  model?: string;
+  weight?: string;
+  dimensions?: string;
+  color?: string;
+  warranty?: string;
+  tags?: string[];
+  images?: ProductImage[]; // Opcional até API implementar completamente
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
+}
+
+// Product Create/Update DTO
+export interface ProductCreateRequest {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  active: boolean;
+  brand?: string;
+  model?: string;
+  weight?: string;
+  dimensions?: string;
+  color?: string;
+  warranty?: string;
+  tags?: string[];
+}
+
+// Product Pagination Response (Traditional) - Real API Response
+export interface ProductTraditionalPaginationResponse {
+  products: Product[];
+  totalProducts: number;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+}
+
+// Product Pagination Response (Cursor-based) - Frontend Format
+export interface ProductPaginationResponse {
+  products: Product[];
+  pageSize: number;
+  hasNext: boolean;
+  nextCursor?: string;
+  hasPrevious: boolean;
+  previousCursor?: string;
+}
+
+// Product Filters
+export interface ProductFilters {
+  limit?: number;
+  cursor?: string;
+  direction?: 'NEXT' | 'PREVIOUS';
+  sortBy?: 'CREATED_AT' | 'NAME' | 'PRICE' | 'STOCK';
+  sortDirection?: 'ASC' | 'DESC';
+  activeOnly?: boolean;
+  category?: string;
+}
+
+// Image Upload Response
+export interface ImageUploadResponse {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  message: string;
 }
 
 // Goal (Meta)

@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/Contact.vue"),
       },
       {
+        path: "image-system-demo",
+        name: "image-system-demo",
+        component: () => import("@/views/ImageSystemDemo.vue"),
+        meta: { title: "Sistema de Imagens - Demo" },
+      },
+      {
         path: "test-donation",
         name: "test-donation",
         component: () => import("@/views/TestDonation.vue"),
