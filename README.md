@@ -121,16 +121,19 @@ frontend/
 ### Installation
 
 1. **Navigate to frontend directory**
+
    ```bash
    cd frontend
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
@@ -178,17 +181,17 @@ npm run lint:fix
 
 ```css
 /* Primary Colors */
---tyler-blue: #5CB6F9;    /* Hope and lightness */
---tyler-pink: #FBA5A4;    /* Care and affection */
+--tyler-blue: #5cb6f9; /* Hope and lightness */
+--tyler-pink: #fba5a4; /* Care and affection */
 
 /* Semantic Colors */
---success: #10B981;
---warning: #F59E0B;
---danger: #EF4444;
---info: #3B82F6;
+--success: #10b981;
+--warning: #f59e0b;
+--danger: #ef4444;
+--info: #3b82f6;
 
 /* Neutral */
---gray-50: #F9FAFB;
+--gray-50: #f9fafb;
 --gray-900: #111827;
 ```
 
@@ -201,6 +204,7 @@ npm run lint:fix
 ### Spacing
 
 Based on Tailwind's 4px scale:
+
 - xs: 4px (1)
 - sm: 8px (2)
 - md: 16px (4)
@@ -215,7 +219,7 @@ All microcomponents follow a consistent API pattern:
 
 ```vue
 <!-- BaseButton -->
-<BaseButton 
+<BaseButton
   variant="primary | outline | danger"
   size="sm | md | lg"
   :loading="boolean"
@@ -243,7 +247,7 @@ All microcomponents follow a consistent API pattern:
 <ProgressBar :progress="75" color="blue | pink" size="sm | md | lg" />
 
 <!-- ImageGallery -->
-<ImageGallery 
+<ImageGallery
   :images="['url1', 'url2', 'url3']"
   :show-thumbnails="true"
   :auto-play="false"
@@ -260,41 +264,39 @@ See [MICROCOMPONENTS.md](./MICROCOMPONENTS.md) for detailed documentation.
 All stores follow this pattern:
 
 ```typescript
-export const useXStore = defineStore('storeName', () => {
+export const useXStore = defineStore("storeName", () => {
   // State
-  const items = ref<Item[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const items = ref<Item[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
 
   // Actions
   async function fetchItems() {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
     try {
       // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 700))
+      await new Promise((resolve) => setTimeout(resolve, 700));
       // Use dummy data or API call
-      items.value = DUMMY_DATA
+      items.value = DUMMY_DATA;
     } catch (err: any) {
-      error.value = err.message
+      error.value = err.message;
     } finally {
-      loading.value = false
+      loading.value = false;
     }
   }
 
   // Getters (computed)
-  const activeItems = computed(() => 
-    items.value.filter(item => item.active)
-  )
+  const activeItems = computed(() => items.value.filter((item) => item.active));
 
   return {
     items,
     loading,
     error,
     fetchItems,
-    activeItems
-  }
-})
+    activeItems,
+  };
+});
 ```
 
 ### Available Stores
@@ -310,42 +312,42 @@ export const useXStore = defineStore('storeName', () => {
 ### useCurrency
 
 ```typescript
-import { useCurrency } from '@/composables'
+import { useCurrency } from "@/composables";
 
-const { formatCurrency } = useCurrency()
-const price = formatCurrency(59.90) // "R$ 59,90"
+const { formatCurrency } = useCurrency();
+const price = formatCurrency(59.9); // "R$ 59,90"
 ```
 
 ### useDate
 
 ```typescript
-import { useDate } from '@/composables'
+import { useDate } from "@/composables";
 
-const { formatDate, formatDateTime, formatRelative } = useDate()
-const date = formatDate('2024-12-25')  // "25/12/2024"
+const { formatDate, formatDateTime, formatRelative } = useDate();
+const date = formatDate("2024-12-25"); // "25/12/2024"
 ```
 
 ### useToast
 
 ```typescript
-import { useToast } from '@/composables'
+import { useToast } from "@/composables";
 
-const { success, error, warning, info } = useToast()
-success('Item saved successfully!')
-error('Failed to delete item')
+const { success, error, warning, info } = useToast();
+success("Item saved successfully!");
+error("Failed to delete item");
 ```
 
 ### useLoading
 
 ```typescript
-import { useLoading } from '@/composables'
+import { useLoading } from "@/composables";
 
-const { isLoading, startLoading, stopLoading, withLoading } = useLoading()
+const { isLoading, startLoading, stopLoading, withLoading } = useLoading();
 
 // Wrap async operations
 await withLoading(async () => {
-  await someAsyncOperation()
-})
+  await someAsyncOperation();
+});
 ```
 
 ## 🛣️ Routing
@@ -375,14 +377,14 @@ await withLoading(async () => {
 
 ```typescript
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  
+  const authStore = useAuthStore();
+
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/admin/login')
+    next("/admin/login");
   } else {
-    next()
+    next();
   }
-})
+});
 ```
 
 ## 🎭 Features
@@ -466,26 +468,26 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  }
-})
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+});
 ```
 
 ### Tailwind Config (tailwind.config.js)
 
 ```javascript
 export default {
-  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        'tyler-blue': '#5CB6F9',
-        'tyler-pink': '#FBA5A4',
-      }
-    }
-  }
-}
+        "tyler-blue": "#5CB6F9",
+        "tyler-pink": "#FBA5A4",
+      },
+    },
+  },
+};
 ```
 
 ## 📚 Additional Documentation

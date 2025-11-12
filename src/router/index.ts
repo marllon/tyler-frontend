@@ -42,6 +42,12 @@ const routes: RouteRecordRaw[] = [
         name: "contact",
         component: () => import("@/views/Contact.vue"),
       },
+      {
+        path: "test-donation",
+        name: "test-donation",
+        component: () => import("@/views/TestDonation.vue"),
+        meta: { title: "Teste de Doação" },
+      },
     ],
   },
   {
@@ -89,6 +95,18 @@ const routes: RouteRecordRaw[] = [
         path: "donations",
         name: "admin-donations",
         component: () => import("@/views/admin/Donations.vue"),
+      },
+      {
+        path: "security",
+        name: "admin-security",
+        component: () => import("@/views/admin/SecuritySettings.vue"),
+        meta: { title: "Configurações de Segurança" },
+      },
+      {
+        path: "settings",
+        name: "admin-settings",
+        component: () => import("@/views/admin/Settings.vue"),
+        meta: { title: "Configurações" },
       },
     ],
   },

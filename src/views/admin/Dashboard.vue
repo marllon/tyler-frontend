@@ -1,8 +1,62 @@
 <template>
   <div class="p-6">
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-      <p class="text-gray-600 mt-1">Visão geral das atividades</p>
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p class="text-gray-600 mt-1">Visão geral das atividades</p>
+        </div>
+        
+        <!-- User Welcome Section -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
+            <!-- Avatar -->
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              {{ getUserInitials(currentUser?.email || currentUser?.name) }}
+            </div>
+            
+            <!-- User Info -->
+            <div class="text-left">
+              <p class="text-lg font-semibold text-gray-900">
+                Olá, {{ getFirstName(currentUser?.name || currentUser?.email) }}! 👋
+              </p>
+              <div class="flex items-center gap-2 text-sm">
+                <span class="text-gray-600">{{ currentUser?.email }}</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium" 
+                      :class="getRoleBadgeClass(currentUser?.role)">
+                  {{ getRoleDisplayName(currentUser?.role) }}
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-medium"
+                      :class="authMode === 'firebase' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'">
+                  {{ authMode === 'firebase' ? '� Firebase Real' : '🔧 Modo Simulado' }}
+                </span>
+              </div>
+              
+              <!-- Aviso sobre modo mock -->
+              <div v-if="authMode === 'mock'" class="mt-1">
+                <p class="text-xs text-orange-600">
+                  ⚠️ Dados de teste - Configure Firebase para produção
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex gap-2">
+            <RouterLink 
+              to="/admin/security"
+              class="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md text-sm hover:bg-blue-200 transition-colors"
+            >
+              🛡️ Segurança
+            </RouterLink>
+            <RouterLink 
+              to="/admin/settings"
+              class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition-colors"
+            >
+              ⚙️ Configurações
+            </RouterLink>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -169,10 +223,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useGoalsStore } from '@/stores/goals'
 import { useRafflesStore } from '@/stores/raffles'
 import { useEventsStore } from '@/stores/events'
+import { useAuthStore } from '@/stores/auth'
 import { useCurrency, useDate } from '@/composables'
 import { BaseCard, Badge, ProgressBar, Spinner } from '@/components/ui'
 
@@ -180,10 +236,64 @@ const productsStore = useProductsStore()
 const goalsStore = useGoalsStore()
 const rafflesStore = useRafflesStore()
 const eventsStore = useEventsStore()
+const authStore = useAuthStore()
 const { formatCurrency } = useCurrency()
 const { formatDate } = useDate()
 
+// Authentication info
+const currentUser = computed(() => authStore.admin)
+const authMode = computed(() => authStore.useFirebase ? 'firebase' : 'mock')
+
 const loading = ref(true)
+
+// Helper functions for user display
+function getUserInitials(name?: string): string {
+  if (!name) return '?';
+  
+  if (name.includes('@')) {
+    // Se for email, usar primeira letra antes do @
+    return name.charAt(0).toUpperCase();
+  }
+  
+  // Se for nome, usar iniciais
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+}
+
+function getFirstName(name?: string): string {
+  if (!name) return 'Usuário';
+  
+  if (name.includes('@')) {
+    // Se for email, extrair nome antes do @
+    const username = name.split('@')[0];
+    return username.charAt(0).toUpperCase() + username.slice(1);
+  }
+  
+  // Se for nome completo, pegar primeiro nome
+  return name.split(' ')[0];
+}
+
+function getRoleDisplayName(role?: string): string {
+  const roleNames = {
+    'super-admin': 'Super Admin',
+    'admin': 'Admin',
+    'user': 'Usuário'
+  };
+  return roleNames[role as keyof typeof roleNames] || 'Usuário';
+}
+
+function getRoleBadgeClass(role?: string): string {
+  const classes = {
+    'super-admin': 'bg-purple-100 text-purple-700',
+    'admin': 'bg-blue-100 text-blue-700',
+    'user': 'bg-gray-100 text-gray-700'
+  };
+  return classes[role as keyof typeof classes] || 'bg-gray-100 text-gray-700';
+}
 
 const stats = computed(() => ({
   totalGoals: goalsStore.goals.reduce((sum, goal) => sum + goal.currentAmount, 0),

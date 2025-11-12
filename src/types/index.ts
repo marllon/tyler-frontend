@@ -1,36 +1,145 @@
+// ============================================
+// API Types - Aligned with Tyler Backend
+// ============================================
+
+// Payment Status Enum
+export type PaymentStatus = 'NEW' | 'WAITING_PAYMENT' | 'PAID' | 'FAILED' | 'CANCELLED' | 'EXPIRED';
+
+// Health Check
+export interface HealthResponse {
+  status: string;
+  message: string;
+  timestamp: string;
+  version: string;
+}
+
+// Product
 export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
-  imageUrl: string;
-  category: string;
-  stock: number;
+  price: number; // em centavos
+  imageUrl?: string;
   active: boolean;
+  category: string;
+  stock?: number; // null = estoque ilimitado
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
 }
 
+// Goal (Meta)
 export interface Goal {
   id: string;
   title: string;
   description: string;
   targetAmount: number;
   currentAmount: number;
+  startDate: string;
+  endDate: string;
+  status: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED';
   imageUrl?: string;
-  deadline?: string;
-  active: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
+// Customer Data
+export interface Customer {
+  name: string;
+  email: string;
+  document: string;
+  phone?: string;
+}
+
+// Donation
+export interface Donation {
+  id: string;
+  amount: number;
+  goalId?: string;
+  anonymous: boolean;
+  message?: string;
+  donor: {
+    name?: string;
+    email?: string;
+    document?: string;
+  };
+  paymentId: string;
+  status: PaymentStatus;
+  createdAt: string;
+}
+
+// Order Item
+export interface OrderItem {
+  productId: string;
+  quantity: number;
+  price: number;
+}
+
+// Order
+export interface Order {
+  id: string;
+  items: OrderItem[];
+  customer: Customer;
+  totalAmount: number;
+  status: PaymentStatus;
+  paymentId?: string;
+  goalId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// PIX Payment Request
+export interface PixPaymentRequest {
+  amount: number;
+  description: string;
+  payer: {
+    name: string;
+    email: string;
+    document: string;
+  };
+}
+
+// PIX QR Code
+export interface PixQrCode {
+  id: string;
+  text: string;
+  links: Array<{
+    media: string;
+    href: string;
+  }>;
+}
+
+// PIX Payment Response
+export interface PixPaymentResponse {
+  id: string;
+  qr_codes: PixQrCode[];
+  status: PaymentStatus;
+  amount: {
+    value: number;
+    currency: string;
+  };
+  created_at: string;
+}
+
+// Payment Status Response
+export interface PaymentStatusResponse {
+  id: string;
+  status: PaymentStatus;
+  amount: {
+    value: number;
+    currency: string;
+  };
+  paid_at?: string;
+}
+
+// Raffle
 export interface Raffle {
   id: string;
   title: string;
   description: string;
   prize: string;
-  imageUrl?: string; // Imagem principal (mantida para retrocompatibilidade)
-  images?: string[]; // Múltiplas imagens do prêmio
+  imageUrl?: string;
+  images?: string[];
   ticketPrice: number;
   totalTickets: number;
   soldTickets: number;
@@ -43,52 +152,122 @@ export interface Raffle {
   updatedAt: string;
 }
 
+// Event
 export interface Event {
   id: string;
   title: string;
   description: string;
   date: string;
   location: string;
-  coverImageUrl: string;
-  gallery: string[];
+  coverImageUrl?: string;
+  gallery?: string[];
   status: "UPCOMING" | "PAST" | "CANCELLED";
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Order {
+// Raffle Ticket
+export interface RaffleTicket {
   id: string;
-  userId?: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: "PENDING" | "PAID" | "CANCELLED" | "REFUNDED";
-  paymentProvider: string;
-  paymentIntentId: string;
-  buyer: BuyerInfo;
-  goalId?: string;
-  createdAt: string;
-  updatedAt: string;
+  raffleId: string;
+  number: number;
+  buyer: Customer;
+  purchasedAt: string;
 }
 
-export interface OrderItem {
-  productId: string;
-  productName: string;
-  quantity: number;
-  price: number;
+// Event Registration
+export interface EventRegistration {
+  id: string;
+  eventId: string;
+  participant: Customer;
+  ticketType?: string;
+  registeredAt: string;
 }
 
-export interface Donation {
-  id: string;
-  userId?: string;
-  goalId: string;
+// API Request Types
+export interface DonationRequest {
   amount: number;
-  status: "PENDING" | "COMPLETED" | "CANCELLED" | "REFUNDED";
-  paymentProvider: string;
-  paymentIntentId: string;
-  donor: DonorInfo;
-  message?: string;
+  goalId?: string;
   anonymous: boolean;
-  createdAt: string;
+  message?: string;
+  donor: {
+    name?: string;
+    email?: string;
+    document?: string;
+  };
+}
+
+export interface OrderCheckoutRequest {
+  items: OrderItem[];
+  customer: Customer;
+  goalId?: string;
+}
+
+export interface RaffleTicketPurchaseRequest {
+  quantity: number;
+  buyer: Customer;
+}
+
+export interface EventRegistrationRequest {
+  participant: Customer;
+  ticketType?: string;
+}
+
+// API Response Types
+export interface ApiResponse<T> {
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    totalPages: number;
+    totalItems: number;
+  };
+}
+
+export interface GoalsResponse extends PaginatedResponse<Goal> {
+  goals: Goal[];
+}
+
+// Admin Dashboard
+export interface DashboardSummary {
+  totalDonations: number;
+  totalOrders: number;
+  activeGoals: number;
+  totalUsers: number;
+}
+
+export interface AdminDashboard {
+  summary: DashboardSummary;
+  recentTransactions: Array<Donation | Order>;
+  goalProgress: Goal[];
+  topProducts: Product[];
+}
+
+// Filter Types
+export interface ProductFilters {
+  page?: number;
+  pageSize?: number;
+  activeOnly?: boolean;
+  category?: string;
+}
+
+export interface GoalFilters {
+  active?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
+// Error Types
+export interface ApiError {
+  status: number;
+  code: string;
+  message: string;
+}
   updatedAt: string;
 }
 
