@@ -1,10 +1,10 @@
-import { ref, computed } from 'vue';
-import { firebaseService, type User } from '@/utils/firebase';
-import { useAuthStore } from '@/stores/auth';
+import { ref, computed } from "vue";
+import { firebaseService, type User } from "@/utils/firebase";
+import { useAuthStore } from "@/stores/auth";
 
 export function useFirebaseAuth() {
   const authStore = useAuthStore();
-  
+
   const loading = computed(() => authStore.loading);
   const user = computed(() => authStore.user);
   const isAuthenticated = computed(() => authStore.isAuthenticated);
@@ -52,7 +52,7 @@ export function useFirebaseAuth() {
    * Verificar se usuário tem permissões de admin
    */
   function isAdmin(): boolean {
-    return authStore.admin?.role === 'admin';
+    return authStore.admin?.role === "admin";
   }
 
   /**
@@ -72,7 +72,7 @@ export function useFirebaseAuth() {
     loading,
     user,
     isAuthenticated,
-    
+
     // Actions
     signIn,
     signInWithGoogle,

@@ -6,8 +6,12 @@
       <h2 class="text-2xl font-bold text-tyler-blue">Admin</h2>
       <div class="mt-2">
         <p class="text-sm text-gray-300">Seja bem-vindo,</p>
-        <p class="text-sm font-medium text-white break-words">{{ admin?.email || 'Usuário' }}</p>
-        <p class="text-xs text-gray-400 mt-1">{{ getRoleDisplayName(admin?.role) }}</p>
+        <p class="text-sm font-medium text-white break-words">
+          {{ admin?.email || "Usuário" }}
+        </p>
+        <p class="text-xs text-gray-400 mt-1">
+          {{ getRoleDisplayName(admin?.role) }}
+        </p>
       </div>
     </div>
 
@@ -208,11 +212,11 @@ const admin = computed(() => authStore.admin);
 
 function getRoleDisplayName(role?: string): string {
   const roleNames = {
-    'super-admin': '👑 Super Administrador',
-    'admin': '🔑 Administrador',
-    'user': '👤 Usuário'
+    "super-admin": "👑 Super Administrador",
+    admin: "🔑 Administrador",
+    user: "👤 Usuário",
   };
-  return roleNames[role as keyof typeof roleNames] || '👤 Usuário';
+  return roleNames[role as keyof typeof roleNames] || "👤 Usuário";
 }
 
 async function handleLogout() {

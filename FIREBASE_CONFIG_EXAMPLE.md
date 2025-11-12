@@ -8,38 +8,45 @@ Acesse [Firebase Console](https://console.firebase.google.com) → Seu Projeto �
 
 **Nome do parâmetro:** `authorized_admins`  
 **Valor padrão:**
+
 ```
 admin@tylerlimaeler.org,tyler@gmail.com,admin@gmail.com
 ```
+
 **Descrição:** Lista de emails autorizados para acessar o painel administrativo (separados por vírgula)
 
-### **2. Domínios Autorizados** 
+### **2. Domínios Autorizados**
 
 **Nome do parâmetro:** `authorized_domains`  
 **Valor padrão:**
+
 ```
 gmail.com,hotmail.com,outlook.com
 ```
+
 **Descrição:** Domínios de email permitidos para acesso (separados por vírgula)
 
 ### **3. Configurações PIX**
 
 **Nome do parâmetro:** `pix_settings`  
 **Valor padrão:**
+
 ```json
 {
   "environment": "sandbox",
-  "minAmount": 1.00,
-  "maxAmount": 10000.00,
+  "minAmount": 1.0,
+  "maxAmount": 10000.0,
   "pixKey": "sua_chave_pix_aqui"
 }
 ```
+
 **Descrição:** Configurações do sistema de pagamento PIX
 
 ## 🎯 Como Funciona
 
 1. **Ordem de Prioridade:**
-   - Firestore (mais dinâmico) 
+
+   - Firestore (mais dinâmico)
    - Firebase Remote Config
    - Variáveis de ambiente (.env)
    - Valores hardcoded (fallback)
@@ -66,6 +73,7 @@ Após configurar no Firebase Console:
 ## 📱 Interface
 
 Use o painel **Admin → Segurança** para:
+
 - Visualizar emails autorizados
 - Adicionar novos emails (super-admin)
 - Remover emails existentes (super-admin)

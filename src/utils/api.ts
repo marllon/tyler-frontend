@@ -18,7 +18,7 @@ class ApiClient {
       async (config) => {
         // Primeiro tentar token do localStorage (mais rápido)
         let token = localStorage.getItem("admin_token");
-        
+
         // Se não tiver token no localStorage, tentar obter do Firebase
         if (!token) {
           const { firebaseService } = await import("./firebase");
@@ -27,11 +27,11 @@ class ApiClient {
             localStorage.setItem("admin_token", token);
           }
         }
-        
+
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
-        
+
         // Log request in development
         if (import.meta.env.DEV) {
           console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
@@ -39,7 +39,7 @@ class ApiClient {
             params: config.params,
           });
         }
-        
+
         return config;
       },
       (error) => Promise.reject(error)
@@ -50,24 +50,35 @@ class ApiClient {
       (response) => {
         // Log successful response in development
         if (import.meta.env.DEV) {
-          console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+          console.log(
+            `✅ ${response.config.method?.toUpperCase()} ${
+              response.config.url
+            }`,
+            response.data
+          );
         }
         return response;
       },
       (error: AxiosError) => {
         // Log error in development
         if (import.meta.env.DEV) {
-          console.error(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-            status: error.response?.status,
-            data: error.response?.data,
-          });
+          console.error(
+            `❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
+            {
+              status: error.response?.status,
+              data: error.response?.data,
+            }
+          );
         }
 
         // Handle authentication errors
         if (error.response?.status === 401) {
           localStorage.removeItem("admin_token");
           // Only redirect if we're in an admin route
-          if (window.location.pathname.startsWith('/admin') && !window.location.pathname.includes('/login')) {
+          if (
+            window.location.pathname.startsWith("/admin") &&
+            !window.location.pathname.includes("/login")
+          ) {
             window.location.href = "/admin/login";
           }
         }
@@ -75,7 +86,7 @@ class ApiClient {
         // Transform error to our ApiError format
         const apiError: ApiError = {
           status: error.response?.status || 500,
-          code: error.code || 'unknown_error',
+          code: error.code || "unknown_error",
           message: this.extractErrorMessage(error),
         };
 
@@ -89,11 +100,11 @@ class ApiClient {
       const data = error.response.data as any;
       if (data.message) return data.message;
       if (data.error) return data.error;
-      if (typeof data === 'string') return data;
+      if (typeof data === "string") return data;
     }
-    
+
     if (error.message) return error.message;
-    return 'Ocorreu um erro inesperado';
+    return "Ocorreu um erro inesperado";
   }
 
   async get<T>(url: string, params?: any): Promise<T> {

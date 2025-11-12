@@ -18,16 +18,19 @@ O Firebase Remote Config permite gerenciar configurações em tempo real sem nec
 ### **2. Criar Parâmetros**
 
 **Emails Autorizados:**
+
 - **Nome do parâmetro:** `authorized_admins`
 - **Valor padrão:** `admin@tyler.com,manager@tyler.com`
 - **Descrição:** Lista de emails autorizados para acessar o painel admin
 
 **Domínios Autorizados:**
+
 - **Nome do parâmetro:** `authorized_domains`
 - **Valor padrão:** `gmail.com,hotmail.com`
 - **Descrição:** Domínios de email permitidos
 
 **Configurações PIX:**
+
 - **Nome do parâmetro:** `pix_settings`
 - **Valor padrão:** `{"environment":"sandbox","minAmount":1.00,"maxAmount":10000.00}`
 - **Descrição:** Configurações do sistema PIX
@@ -36,46 +39,60 @@ O Firebase Remote Config permite gerenciar configurações em tempo real sem nec
 
 ```typescript
 // src/utils/remoteConfig.ts
-import { getRemoteConfig, fetchAndActivate, getValue } from 'firebase/remote-config';
-import { app } from './firebase';
+import {
+  getRemoteConfig,
+  fetchAndActivate,
+  getValue,
+} from "firebase/remote-config";
+import { app } from "./firebase";
 
 const remoteConfig = getRemoteConfig(app);
 
 // Configurações padrão
 remoteConfig.defaultConfig = {
-  authorized_admins: 'admin@tyler.com',
-  authorized_domains: 'gmail.com,hotmail.com',
-  pix_settings: '{"environment":"sandbox","minAmount":1.00,"maxAmount":10000.00}'
+  authorized_admins: "admin@tyler.com",
+  authorized_domains: "gmail.com,hotmail.com",
+  pix_settings:
+    '{"environment":"sandbox","minAmount":1.00,"maxAmount":10000.00}',
 };
 
 export async function initRemoteConfig() {
   try {
     await fetchAndActivate(remoteConfig);
-    console.log('🔧 Remote Config ativado com sucesso');
+    console.log("🔧 Remote Config ativado com sucesso");
   } catch (error) {
-    console.warn('⚠️ Erro ao carregar Remote Config, usando valores padrão:', error);
+    console.warn(
+      "⚠️ Erro ao carregar Remote Config, usando valores padrão:",
+      error
+    );
   }
 }
 
 export function getAuthorizedAdmins(): string[] {
-  const value = getValue(remoteConfig, 'authorized_admins').asString();
-  return value.split(',').map(email => email.trim()).filter(Boolean);
+  const value = getValue(remoteConfig, "authorized_admins").asString();
+  return value
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
 }
 
 export function getAuthorizedDomains(): string[] {
-  const value = getValue(remoteConfig, 'authorized_domains').asString();
-  return value.split(',').map(domain => domain.trim()).filter(Boolean);
+  const value = getValue(remoteConfig, "authorized_domains").asString();
+  return value
+    .split(",")
+    .map((domain) => domain.trim())
+    .filter(Boolean);
 }
 
 export function getPixSettings() {
-  const value = getValue(remoteConfig, 'pix_settings').asString();
+  const value = getValue(remoteConfig, "pix_settings").asString();
   try {
     return JSON.parse(value);
   } catch {
     return {
-      environment: 'sandbox',
-      minAmount: 1.00,
-      maxAmount: 10000.00
+      environment: "sandbox",
+      minAmount: 1.0,
+      maxAmount: 10000.0,
     };
   }
 }
@@ -106,32 +123,44 @@ firebase functions:config:set tyler.pix_key="sua_chave_pix_aqui"
 
 ```javascript
 // functions/src/index.js
-const { onCall } = require('firebase-functions/v2/https');
-const { defineString } = require('firebase-functions/params');
+const { onCall } = require("firebase-functions/v2/https");
+const { defineString } = require("firebase-functions/params");
 
 // Parâmetros de ambiente
-const authorizedAdmins = defineString('AUTHORIZED_ADMINS', { default: 'admin@tyler.com' });
-const authorizedDomains = defineString('AUTHORIZED_DOMAINS', { default: 'gmail.com' });
+const authorizedAdmins = defineString("AUTHORIZED_ADMINS", {
+  default: "admin@tyler.com",
+});
+const authorizedDomains = defineString("AUTHORIZED_DOMAINS", {
+  default: "gmail.com",
+});
 
 exports.checkAuthorization = onCall((request) => {
   const { email } = request.data;
-  
+
   if (!email) {
-    throw new Error('Email é obrigatório');
+    throw new Error("Email é obrigatório");
   }
 
-  const admins = authorizedAdmins.value().split(',').map(e => e.trim());
-  const domains = authorizedDomains.value().split(',').map(d => d.trim());
-  const emailDomain = email.split('@')[1];
+  const admins = authorizedAdmins
+    .value()
+    .split(",")
+    .map((e) => e.trim());
+  const domains = authorizedDomains
+    .value()
+    .split(",")
+    .map((d) => d.trim());
+  const emailDomain = email.split("@")[1];
 
   const isAuthorizedAdmin = admins.includes(email);
   const isAuthorizedDomain = domains.includes(emailDomain);
 
   return {
     authorized: isAuthorizedAdmin || isAuthorizedDomain,
-    role: isAuthorizedAdmin ? 'admin' : 'user',
-    reason: !isAuthorizedAdmin && !isAuthorizedDomain ? 
-      'Email ou domínio não autorizado' : null
+    role: isAuthorizedAdmin ? "admin" : "user",
+    reason:
+      !isAuthorizedAdmin && !isAuthorizedDomain
+        ? "Email ou domínio não autorizado"
+        : null,
   };
 });
 ```
@@ -140,21 +169,21 @@ exports.checkAuthorization = onCall((request) => {
 
 ```typescript
 // src/utils/firebaseAuth.ts
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from './firebase';
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { app } from "./firebase";
 
 const functions = getFunctions(app);
-const checkAuthorization = httpsCallable(functions, 'checkAuthorization');
+const checkAuthorization = httpsCallable(functions, "checkAuthorization");
 
 export async function validateEmailAuthorization(email: string) {
   try {
     const result = await checkAuthorization({ email });
     return result.data;
   } catch (error) {
-    console.error('Erro ao validar autorização:', error);
+    console.error("Erro ao validar autorização:", error);
     return {
       authorized: false,
-      reason: 'Erro ao verificar autorização'
+      reason: "Erro ao verificar autorização",
     };
   }
 }
@@ -178,7 +207,7 @@ Use o Firestore para gerenciar autorizações de forma dinâmica.
       "addedBy": "system"
     },
     {
-      "email": "manager@tyler.com", 
+      "email": "manager@tyler.com",
       "role": "admin",
       "addedAt": "2024-11-11T22:00:00Z",
       "addedBy": "admin@tyler.com"
@@ -193,44 +222,53 @@ Use o Firestore para gerenciar autorizações de forma dinâmica.
 
 ```typescript
 // src/utils/firestoreAuth.ts
-import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { db } from './firebase';
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
+import { db } from "./firebase";
 
-const SETTINGS_DOC = 'settings/authorization';
+const SETTINGS_DOC = "settings/authorization";
 
 export async function getAuthorizedEmails() {
   try {
     const docRef = doc(db, SETTINGS_DOC);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       return docSnap.data().authorizedEmails || [];
     }
-    
+
     return [];
   } catch (error) {
-    console.error('Erro ao buscar emails autorizados:', error);
+    console.error("Erro ao buscar emails autorizados:", error);
     return [];
   }
 }
 
-export async function addAuthorizedEmail(email: string, role: string = 'admin') {
+export async function addAuthorizedEmail(
+  email: string,
+  role: string = "admin"
+) {
   try {
     const docRef = doc(db, SETTINGS_DOC);
-    
+
     await updateDoc(docRef, {
       authorizedEmails: arrayUnion({
         email,
         role,
         addedAt: new Date().toISOString(),
-        addedBy: 'admin' // pegar do contexto atual
+        addedBy: "admin", // pegar do contexto atual
       }),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
-    
+
     return { success: true };
   } catch (error) {
-    console.error('Erro ao adicionar email:', error);
+    console.error("Erro ao adicionar email:", error);
     return { success: false, error: error.message };
   }
 }
@@ -238,19 +276,19 @@ export async function addAuthorizedEmail(email: string, role: string = 'admin') 
 export async function removeAuthorizedEmail(email: string) {
   try {
     const emails = await getAuthorizedEmails();
-    const emailToRemove = emails.find(e => e.email === email);
-    
+    const emailToRemove = emails.find((e) => e.email === email);
+
     if (emailToRemove) {
       const docRef = doc(db, SETTINGS_DOC);
       await updateDoc(docRef, {
         authorizedEmails: arrayRemove(emailToRemove),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     }
-    
+
     return { success: true };
   } catch (error) {
-    console.error('Erro ao remover email:', error);
+    console.error("Erro ao remover email:", error);
     return { success: false, error: error.message };
   }
 }
@@ -265,8 +303,9 @@ Para máxima flexibilidade, use uma abordagem híbrida:
 3. **Firestore** - Dados dinâmicos como lista de administradores
 
 ### **Ordem de Prioridade:**
+
 1. Firestore (tempo real, mais flexível)
-2. Remote Config (mudanças sem rebuild) 
+2. Remote Config (mudanças sem rebuild)
 3. Environment Variables (fallback)
 4. Hardcoded defaults (último recurso)
 
@@ -277,20 +316,20 @@ export async function getAuthorizedEmails(): Promise<string[]> {
     // 1. Tentar Firestore primeiro
     const firestoreEmails = await getFirestoreAuthorizedEmails();
     if (firestoreEmails.length > 0) return firestoreEmails;
-    
+
     // 2. Remote Config como backup
     const remoteEmails = getRemoteConfigAuthorizedEmails();
     if (remoteEmails.length > 0) return remoteEmails;
-    
+
     // 3. Environment variables
-    const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS?.split(',') || [];
+    const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS?.split(",") || [];
     if (envEmails.length > 0) return envEmails;
-    
+
     // 4. Default fallback
-    return ['admin@tyler.com'];
+    return ["admin@tyler.com"];
   } catch (error) {
-    console.error('Erro ao buscar emails autorizados:', error);
-    return ['admin@tyler.com'];
+    console.error("Erro ao buscar emails autorizados:", error);
+    return ["admin@tyler.com"];
   }
 }
 ```

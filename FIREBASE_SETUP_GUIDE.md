@@ -20,6 +20,7 @@
 ### **3. Configurar Domínios Autorizados**
 
 Na seção **Authentication → Settings → Authorized domains**, adicione:
+
 - `localhost` (para desenvolvimento)
 - Seu domínio de produção (ex: `tylerlimaeler.org`)
 
@@ -56,11 +57,13 @@ VITE_AUTHORIZED_DOMAINS=gmail.com,tylerlimaeler.org
 3. Adicione os parâmetros:
 
 **Emails Autorizados:**
+
 - Nome: `authorized_admins`
 - Valor: `admin@tylerlimaeler.org,seu-email@gmail.com`
 
 **Domínios Autorizados:**
-- Nome: `authorized_domains`  
+
+- Nome: `authorized_domains`
 - Valor: `gmail.com,tylerlimaeler.org`
 
 ### **7. Testar Configuração**
@@ -80,9 +83,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Apenas admins autenticados podem ler configurações
     match /settings/{document} {
-      allow read: if request.auth != null && 
+      allow read: if request.auth != null &&
                      resource.data.authorizedEmails[request.auth.token.email] != null;
-      allow write: if request.auth != null && 
+      allow write: if request.auth != null &&
                       resource.data.authorizedEmails[request.auth.token.email].role == 'super-admin';
     }
   }
@@ -92,6 +95,7 @@ service cloud.firestore {
 ## 🚀 Modo de Desenvolvimento
 
 Se não configurar Firebase, o sistema funciona em **modo mock**:
+
 - Login: `admin@tyler.com` / `admin123`
 - Todos os recursos funcionam normalmente
 - Dados são armazenados localmente
@@ -99,21 +103,25 @@ Se não configurar Firebase, o sistema funciona em **modo mock**:
 ## ❗ Troubleshooting
 
 **Erro "API key not valid":**
+
 - Verifique se a chave está completa no .env
 - Confirme se o projeto está ativo no Firebase
 - Verifique se o domínio está autorizado
 
 **Erro "unauthorized-domain":**
+
 - Adicione `localhost` nos domínios autorizados
 - Para produção, adicione seu domínio real
 
 **Modal "não autorizado":**
+
 - Adicione seu email em `VITE_AUTHORIZED_ADMINS`
 - Ou configure via Remote Config no Firebase
 
 ## 📱 Interface Admin
 
 Após configurado, acesse `/admin/security` para:
+
 - Ver status da autenticação
-- Gerenciar emails autorizados  
+- Gerenciar emails autorizados
 - Verificar configurações do Firebase

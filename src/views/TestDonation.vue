@@ -7,13 +7,30 @@
         </h1>
 
         <!-- Status da API -->
-        <div class="mb-8 p-4 rounded-lg" :class="healthStatus === 'healthy' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
+        <div
+          class="mb-8 p-4 rounded-lg"
+          :class="
+            healthStatus === 'healthy'
+              ? 'bg-green-50 border border-green-200'
+              : 'bg-red-50 border border-red-200'
+          "
+        >
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="font-medium" :class="healthStatus === 'healthy' ? 'text-green-800' : 'text-red-800'">
+              <h3
+                class="font-medium"
+                :class="
+                  healthStatus === 'healthy' ? 'text-green-800' : 'text-red-800'
+                "
+              >
                 Status da API Tyler
               </h3>
-              <p class="text-sm mt-1" :class="healthStatus === 'healthy' ? 'text-green-600' : 'text-red-600'">
+              <p
+                class="text-sm mt-1"
+                :class="
+                  healthStatus === 'healthy' ? 'text-green-600' : 'text-red-600'
+                "
+              >
                 {{ healthMessage }}
               </p>
             </div>
@@ -21,9 +38,13 @@
               @click="checkApiHealth"
               :disabled="checkingHealth"
               class="px-3 py-1 text-sm rounded-md transition-colors"
-              :class="healthStatus === 'healthy' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'"
+              :class="
+                healthStatus === 'healthy'
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              "
             >
-              {{ checkingHealth ? 'Verificando...' : 'Verificar' }}
+              {{ checkingHealth ? "Verificando..." : "Verificar" }}
             </button>
           </div>
         </div>
@@ -54,7 +75,11 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Doação geral</option>
-                <option v-for="goal in activeGoals" :key="goal.id" :value="goal.id">
+                <option
+                  v-for="goal in activeGoals"
+                  :key="goal.id"
+                  :value="goal.id"
+                >
                   {{ goal.title }}
                 </option>
               </select>
@@ -124,10 +149,17 @@
           </div>
 
           <!-- Validation Errors -->
-          <div v-if="validationErrors.length > 0" class="bg-red-50 border border-red-200 rounded-md p-4">
-            <h4 class="text-red-800 font-medium mb-2">Corrija os seguintes erros:</h4>
+          <div
+            v-if="validationErrors.length > 0"
+            class="bg-red-50 border border-red-200 rounded-md p-4"
+          >
+            <h4 class="text-red-800 font-medium mb-2">
+              Corrija os seguintes erros:
+            </h4>
             <ul class="text-red-700 text-sm space-y-1">
-              <li v-for="error in validationErrors" :key="error">• {{ error }}</li>
+              <li v-for="error in validationErrors" :key="error">
+                • {{ error }}
+              </li>
             </ul>
           </div>
 
@@ -138,7 +170,7 @@
               :disabled="processing"
               class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3"
             >
-              {{ processing ? 'Processando...' : 'Doar com PIX' }}
+              {{ processing ? "Processando..." : "Doar com PIX" }}
             </BaseButton>
           </div>
         </form>
@@ -158,23 +190,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
-import BaseInput from '@/components/ui/BaseInput.vue';
-import BaseButton from '@/components/ui/BaseButton.vue';
-import PixPaymentModal from '@/components/PixPaymentModal.vue';
-import { useGoalsStore } from '@/stores/goals';
-import { useDonations } from '@/composables/useDonations';
-import { useToast } from '@/composables/useToast';
-import { healthService } from '@/utils/services';
-import type { DonationRequest, PaymentStatusResponse } from '@/types';
+import { ref, reactive, computed, onMounted } from "vue";
+import BaseInput from "@/components/ui/BaseInput.vue";
+import BaseButton from "@/components/ui/BaseButton.vue";
+import PixPaymentModal from "@/components/PixPaymentModal.vue";
+import { useGoalsStore } from "@/stores/goals";
+import { useDonations } from "@/composables/useDonations";
+import { useToast } from "@/composables/useToast";
+import { healthService } from "@/utils/services";
+import type { DonationRequest, PaymentStatusResponse } from "@/types";
 
 // Stores e composables
 const goalsStore = useGoalsStore();
-const { 
-  createDonation, 
+const {
+  createDonation,
   handlePaymentSuccess: processPaymentSuccess,
   validateDonationData,
-  formatDocument
+  formatDocument,
 } = useDonations();
 const { showToast } = useToast();
 
@@ -182,20 +214,20 @@ const { showToast } = useToast();
 const processing = ref(false);
 const showPaymentModal = ref(false);
 const checkingHealth = ref(false);
-const healthStatus = ref<'healthy' | 'unhealthy'>('unhealthy');
-const healthMessage = ref('');
+const healthStatus = ref<"healthy" | "unhealthy">("unhealthy");
+const healthMessage = ref("");
 
 // Form data
 const donationForm = reactive<Partial<DonationRequest>>({
   amount: 0,
-  goalId: '',
+  goalId: "",
   anonymous: false,
-  message: '',
+  message: "",
   donor: {
-    name: '',
-    email: '',
-    document: ''
-  }
+    name: "",
+    email: "",
+    document: "",
+  },
 });
 
 // Computed
@@ -206,7 +238,7 @@ const validationErrors = computed(() => {
     const amountCents = Math.round((donationForm.amount || 0) * 100);
     return validateDonationData({
       ...donationForm,
-      amount: amountCents
+      amount: amountCents,
     });
   }
   return [];
@@ -217,15 +249,21 @@ const donationAmountCents = computed(() => {
 });
 
 const donationDescription = computed(() => {
-  const goal = activeGoals.value.find(g => g.id === donationForm.goalId);
-  const base = goal ? `Doação para: ${goal.title}` : 'Doação solidária';
+  const goal = activeGoals.value.find((g) => g.id === donationForm.goalId);
+  const base = goal ? `Doação para: ${goal.title}` : "Doação solidária";
   return donationForm.message ? `${base} - ${donationForm.message}` : base;
 });
 
 const payerData = computed(() => ({
-  name: donationForm.anonymous ? 'Doador Anônimo' : donationForm.donor?.name || 'Doador',
-  email: donationForm.anonymous ? 'anonimo@tyler.com' : donationForm.donor?.email || '',
-  document: donationForm.anonymous ? '00000000000' : donationForm.donor?.document?.replace(/\D/g, '') || '00000000000'
+  name: donationForm.anonymous
+    ? "Doador Anônimo"
+    : donationForm.donor?.name || "Doador",
+  email: donationForm.anonymous
+    ? "anonimo@tyler.com"
+    : donationForm.donor?.email || "",
+  document: donationForm.anonymous
+    ? "00000000000"
+    : donationForm.donor?.document?.replace(/\D/g, "") || "00000000000",
 }));
 
 // Methods
@@ -233,11 +271,11 @@ async function checkApiHealth() {
   checkingHealth.value = true;
   try {
     const health = await healthService.checkHealth();
-    healthStatus.value = health.status === 'healthy' ? 'healthy' : 'unhealthy';
+    healthStatus.value = health.status === "healthy" ? "healthy" : "unhealthy";
     healthMessage.value = health.message;
   } catch (error) {
-    healthStatus.value = 'unhealthy';
-    healthMessage.value = 'Não foi possível conectar com a API';
+    healthStatus.value = "unhealthy";
+    healthMessage.value = "Não foi possível conectar com a API";
   } finally {
     checkingHealth.value = false;
   }
@@ -247,7 +285,7 @@ async function handleSubmit() {
   // Validate form
   const errors = validationErrors.value;
   if (errors.length > 0) {
-    showToast('Corrija os erros no formulário', 'error');
+    showToast("Corrija os erros no formulário", "error");
     return;
   }
 
@@ -262,14 +300,14 @@ function handlePaymentSuccess(paymentData: PaymentStatusResponse) {
 }
 
 function handlePaymentError(error: string) {
-  showToast(error, 'error');
+  showToast(error, "error");
   showPaymentModal.value = false;
   processing.value = false;
 }
 
 function formatCpfInput(event: Event) {
   const target = event.target as HTMLInputElement;
-  const value = target.value.replace(/\D/g, '');
+  const value = target.value.replace(/\D/g, "");
   if (value.length <= 11) {
     donationForm.donor!.document = formatDocument(value);
   }
@@ -278,14 +316,14 @@ function formatCpfInput(event: Event) {
 function resetForm() {
   Object.assign(donationForm, {
     amount: 0,
-    goalId: '',
+    goalId: "",
     anonymous: false,
-    message: '',
+    message: "",
     donor: {
-      name: '',
-      email: '',
-      document: ''
-    }
+      name: "",
+      email: "",
+      document: "",
+    },
   });
   processing.value = false;
 }

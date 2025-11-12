@@ -3,15 +3,17 @@
 ## Passo a Passo para Configurar Firebase
 
 ### 1. Criar Projeto Firebase
+
 1. Acesse [Firebase Console](https://console.firebase.google.com/)
-2. Clique em "Adicionar projeto" 
+2. Clique em "Adicionar projeto"
 3. Nome do projeto: `tyler-project` (ou outro nome)
 4. Ative Google Analytics (opcional)
 
 ### 2. Configurar Authentication
+
 1. No painel lateral: **Authentication** > **Método de login**
 2. Ativar **Google**:
-   - Clicar em "Google" 
+   - Clicar em "Google"
    - Ativar o provedor
    - Configurar email de suporte: `admin@tylerlimaeler.org`
    - Salvar
@@ -19,6 +21,7 @@
 4. Em **Usuários**, os admins aparecerão automaticamente após primeiro login Google
 
 ### 3. Obter Configurações
+
 1. No painel: **Configurações do projeto** (ícone engrenagem)
 2. Na aba **Geral**, descer até **Seus aplicativos**
 3. Clicar no ícone **</>** (Web)
@@ -42,6 +45,7 @@ VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
 ### 5. Regras de Segurança (Opcional)
 
 No **Firestore** (se usar futuramente):
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -57,16 +61,19 @@ service cloud.firestore {
 ### 6. Testar Integração
 
 1. **Iniciar aplicação:**
+
    ```bash
    npm run dev
    ```
 
 2. **Acessar login admin:**
+
    ```
    http://localhost:5173/admin/login
    ```
 
 3. **Fazer login:**
+
    - Clicar em **"Continuar com Google"**
    - Selecionar conta Google do administrador
    - **Ou** usar email/senha se configurado
@@ -78,6 +85,7 @@ service cloud.firestore {
 ## 🔐 Funcionamento da Autenticação
 
 ### Fluxo de Login
+
 ```
 1. Usuário insere email/senha
 2. Firebase autentica credenciais
@@ -88,10 +96,11 @@ service cloud.firestore {
 ```
 
 ### Estrutura do Token JWT
+
 ```json
 {
   "iss": "https://securetoken.google.com/tyler-project",
-  "aud": "tyler-project", 
+  "aud": "tyler-project",
   "auth_time": 1636728394,
   "user_id": "abc123...",
   "sub": "abc123...",
@@ -102,12 +111,14 @@ service cloud.firestore {
 ```
 
 ### Backend Integration
+
 O backend deve verificar tokens Firebase:
+
 ```java
 // Spring Boot example
 @Component
 public class FirebaseAuthService {
-    
+
     public DecodedIdToken verifyToken(String idToken) {
         return FirebaseAuth.getInstance().verifyIdToken(idToken);
     }
@@ -117,6 +128,7 @@ public class FirebaseAuthService {
 ## 🚨 Segurança
 
 ### Boas Práticas Implementadas
+
 - ✅ Token expira automaticamente (1 hora)
 - ✅ Refresh automático de token
 - ✅ Logout limpa todos os dados
@@ -124,11 +136,12 @@ public class FirebaseAuthService {
 - ✅ Redirecionamento automático se não autenticado
 
 ### Configurações de Segurança
+
 ```javascript
 // Em firebase.ts - já implementado
 const firebaseConfig = {
   // Configurações públicas - OK expor
-  apiKey: "...", 
+  apiKey: "...",
   authDomain: "...",
   projectId: "...",
   // etc...
@@ -138,16 +151,19 @@ const firebaseConfig = {
 ## 📱 Funcionalidades Implementadas
 
 ### Componentes
+
 - ✅ `Login.vue` - Interface de login
 - ✅ `AdminHeader.vue` - Menu com logout
 - ✅ `AdminLayout.vue` - Layout protegido
 
-### Services  
+### Services
+
 - ✅ `firebase.ts` - Serviços Firebase
 - ✅ `useFirebaseAuth.ts` - Composable de autenticação
 - ✅ `auth.ts` - Store Pinia integrada
 
 ### Features
+
 - ✅ Login/logout
 - ✅ Proteção de rotas
 - ✅ Token refresh automático
@@ -157,15 +173,19 @@ const firebaseConfig = {
 ## 🔧 Troubleshooting
 
 ### Erro: "Firebase configuration invalid"
-**Solução:** Verificar se todas as variáveis VITE_FIREBASE_* estão definidas no .env
 
-### Erro: "User not found" 
+**Solução:** Verificar se todas as variáveis VITE*FIREBASE*\* estão definidas no .env
+
+### Erro: "User not found"
+
 **Solução:** Adicionar usuário manualmente no Firebase Console > Authentication > Users
 
 ### Erro: "Invalid token"
+
 **Solução:** Verificar se projeto Firebase está ativo e configurações estão corretas
 
 ### Token não incluído nas requisições
+
 **Solução:** Verificar se usuário está logado e localStorage tem 'admin_token'
 
 ---

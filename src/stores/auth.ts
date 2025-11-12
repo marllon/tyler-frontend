@@ -12,25 +12,31 @@ export const useAuthStore = defineStore("auth", () => {
   const loading = ref(false);
   const useFirebase = ref(true); // Flag para controlar se usa Firebase ou mock
 
-  const isAuthenticated = computed(() => !!token.value && (!!user.value || !!admin.value));
+  const isAuthenticated = computed(
+    () => !!token.value && (!!user.value || !!admin.value)
+  );
 
   async function loginWithGoogle() {
     loading.value = true;
-    
+
     try {
       // Tentar login com Google via Firebase
       const firebaseResult = await firebaseService.signInWithGoogle();
-      
+
       if (firebaseResult.success) {
         // Verificar se o email está autorizado
-        const authResult = await authorizationService.checkEmailAuthorization(firebaseResult.user!.email || '');
-        
+        const authResult = await authorizationService.checkEmailAuthorization(
+          firebaseResult.user!.email || ""
+        );
+
         if (!authResult.authorized) {
           // Fazer logout no Firebase se não autorizado
           await firebaseService.signOut();
           return {
             success: false,
-            error: authResult.reason || 'Email não autorizado para acessar o sistema'
+            error:
+              authResult.reason ||
+              "Email não autorizado para acessar o sistema",
           };
         }
 
@@ -38,56 +44,64 @@ export const useAuthStore = defineStore("auth", () => {
         useFirebase.value = true;
         user.value = firebaseResult.user!;
         token.value = firebaseResult.token!;
-        
+
         admin.value = {
           id: firebaseResult.user!.uid,
-          name: firebaseResult.user!.displayName || firebaseResult.user!.email || 'Admin',
-          email: firebaseResult.user!.email || '',
-          role: authResult.role || 'admin'
+          name:
+            firebaseResult.user!.displayName ||
+            firebaseResult.user!.email ||
+            "Admin",
+          email: firebaseResult.user!.email || "",
+          role: authResult.role || "admin",
         };
 
         localStorage.setItem("admin_token", firebaseResult.token!);
         return { success: true };
       }
-      
+
       // Se Firebase falhar, usar mock do Google para desenvolvimento
-      console.warn('⚠️ Firebase Google Auth não disponível, usando mock para desenvolvimento');
+      console.warn(
+        "⚠️ Firebase Google Auth não disponível, usando mock para desenvolvimento"
+      );
       useFirebase.value = false;
-      
+
       const mockResult = await mockAuthService.signInWithGoogle();
-      
+
       if (!mockResult.success) {
         return {
           success: false,
-          error: mockResult.error || "Erro ao fazer login com Google"
+          error: mockResult.error || "Erro ao fazer login com Google",
         };
       }
 
       // Verificar autorização também no mock
-      const authResult = await authorizationService.checkEmailAuthorization(mockResult.user!.email || '');
-      
+      const authResult = await authorizationService.checkEmailAuthorization(
+        mockResult.user!.email || ""
+      );
+
       if (!authResult.authorized) {
         mockAuthService.clearMockUser();
         return {
           success: false,
-          error: authResult.reason || 'Email não autorizado para acessar o sistema (modo desenvolvimento)'
+          error:
+            authResult.reason ||
+            "Email não autorizado para acessar o sistema (modo desenvolvimento)",
         };
       }
 
       // Armazenar dados do mock
       user.value = mockResult.user!;
       token.value = mockResult.token!;
-      
+
       admin.value = {
         id: mockResult.user!.uid,
-        name: mockResult.user!.displayName || mockResult.user!.email || 'Admin',
-        email: mockResult.user!.email || '',
-        role: authResult.role || 'admin'
+        name: mockResult.user!.displayName || mockResult.user!.email || "Admin",
+        email: mockResult.user!.email || "",
+        role: authResult.role || "admin",
       };
 
       localStorage.setItem("admin_token", mockResult.token!);
       return { success: true };
-      
     } catch (error: any) {
       return {
         success: false,
@@ -100,21 +114,25 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function login(email: string, password: string) {
     loading.value = true;
-    
+
     try {
       // Tentar Firebase primeiro
       const firebaseResult = await firebaseService.signIn(email, password);
-      
+
       if (firebaseResult.success) {
         // Verificar se o email está autorizado
-        const authResult = await authorizationService.checkEmailAuthorization(firebaseResult.user!.email || '');
-        
+        const authResult = await authorizationService.checkEmailAuthorization(
+          firebaseResult.user!.email || ""
+        );
+
         if (!authResult.authorized) {
           // Fazer logout no Firebase se não autorizado
           await firebaseService.signOut();
           return {
             success: false,
-            error: authResult.reason || 'Email não autorizado para acessar o sistema'
+            error:
+              authResult.reason ||
+              "Email não autorizado para acessar o sistema",
           };
         }
 
@@ -122,48 +140,52 @@ export const useAuthStore = defineStore("auth", () => {
         useFirebase.value = true;
         user.value = firebaseResult.user!;
         token.value = firebaseResult.token!;
-        
+
         admin.value = {
           id: firebaseResult.user!.uid,
-          name: firebaseResult.user!.displayName || firebaseResult.user!.email || 'Admin',
-          email: firebaseResult.user!.email || '',
-          role: authResult.role || 'admin'
+          name:
+            firebaseResult.user!.displayName ||
+            firebaseResult.user!.email ||
+            "Admin",
+          email: firebaseResult.user!.email || "",
+          role: authResult.role || "admin",
         };
 
         localStorage.setItem("admin_token", firebaseResult.token!);
         return { success: true };
       }
-      
+
       // Se Firebase falhar, usar mock para desenvolvimento
-      console.warn('⚠️ Firebase não disponível, usando autenticação mock para desenvolvimento');
+      console.warn(
+        "⚠️ Firebase não disponível, usando autenticação mock para desenvolvimento"
+      );
       useFirebase.value = false;
-      
+
       const mockResult = await mockAuthService.signIn(email, password);
-      
+
       if (!mockResult.success) {
         return {
           success: false,
-          error: mockResult.error || "Erro ao fazer login"
+          error: mockResult.error || "Erro ao fazer login",
         };
       }
 
       // Armazenar dados do mock
       user.value = mockResult.user!;
       token.value = mockResult.token!;
-      
+
       admin.value = {
         id: mockResult.user!.uid,
-        name: mockResult.user!.displayName || mockResult.user!.email || 'Admin',
-        email: mockResult.user!.email || '',
-        role: 'admin'
+        name: mockResult.user!.displayName || mockResult.user!.email || "Admin",
+        email: mockResult.user!.email || "",
+        role: "admin",
       };
 
       // Salvar no mock service
       mockAuthService.saveMockUser(mockResult.user!, mockResult.token!);
       localStorage.setItem("admin_token", mockResult.token!);
-      
+
       return { success: true };
-      
     } catch (error: any) {
       return {
         success: false,
@@ -176,7 +198,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function logout() {
     loading.value = true;
-    
+
     try {
       if (useFirebase.value) {
         await firebaseService.signOut();
@@ -184,26 +206,26 @@ export const useAuthStore = defineStore("auth", () => {
         await mockAuthService.signOut();
         mockAuthService.clearMockUser();
       }
-      
+
       token.value = null;
       admin.value = null;
       user.value = null;
       localStorage.removeItem("admin_token");
-      
+
       return { success: true };
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error("Erro ao fazer logout:", error);
       // Limpar dados localmente mesmo se o logout falhar
       token.value = null;
       admin.value = null;
       user.value = null;
       localStorage.removeItem("admin_token");
-      
+
       if (!useFirebase.value) {
         mockAuthService.clearMockUser();
       }
-      
-      return { success: false, error: 'Erro ao fazer logout' };
+
+      return { success: false, error: "Erro ao fazer logout" };
     } finally {
       loading.value = false;
     }
@@ -219,13 +241,13 @@ export const useAuthStore = defineStore("auth", () => {
           user.value = firebaseUser;
           admin.value = {
             id: firebaseUser.uid,
-            name: firebaseUser.displayName || firebaseUser.email || 'Admin',
-            email: firebaseUser.email || '',
-            role: 'admin'
+            name: firebaseUser.displayName || firebaseUser.email || "Admin",
+            email: firebaseUser.email || "",
+            role: "admin",
           };
-          
+
           // Atualizar token
-          firebaseUser.getIdToken().then(newToken => {
+          firebaseUser.getIdToken().then((newToken) => {
             token.value = newToken;
             localStorage.setItem("admin_token", newToken);
           });
@@ -235,7 +257,7 @@ export const useAuthStore = defineStore("auth", () => {
         }
       });
     } catch (error) {
-      console.warn('Firebase não disponível, usando sistema mock');
+      console.warn("Firebase não disponível, usando sistema mock");
       checkMockAuth();
       return () => {}; // Retorna função vazia para cleanup
     }
@@ -244,19 +266,19 @@ export const useAuthStore = defineStore("auth", () => {
   // Verificar autenticação mock
   function checkMockAuth() {
     useFirebase.value = false;
-    
+
     mockAuthService.onAuthStateChanged((mockUser) => {
       if (mockUser) {
         user.value = mockUser;
         admin.value = {
           id: mockUser.uid,
-          name: mockUser.displayName || mockUser.email || 'Admin',
-          email: mockUser.email || '',
-          role: 'admin'
+          name: mockUser.displayName || mockUser.email || "Admin",
+          email: mockUser.email || "",
+          role: "admin",
         };
-        
+
         // Usar token mock
-        const mockToken = localStorage.getItem('mock_token');
+        const mockToken = localStorage.getItem("mock_token");
         if (mockToken) {
           token.value = mockToken;
           localStorage.setItem("admin_token", mockToken);
@@ -280,11 +302,11 @@ export const useAuthStore = defineStore("auth", () => {
           user.value = currentUser;
           admin.value = {
             id: currentUser.uid,
-            name: currentUser.displayName || currentUser.email || 'Admin',
-            email: currentUser.email || '',
-            role: 'admin'
+            name: currentUser.displayName || currentUser.email || "Admin",
+            email: currentUser.email || "",
+            role: "admin",
           };
-          
+
           // Atualizar token se necessário
           const freshToken = await firebaseService.getCurrentUserToken();
           if (freshToken) {
@@ -296,7 +318,7 @@ export const useAuthStore = defineStore("auth", () => {
           logout();
         }
       } catch (error) {
-        console.error('Erro ao verificar autenticação:', error);
+        console.error("Erro ao verificar autenticação:", error);
         logout();
       }
     }

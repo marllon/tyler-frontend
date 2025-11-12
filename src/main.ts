@@ -20,7 +20,7 @@ async function initializeServices() {
     const { initRemoteConfig } = await import("@/utils/remoteConfig");
     await initRemoteConfig();
   } catch (error) {
-    console.warn('⚠️ Erro ao inicializar Remote Config:', error);
+    console.warn("⚠️ Erro ao inicializar Remote Config:", error);
   }
 
   // Inicializar auth

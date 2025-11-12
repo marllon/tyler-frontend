@@ -1,0 +1,86 @@
+# =====================================
+# 🧱 NODE / VUE DEFAULTS
+# =====================================
+node_modules/
+dist/
+build/
+coverage/
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =====================================
+# ⚙️ VITE / VUE CLI
+# =====================================
+.vite/
+.cache/
+.temp/
+.vuepress/dist/
+.vuepress/.temp
+public/dist/
+
+# =====================================
+# 🧩 SYSTEM FILES
+# =====================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# =====================================
+# 🔐 ENVIRONMENTS & CREDENTIALS
+# =====================================
+# arquivos de variáveis de ambiente — NÃO comitar!
+.env
+.env**
+.env.local
+.env.*.local
+.env.development.local
+.env.production.local
+.env.test.local
+
+# backups ou configs sensíveis
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+*.pfx
+*.bak
+*.secret
+*.enc
+secrets.json
+credentials.json
+firebase.json
+google-services.json
+serviceAccount*.json
+config.private.js
+config.secret.js
+
+# =====================================
+# 🧰 TOOLING
+# =====================================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-debug.log
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# =====================================
+# 🧑‍💻 LOCAL FILES
+# =====================================
+# arquivos e pastas usadas apenas em desenvolvimento local
+.envrc
+local.env
+local.settings.json
+scripts/local/
+scripts/dev-only/

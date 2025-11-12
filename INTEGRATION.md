@@ -7,21 +7,25 @@ Este documento descreve como a aplicação frontend Tyler foi integrada com a AP
 ### ✅ **Implementado e Testável**
 
 1. **Configuração da API**
+
    - Cliente HTTP centralizado (`/src/utils/api.ts`)
    - Interceptors para autenticação e tratamento de erros
    - Configuração de ambiente para dev/prod
 
 2. **Sistema de Pagamentos PIX**
+
    - Service para criar checkout PIX (`/src/utils/services.ts`)
    - Polling automático de status de pagamento
    - Componente modal completo (`/src/components/PixPaymentModal.vue`)
 
 3. **Sistema de Doações**
+
    - Composable `useDonations` para lógica de negócio
    - Validação de formulários
    - Integração com metas de arrecadação
 
 4. **Stores Atualizadas**
+
    - Goals store integrada com API
    - Suporte a dados dummy para desenvolvimento
    - Computed properties para goals ativas/completas
@@ -55,6 +59,7 @@ VITE_NODE_ENV=production
 ## 🧪 **Como Testar a Integração**
 
 ### 1. Verificar Conectividade
+
 ```bash
 # Iniciar o frontend
 npm run dev
@@ -64,12 +69,15 @@ http://localhost:5173/test-donation
 ```
 
 ### 2. Health Check
+
 A página de teste inclui um botão "Verificar" que testa a conectividade com:
+
 ```
 GET http://localhost:8080/api/health
 ```
 
 ### 3. Teste de Doação PIX
+
 1. Preencher formulário de doação
 2. Clicar em "Doar com PIX"
 3. Modal abrirá com QR Code
@@ -80,12 +88,14 @@ GET http://localhost:8080/api/health
 O sistema suporta dois modos:
 
 **Modo Dummy (padrão para desenvolvimento):**
+
 ```typescript
 const goalsStore = useGoalsStore();
 goalsStore.useDummyData = true; // Usar dados locais
 ```
 
 **Modo API (quando backend estiver ativo):**
+
 ```typescript
 const goalsStore = useGoalsStore();
 goalsStore.useDummyData = false; // Usar API real
@@ -120,16 +130,18 @@ src/
 ## 🔗 **APIs Integradas**
 
 ### Health Check
+
 ```typescript
-import { healthService } from '@/utils/services';
+import { healthService } from "@/utils/services";
 
 const health = await healthService.checkHealth();
 // Retorna: { status, message, timestamp, version }
 ```
 
 ### PIX Payments
+
 ```typescript
-import { paymentService } from '@/utils/services';
+import { paymentService } from "@/utils/services";
 
 // Criar checkout
 const pixData = await paymentService.createPixCheckout({
@@ -138,8 +150,8 @@ const pixData = await paymentService.createPixCheckout({
   payer: {
     name: "João Silva",
     email: "joao@example.com",
-    document: "11144477735"
-  }
+    document: "11144477735",
+  },
 });
 
 // Verificar status
@@ -147,8 +159,9 @@ const status = await paymentService.getPaymentStatus(pixData.id);
 ```
 
 ### Goals (Metas)
+
 ```typescript
-import { useGoalsStore } from '@/stores/goals';
+import { useGoalsStore } from "@/stores/goals";
 
 const goalsStore = useGoalsStore();
 
@@ -175,30 +188,32 @@ const donationData = {
   donor: {
     name: "João Silva",
     email: "joao@example.com",
-    document: "11144477735"
-  }
+    document: "11144477735",
+  },
 };
 
 // 2. Criar PIX via service
 const pixResponse = await paymentService.createPixCheckout({
   amount: donationData.amount,
   description: `Doação: ${donationData.message}`,
-  payer: donationData.donor
+  payer: donationData.donor,
 });
 
 // 3. Exibir QR Code e polling automático
-paymentService.pollPaymentStatus(
-  pixResponse.id,
-  (status) => console.log('Status:', status),
-  60, // máximo 5 minutos
-  5000 // verificar a cada 5s
-).then((finalStatus) => {
-  if (finalStatus.status === 'PAID') {
-    // 4. Atualizar meta
-    goalsStore.updateGoalProgress(donationData.goalId, donationData.amount);
-    showToast('Doação confirmada!', 'success');
-  }
-});
+paymentService
+  .pollPaymentStatus(
+    pixResponse.id,
+    (status) => console.log("Status:", status),
+    60, // máximo 5 minutos
+    5000 // verificar a cada 5s
+  )
+  .then((finalStatus) => {
+    if (finalStatus.status === "PAID") {
+      // 4. Atualizar meta
+      goalsStore.updateGoalProgress(donationData.goalId, donationData.amount);
+      showToast("Doação confirmada!", "success");
+    }
+  });
 ```
 
 ## 🚧 **Próximos Passos**
@@ -206,19 +221,22 @@ paymentService.pollPaymentStatus(
 ### Quando Backend Estiver Totalmente Ativo:
 
 1. **Alterar modo de dados:**
+
 ```typescript
 // Em stores/goals.ts ou via configuração
 goalsStore.useDummyData = false;
 ```
 
 2. **Implementar outras APIs:**
+
 - Products (`/api/products`)
-- Orders (`/api/orders/checkout`)  
+- Orders (`/api/orders/checkout`)
 - Raffles (`/api/raffles`)
 - Events (`/api/events`)
 - Admin Dashboard (`/api/admin/*`)
 
 3. **Adicionar autenticação Firebase:**
+
 ```typescript
 // Interceptor já preparado em api.ts
 const token = await firebase.auth().currentUser?.getIdToken();
@@ -228,37 +246,41 @@ const token = await firebase.auth().currentUser?.getIdToken();
 ## 🛠️ **Utilitários Disponíveis**
 
 ### Composables
+
 ```typescript
-import { 
-  useDonations,     // Lógica de doações
-  useCurrency,      // Formatação de moeda
-  useToast,         // Notificações
-  useLoading        // Estados de loading
-} from '@/composables';
+import {
+  useDonations, // Lógica de doações
+  useCurrency, // Formatação de moeda
+  useToast, // Notificações
+  useLoading, // Estados de loading
+} from "@/composables";
 ```
 
 ### Services
+
 ```typescript
-import { 
-  healthService,    // Health check
-  paymentService    // PIX payments
-} from '@/utils/services';
+import {
+  healthService, // Health check
+  paymentService, // PIX payments
+} from "@/utils/services";
 ```
 
 ### Stores
+
 ```typescript
-import { 
-  useGoalsStore,    // Metas integradas
-  useAuthStore,     // Autenticação
+import {
+  useGoalsStore, // Metas integradas
+  useAuthStore, // Autenticação
   useProductsStore, // Produtos (a integrar)
-  useRafflesStore,  // Rifas (a integrar)
-  useEventsStore    // Eventos (a integrar)
-} from '@/stores';
+  useRafflesStore, // Rifas (a integrar)
+  useEventsStore, // Eventos (a integrar)
+} from "@/stores";
 ```
 
 ## 🐛 **Debug e Logging**
 
 Em modo desenvolvimento, todas as requisições são logadas no console:
+
 ```
 🚀 GET /health
 ✅ GET /health { status: "healthy", ... }
@@ -274,38 +296,43 @@ Em modo desenvolvimento, todas as requisições são logadas no console:
 Sistema completo de autenticação integrado:
 
 ### ✅ **Implementado:**
+
 - **🔥 Firebase Authentication** - Serviço completo configurado
-- **🔒 Login/Logout** - Interface e lógica implementadas  
+- **🔒 Login/Logout** - Interface e lógica implementadas
 - **🛡️ Proteção de rotas** - Guard automático para `/admin/*`
 - **🔄 Auto-refresh tokens** - Renovação automática de JWT
 - **📱 Estado persistente** - Mantém login entre sessões
 - **🚪 Interceptors** - Token incluído em todas as requisições
 
 ### 🔧 **Como configurar:**
+
 1. **Criar projeto Firebase** (ver `FIREBASE_SETUP.md`)
 2. **Configurar variáveis de ambiente:**
+
 ```bash
 VITE_FIREBASE_API_KEY=sua_api_key
 VITE_FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=seu-projeto-id
 # etc...
 ```
+
 3. **Adicionar usuários admin** no Firebase Console
 4. **Acessar:** `http://localhost:5173/admin/login`
 
 ### 🎯 **Fluxo completo:**
+
 ```typescript
 // Login automático
 const { signIn } = useFirebaseAuth();
-await signIn('admin@tyler.com', 'senha');
+await signIn("admin@tyler.com", "senha");
 
 // Token incluído automaticamente
-const response = await api.get('/admin/dashboard');
+const response = await api.get("/admin/dashboard");
 // Header: Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
 ```
 
 ---
 
-**🎉 A integração está completa e pronta para uso!** 
+**🎉 A integração está completa e pronta para uso!**
 
 Acesse `/test-donation` para testar o sistema completo de doações PIX.

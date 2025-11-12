@@ -9,7 +9,7 @@
       <!-- Configurações da API -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">API Tyler</h2>
-        
+
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -35,7 +35,9 @@
             />
           </div>
 
-          <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+          <div
+            class="flex items-center justify-between p-4 bg-blue-50 rounded-lg"
+          >
             <div>
               <h3 class="font-medium text-blue-900">Status da Conexão</h3>
               <p class="text-sm text-blue-700">{{ connectionStatus }}</p>
@@ -45,7 +47,7 @@
               :disabled="testing"
               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {{ testing ? 'Testando...' : 'Testar Conexão' }}
+              {{ testing ? "Testando..." : "Testar Conexão" }}
             </button>
           </div>
         </div>
@@ -54,7 +56,7 @@
       <!-- Configurações PIX -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">PIX / PagBank</h2>
-        
+
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -118,12 +120,14 @@
       <!-- Configurações de Notificações -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Notificações</h2>
-        
+
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <div>
               <h3 class="font-medium text-gray-900">Email de Doações</h3>
-              <p class="text-sm text-gray-600">Receber email quando uma nova doação for feita</p>
+              <p class="text-sm text-gray-600">
+                Receber email quando uma nova doação for feita
+              </p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -132,14 +136,18 @@
                 @change="saveNotifications"
                 class="sr-only peer"
               />
-              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+              ></div>
             </label>
           </div>
 
           <div class="flex items-center justify-between">
             <div>
               <h3 class="font-medium text-gray-900">Email de Pedidos</h3>
-              <p class="text-sm text-gray-600">Receber email quando um novo pedido for feito</p>
+              <p class="text-sm text-gray-600">
+                Receber email quando um novo pedido for feito
+              </p>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
@@ -148,7 +156,9 @@
                 @change="saveNotifications"
                 class="sr-only peer"
               />
-              <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div
+                class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+              ></div>
             </label>
           </div>
 
@@ -170,7 +180,7 @@
       <!-- Configurações do Site -->
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Site</h2>
-        
+
         <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -228,82 +238,89 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { api } from '@/utils/api';
+import { ref, computed, onMounted } from "vue";
+import { api } from "@/utils/api";
 
 // API Configuration
 const apiConfig = computed(() => ({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
-  timeout: 30000
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
+  timeout: 30000,
 }));
 
 // Connection Status
-const connectionStatus = ref('Não testado');
+const connectionStatus = ref("Não testado");
 const testing = ref(false);
 
 // PIX Configuration
 const pixConfig = ref({
-  environment: 'sandbox',
-  pixKey: '',
-  minAmount: 1.00,
-  maxAmount: 10000.00
+  environment: "sandbox",
+  pixKey: "",
+  minAmount: 1.0,
+  maxAmount: 10000.0,
 });
 
 // Notifications Configuration
 const notifications = ref({
   donations: true,
   orders: true,
-  email: ''
+  email: "",
 });
 
 // Site Configuration
 const siteConfig = ref({
-  organizationName: 'Tyler - Organização Beneficente',
-  description: 'Ajudando a transformar vidas através da solidariedade e do trabalho comunitário.',
-  phone: '',
-  email: ''
+  organizationName: "Tyler - Organização Beneficente",
+  description:
+    "Ajudando a transformar vidas através da solidariedade e do trabalho comunitário.",
+  phone: "",
+  email: "",
 });
 
 // Methods
 async function testConnection() {
   testing.value = true;
   try {
-    const response = await api.get('/health');
-    connectionStatus.value = response.data ? 'Conectado ✓' : 'Erro na resposta';
+    const response = await api.get("/health");
+    connectionStatus.value = response.data ? "Conectado ✓" : "Erro na resposta";
   } catch (error) {
-    connectionStatus.value = 'Falha na conexão ✗';
+    connectionStatus.value = "Falha na conexão ✗";
   } finally {
     testing.value = false;
   }
 }
 
 function savePixConfig() {
-  localStorage.setItem('tyler-pix-config', JSON.stringify(pixConfig.value));
+  localStorage.setItem("tyler-pix-config", JSON.stringify(pixConfig.value));
 }
 
 function saveNotifications() {
-  localStorage.setItem('tyler-notifications', JSON.stringify(notifications.value));
+  localStorage.setItem(
+    "tyler-notifications",
+    JSON.stringify(notifications.value)
+  );
 }
 
 function saveSiteConfig() {
-  localStorage.setItem('tyler-site-config', JSON.stringify(siteConfig.value));
+  localStorage.setItem("tyler-site-config", JSON.stringify(siteConfig.value));
 }
 
 function loadConfigurations() {
   // Load PIX Config
-  const savedPixConfig = localStorage.getItem('tyler-pix-config');
+  const savedPixConfig = localStorage.getItem("tyler-pix-config");
   if (savedPixConfig) {
     pixConfig.value = { ...pixConfig.value, ...JSON.parse(savedPixConfig) };
   }
 
   // Load Notifications
-  const savedNotifications = localStorage.getItem('tyler-notifications');
+  const savedNotifications = localStorage.getItem("tyler-notifications");
   if (savedNotifications) {
-    notifications.value = { ...notifications.value, ...JSON.parse(savedNotifications) };
+    notifications.value = {
+      ...notifications.value,
+      ...JSON.parse(savedNotifications),
+    };
   }
 
   // Load Site Config
-  const savedSiteConfig = localStorage.getItem('tyler-site-config');
+  const savedSiteConfig = localStorage.getItem("tyler-site-config");
   if (savedSiteConfig) {
     siteConfig.value = { ...siteConfig.value, ...JSON.parse(savedSiteConfig) };
   }

@@ -8,7 +8,10 @@
             Como você gostaria de contribuir?
           </h3>
           <p class="text-gray-600">
-            Valor: <span class="font-semibold text-green-600">{{ formatCurrency(amount) }}</span>
+            Valor:
+            <span class="font-semibold text-green-600">{{
+              formatCurrency(amount)
+            }}</span>
           </p>
         </div>
 
@@ -24,7 +27,7 @@
               <div class="text-sm text-gray-600">Pagamento instantâneo</div>
             </div>
           </button>
-          
+
           <!-- Futuras opções de pagamento -->
           <button
             disabled
@@ -45,23 +48,24 @@
           <h3 class="text-lg font-medium text-gray-900">
             Escaneie o QR Code PIX
           </h3>
-          
+
           <div class="bg-white p-4 rounded-lg border">
-            <img 
+            <img
               v-if="qrCodeUrl"
-              :src="qrCodeUrl" 
+              :src="qrCodeUrl"
               alt="QR Code PIX"
               class="mx-auto max-w-64 w-full"
             />
-            <div v-else class="w-64 h-64 mx-auto bg-gray-100 rounded flex items-center justify-center">
+            <div
+              v-else
+              class="w-64 h-64 mx-auto bg-gray-100 rounded flex items-center justify-center"
+            >
               <Spinner />
             </div>
           </div>
 
           <div class="space-y-2">
-            <p class="text-sm text-gray-600">
-              Ou copie o código PIX:
-            </p>
+            <p class="text-sm text-gray-600">Ou copie o código PIX:</p>
             <div class="flex gap-2">
               <input
                 :value="pixData.qr_codes[0]?.text"
@@ -81,7 +85,10 @@
             <p class="text-sm text-blue-800">
               <strong>Status:</strong> {{ getStatusMessage(paymentStatus) }}
             </p>
-            <div v-if="paymentStatus === 'WAITING_PAYMENT'" class="flex items-center justify-center mt-2">
+            <div
+              v-if="paymentStatus === 'WAITING_PAYMENT'"
+              class="flex items-center justify-center mt-2"
+            >
               <Spinner class="w-4 h-4 mr-2" />
               <span class="text-sm">Aguardando pagamento...</span>
             </div>
@@ -148,18 +155,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import BaseModal from '@/components/ui/BaseModal.vue';
-import Spinner from '@/components/ui/Spinner.vue';
-import { paymentService } from '@/utils/services';
-import { useCurrency } from '@/composables/useCurrency';
-import { useToast } from '@/composables/useToast';
-import type { 
-  PixPaymentRequest, 
-  PixPaymentResponse, 
+import { ref, computed, watch } from "vue";
+import BaseModal from "@/components/ui/BaseModal.vue";
+import Spinner from "@/components/ui/Spinner.vue";
+import { paymentService } from "@/utils/services";
+import { useCurrency } from "@/composables/useCurrency";
+import { useToast } from "@/composables/useToast";
+import type {
+  PixPaymentRequest,
+  PixPaymentResponse,
   PaymentStatusResponse,
-  PaymentStatus 
-} from '@/types';
+  PaymentStatus,
+} from "@/types";
 
 interface Props {
   modelValue: boolean;
@@ -174,9 +181,9 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'update:modelValue', value: boolean): void;
-  (e: 'success', data: PaymentStatusResponse): void;
-  (e: 'error', error: string): void;
+  (e: "update:modelValue", value: boolean): void;
+  (e: "success", data: PaymentStatusResponse): void;
+  (e: "error", error: string): void;
 }
 
 const props = defineProps<Props>();
@@ -186,31 +193,33 @@ const { formatCurrency } = useCurrency();
 const { showToast } = useToast();
 
 // State
-const step = ref<'payment-method' | 'pix-payment' | 'success' | 'error'>('payment-method');
+const step = ref<"payment-method" | "pix-payment" | "success" | "error">(
+  "payment-method"
+);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const pixData = ref<PixPaymentResponse | null>(null);
-const paymentStatus = ref<PaymentStatus>('NEW');
+const paymentStatus = ref<PaymentStatus>("NEW");
 const pollInterval = ref<number | null>(null);
 
 // Computed
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+  set: (value) => emit("update:modelValue", value),
 });
 
 const modalTitle = computed(() => {
   switch (step.value) {
-    case 'payment-method':
-      return 'Escolha a forma de pagamento';
-    case 'pix-payment':
-      return 'Pagamento PIX';
-    case 'success':
-      return 'Pagamento realizado!';
-    case 'error':
-      return 'Erro no pagamento';
+    case "payment-method":
+      return "Escolha a forma de pagamento";
+    case "pix-payment":
+      return "Pagamento PIX";
+    case "success":
+      return "Pagamento realizado!";
+    case "error":
+      return "Erro no pagamento";
     default:
-      return '';
+      return "";
   }
 });
 
@@ -230,19 +239,18 @@ async function initiatePixPayment() {
     const paymentRequest: PixPaymentRequest = {
       amount: props.amount,
       description: props.description,
-      payer: props.payer
+      payer: props.payer,
     };
 
     pixData.value = await paymentService.createPixCheckout(paymentRequest);
     paymentStatus.value = pixData.value.status;
-    step.value = 'pix-payment';
-    
+    step.value = "pix-payment";
+
     // Start polling for payment status
     startStatusPolling();
-    
   } catch (err: any) {
-    error.value = err.message || 'Erro ao gerar PIX';
-    step.value = 'error';
+    error.value = err.message || "Erro ao gerar PIX";
+    step.value = "error";
   } finally {
     loading.value = false;
   }
@@ -250,28 +258,34 @@ async function initiatePixPayment() {
 
 function startStatusPolling() {
   if (!pixData.value) return;
-  
+
   const maxAttempts = 60; // 5 minutes
   const interval = 5000; // 5 seconds
-  
-  paymentService.pollPaymentStatus(
-    pixData.value.id,
-    (status) => {
-      paymentStatus.value = status.status;
-    },
-    maxAttempts,
-    interval
-  ).then((finalStatus) => {
-    if (finalStatus.status === 'PAID') {
-      step.value = 'success';
-      emit('success', finalStatus);
-      showToast('Pagamento confirmado! Obrigado pela sua contribuição.', 'success');
-    }
-  }).catch((err) => {
-    error.value = err.message;
-    step.value = 'error';
-    emit('error', err.message);
-  });
+
+  paymentService
+    .pollPaymentStatus(
+      pixData.value.id,
+      (status) => {
+        paymentStatus.value = status.status;
+      },
+      maxAttempts,
+      interval
+    )
+    .then((finalStatus) => {
+      if (finalStatus.status === "PAID") {
+        step.value = "success";
+        emit("success", finalStatus);
+        showToast(
+          "Pagamento confirmado! Obrigado pela sua contribuição.",
+          "success"
+        );
+      }
+    })
+    .catch((err) => {
+      error.value = err.message;
+      step.value = "error";
+      emit("error", err.message);
+    });
 }
 
 function stopStatusPolling() {
@@ -285,43 +299,46 @@ async function copyPixCode() {
   if (pixData.value?.qr_codes?.[0]?.text) {
     try {
       await navigator.clipboard.writeText(pixData.value.qr_codes[0].text);
-      showToast('Código PIX copiado!', 'success');
+      showToast("Código PIX copiado!", "success");
     } catch (err) {
-      showToast('Erro ao copiar código', 'error');
+      showToast("Erro ao copiar código", "error");
     }
   }
 }
 
 function getStatusMessage(status: PaymentStatus): string {
   const messages = {
-    'NEW': 'Iniciando pagamento...',
-    'WAITING_PAYMENT': 'Aguardando pagamento PIX',
-    'PAID': 'Pagamento confirmado',
-    'FAILED': 'Pagamento falhou',
-    'CANCELLED': 'Pagamento cancelado',
-    'EXPIRED': 'PIX expirado'
+    NEW: "Iniciando pagamento...",
+    WAITING_PAYMENT: "Aguardando pagamento PIX",
+    PAID: "Pagamento confirmado",
+    FAILED: "Pagamento falhou",
+    CANCELLED: "Pagamento cancelado",
+    EXPIRED: "PIX expirado",
   };
   return messages[status] || status;
 }
 
 function resetPayment() {
-  step.value = 'payment-method';
+  step.value = "payment-method";
   error.value = null;
   pixData.value = null;
-  paymentStatus.value = 'NEW';
+  paymentStatus.value = "NEW";
   stopStatusPolling();
 }
 
 function handleClose() {
   stopStatusPolling();
   resetPayment();
-  emit('update:modelValue', false);
+  emit("update:modelValue", false);
 }
 
 // Cleanup on unmount
-watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
-    stopStatusPolling();
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (!newValue) {
+      stopStatusPolling();
+    }
   }
-});
+);
 </script>
