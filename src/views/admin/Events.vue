@@ -271,9 +271,7 @@ const form = reactive({
 const errors = reactive({
   title: '',
   description: ''
-})
-
-// Limpar galeria quando evento não for mais marcado como completo
+})
 watch(() => form.completed, (isCompleted) => {
   if (!isCompleted) {
     form.gallery = []
@@ -322,8 +320,7 @@ function removeGalleryImage(index: number) {
   form.gallery.splice(index, 1)
 }
 
-async function saveEvent() {
-  // Validação
+async function saveEvent() {
   let isValid = true
   
   if (!form.title) {
@@ -344,8 +341,7 @@ async function saveEvent() {
 
   saving.value = true
 
-  try {
-    // Simular salvamento
+  try {
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     if (editingEvent.value) {
@@ -355,8 +351,7 @@ async function saveEvent() {
     }
 
     showModal.value = false
-    resetForm()
-    // Recarregar eventos
+    resetForm()
     await eventsStore.fetchEvents()
   } catch (err) {
     showError('Erro ao salvar evento')
@@ -370,16 +365,13 @@ async function deleteEvent(event: Event) {
     return
   }
 
-  try {
-    // Simular exclusão
+  try {
     await new Promise(resolve => setTimeout(resolve, 500))
     success('Evento excluído com sucesso!')
     await eventsStore.fetchEvents()
   } catch (err) {
     showError('Erro ao excluir evento')
   }
-}
-
-// Carregar eventos ao montar
+}
 eventsStore.fetchEvents()
 </script>

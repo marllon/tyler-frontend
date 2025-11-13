@@ -1,4 +1,3 @@
-// Composable para formatação de moeda
 export function useCurrency() {
   const formatCurrency = (value: number, currency: string = "BRL"): string => {
     return new Intl.NumberFormat("pt-BR", {

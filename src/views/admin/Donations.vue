@@ -156,9 +156,7 @@ const { formatCurrency } = useCurrency()
 const { formatDate } = useDate()
 
 const loading = ref(false)
-const goalFilter = ref('all')
-
-// Dados de exemplo
+const goalFilter = ref('all')
 const donations = ref<Donation[]>([
   {
     id: '1',

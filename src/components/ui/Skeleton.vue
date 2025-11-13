@@ -18,9 +18,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const skeletonClasses = computed(() => {
-  const classes = ["bg-gray-200"];
-
-  // Animation
+  const classes = ["bg-gray-200"];
   if (props.animation === "pulse") {
     classes.push("animate-pulse");
   } else if (props.animation === "wave") {
@@ -31,9 +29,7 @@ const skeletonClasses = computed(() => {
       "via-gray-300",
       "to-gray-200"
     );
-  }
-
-  // Variant
+  }
   if (props.variant === "text") {
     classes.push("h-4", "rounded");
   } else if (props.variant === "circular") {

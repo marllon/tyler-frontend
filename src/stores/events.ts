@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import type { Event, ApiResponse } from "@/types";
-import { api } from "@/utils/api";
-
-// Dados dummy para demonstração
+import { api } from "@/utils/api";
 const DUMMY_EVENTS: Event[] = [
   {
     id: "1",
@@ -122,18 +120,9 @@ export const useEventsStore = defineStore("events", () => {
   async function fetchEvents() {
     loading.value = true;
     error.value = null;
-    try {
-      // Simular delay de rede
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Usar dados dummy por enquanto
-      events.value = DUMMY_EVENTS;
-      
-      // TODO: Quando o backend estiver pronto, descomentar:
-      // const response = await api.get<ApiResponse<Event[]>>("/events");
-      // if (response.success && response.data) {
-      //   events.value = response.data;
-      // }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      events.value = DUMMY_EVENTS;
     } catch (err: any) {
       error.value = err.message || "Erro ao carregar eventos";
     } finally {

@@ -239,43 +239,31 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { api } from "@/utils/api";
-
-// API Configuration
+import { api } from "@/utils/api";
 const apiConfig = computed(() => ({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
   timeout: 30000,
-}));
-
-// Connection Status
+}));
 const connectionStatus = ref("Não testado");
-const testing = ref(false);
-
-// PIX Configuration
+const testing = ref(false);
 const pixConfig = ref({
   environment: "sandbox",
   pixKey: "",
   minAmount: 1.0,
   maxAmount: 10000.0,
-});
-
-// Notifications Configuration
+});
 const notifications = ref({
   donations: true,
   orders: true,
   email: "",
-});
-
-// Site Configuration
+});
 const siteConfig = ref({
   organizationName: "Tyler - Organização Beneficente",
   description:
     "Ajudando a transformar vidas através da solidariedade e do trabalho comunitário.",
   phone: "",
   email: "",
-});
-
-// Methods
+});
 async function testConnection() {
   testing.value = true;
   try {
@@ -303,23 +291,18 @@ function saveSiteConfig() {
   localStorage.setItem("tyler-site-config", JSON.stringify(siteConfig.value));
 }
 
-function loadConfigurations() {
-  // Load PIX Config
+function loadConfigurations() {
   const savedPixConfig = localStorage.getItem("tyler-pix-config");
   if (savedPixConfig) {
     pixConfig.value = { ...pixConfig.value, ...JSON.parse(savedPixConfig) };
-  }
-
-  // Load Notifications
+  }
   const savedNotifications = localStorage.getItem("tyler-notifications");
   if (savedNotifications) {
     notifications.value = {
       ...notifications.value,
       ...JSON.parse(savedNotifications),
     };
-  }
-
-  // Load Site Config
+  }
   const savedSiteConfig = localStorage.getItem("tyler-site-config");
   if (savedSiteConfig) {
     siteConfig.value = { ...siteConfig.value, ...JSON.parse(savedSiteConfig) };

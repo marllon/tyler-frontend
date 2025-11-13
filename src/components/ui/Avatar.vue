@@ -55,9 +55,7 @@ const avatarClasses = computed(() => {
     "bg-gray-200",
     "text-gray-600",
     "flex-shrink-0",
-  ];
-
-  // Size
+  ];
   if (props.size === "xs") {
     classes.push("w-6", "h-6", "text-xs");
   } else if (props.size === "sm") {
@@ -70,9 +68,7 @@ const avatarClasses = computed(() => {
     classes.push("w-16", "h-16", "text-xl");
   } else {
     classes.push("w-20", "h-20", "text-2xl");
-  }
-
-  // Rounded
+  }
   if (props.rounded) {
     classes.push("rounded-full");
   } else {

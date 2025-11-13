@@ -118,8 +118,7 @@ async function handleSubmit() {
   error.value = "";
   success.value = false;
 
-  try {
-    // TODO: Implementar envio real
+  try {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     success.value = true;
     form.value = { name: "", email: "", phone: "", subject: "", message: "" };

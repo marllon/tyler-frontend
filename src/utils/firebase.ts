@@ -7,9 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
   type User,
-} from "firebase/auth";
-
-// Configuração do Firebase
+} from "firebase/auth";
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -17,9 +15,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
-
-// Verificar se as configurações são válidas
+};
 function isValidFirebaseConfig(config: any): boolean {
   const requiredFields = ["apiKey", "authDomain", "projectId"];
 
@@ -28,17 +24,13 @@ function isValidFirebaseConfig(config: any): boolean {
     if (!value || value === "undefined" || value.length < 10) {
       return false;
     }
-  }
-
-  // Verificar se não são valores de exemplo/placeholder
+  }
   if (
     config.projectId === "tyler-project" ||
     config.apiKey === "your_api_key_here"
   ) {
     return false;
-  }
-
-  // Verificar se não é chave do Google Console (erro comum)
+  }
   if (config.apiKey && config.apiKey.startsWith("GOCSPX-")) {
     console.error(
       "❌ Erro: Você está usando uma chave do Google Console, não do Firebase!"
@@ -63,9 +55,7 @@ if (!isFirebaseConfigValid) {
   console.info("   VITE_FIREBASE_API_KEY=sua_chave_aqui");
   console.info("   VITE_FIREBASE_PROJECT_ID=seu_projeto_aqui");
   console.info("   VITE_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com");
-}
-
-// Inicializar Firebase apenas se as configurações estiverem válidas
+}
 let app;
 let auth;
 let googleProvider;
@@ -74,9 +64,7 @@ if (isFirebaseConfigValid) {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    googleProvider = new GoogleAuthProvider();
-
-    // Configurar o provider do Google
+    googleProvider = new GoogleAuthProvider();
     googleProvider.addScope("email");
     googleProvider.addScope("profile");
 
@@ -100,16 +88,10 @@ export {
   signOut,
   onAuthStateChanged,
 };
-export type { User };
-
-// Exportar db como null por enquanto (para compatibilidade)
-export const db = null;
-
-// Funções de autenticação
+export type { User };
+export const db = null;
 export const firebaseService = {
-  /**
-   * Login com Google
-   */
+  
   async signInWithGoogle() {
     console.log("🔑 Iniciando login com Google...");
 
@@ -149,9 +131,6 @@ export const firebaseService = {
     }
   },
 
-  /**
-   * Login com email e senha (mantido como fallback)
-   */
   async signIn(email: string, password: string) {
     if (!auth) {
       return {
@@ -181,9 +160,6 @@ export const firebaseService = {
     }
   },
 
-  /**
-   * Logout
-   */
   async signOut() {
     if (!auth) {
       return { success: true }; // Se não tem auth, considera logout bem-sucedido
@@ -200,9 +176,6 @@ export const firebaseService = {
     }
   },
 
-  /**
-   * Obter token do usuário atual
-   */
   async getCurrentUserToken(): Promise<string | null> {
     if (!auth) return null;
 
@@ -217,28 +190,18 @@ export const firebaseService = {
     }
   },
 
-  /**
-   * Verificar se usuário está logado
-   */
   getCurrentUser(): User | null {
     return auth?.currentUser || null;
   },
 
-  /**
-   * Escutar mudanças de estado de autenticação
-   */
   onAuthStateChanged(callback: (user: User | null) => void) {
-    if (!auth) {
-      // Se Firebase não está configurado, chama callback com null
+    if (!auth) {
       callback(null);
       return () => {}; // Retorna função vazia para unsubscribe
     }
     return onAuthStateChanged(auth, callback);
   },
 
-  /**
-   * Traduzir códigos de erro do Firebase
-   */
   getErrorMessage(errorCode: string): string {
     const errorMessages: Record<string, string> = {
       "auth/user-not-found": "Usuário não encontrado",

@@ -393,28 +393,20 @@ const saving = ref(false);
 const editingProduct = ref<Product | null>(null);
 const hasUnsavedChanges = ref(false);
 const showConfirmExit = ref(false);
-const productFormRef = ref<InstanceType<typeof ProductFormNew> | null>(null);
-
-// Filtros
+const productFormRef = ref<InstanceType<typeof ProductFormNew> | null>(null);
 const filters = reactive<ProductFilters>({
   limit: 20,
   sortBy: "CREATED_AT",
   sortDirection: "DESC",
   activeOnly: true,
   category: "",
-});
+});
 
-// ============================================
-// COMPUTED
-// ============================================
 function getPrimaryImage(product: Product): string | null {
   const primaryImage = product.images?.find((img) => img.isPrimary);
   return primaryImage?.url || product.images?.[0]?.url || null;
-}
+}
 
-// ============================================
-// METHODS
-// ============================================
 function openCreateModal() {
   editingProduct.value = null;
   hasUnsavedChanges.value = false;
@@ -450,8 +442,7 @@ function onFormChange() {
   hasUnsavedChanges.value = true;
 }
 
-function testProductWithImages() {
-  // Criar produto de teste com imagens para demonstrar funcionalidade
+function testProductWithImages() {
   const testProduct: Product = {
     id: "test-product-123",
     name: "Camiseta Tyler - Teste",
@@ -511,10 +502,8 @@ async function handleProductSubmit({
   try {
     let success = false;
 
-    if (editingProduct.value) {
-      // Atualizar produto existente
-      if (images.length > 0 || imagesToDelete?.length || primaryImageId) {
-        // Se há mudanças nas imagens, usar o endpoint que lida com imagens
+    if (editingProduct.value) {
+      if (images.length > 0 || imagesToDelete?.length || primaryImageId) {
         success = await productsStore.updateProductWithImages(
           editingProduct.value.id,
           productData,
@@ -525,22 +514,18 @@ async function handleProductSubmit({
             primaryImageId,
           }
         );
-      } else {
-        // Apenas dados do produto, sem mudanças nas imagens
+      } else {
         success = await productsStore.updateProduct(
           editingProduct.value.id,
           productData
         );
       }
-    } else {
-      // Criar novo produto
-      if (images.length > 0) {
-        // Usar barra de progresso para criação com imagens
+    } else {
+      if (images.length > 0) {
         success = await productsStore.createProductWithImages(
           productData,
           images,
-          (progress) => {
-            // Atualizar progresso no formulário
+          (progress) => {
             productFormRef.value?.updateProgress(progress);
           }
         );
@@ -549,15 +534,13 @@ async function handleProductSubmit({
       }
     }
 
-    if (success) {
-      // Finalizar progresso se estava sendo usado
+    if (success) {
       productFormRef.value?.finishProgress();
       hasUnsavedChanges.value = false;
       closeModal();
     }
   } catch (error) {
-    console.error("Erro ao salvar produto:", error);
-    // Finalizar progresso em caso de erro
+    console.error("Erro ao salvar produto:", error);
     productFormRef.value?.finishProgress();
   } finally {
     saving.value = false;
@@ -578,13 +561,9 @@ async function applyFilters() {
 
 async function refreshProducts() {
   await productsStore.fetchProductsPaginated(filters);
-}
+}
 
-// ============================================
-// LIFECYCLE
-// ============================================
-onMounted(() => {
-  // Carregar produtos ao montar
+onMounted(() => {
   productsStore.fetchProductsPaginated(filters);
 });
 </script>

@@ -8,28 +8,19 @@ class ApiClient {
     this.client = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api",
       timeout: 30000, // 30 segundos
-    });
-
-    // Request interceptor
+    });
     this.client.interceptors.request.use(
-      async (config) => {
-        // Definir Content-Type apenas se não foi definido e não for FormData
+      async (config) => {
         if (
           !config.headers["Content-Type"] &&
           !(config.data instanceof FormData)
         ) {
           config.headers["Content-Type"] = "application/json";
-        }
-
-        // Remover Content-Type se foi explicitamente definido como undefined
+        }
         if (config.headers["Content-Type"] === undefined) {
           delete config.headers["Content-Type"];
-        }
-
-        // Primeiro tentar token do localStorage (mais rápido)
-        let token = localStorage.getItem("admin_token");
-
-        // Se não tiver token no localStorage, tentar obter do Firebase
+        }
+        let token = localStorage.getItem("admin_token");
         if (!token) {
           const { firebaseService } = await import("./firebase");
           token = await firebaseService.getCurrentUserToken();
@@ -40,9 +31,7 @@ class ApiClient {
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
-        }
-
-        // Log request in development
+        }
         if (import.meta.env.DEV) {
           console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, {
             data: config.data instanceof FormData ? "FormData" : config.data,
@@ -53,12 +42,9 @@ class ApiClient {
         return config;
       },
       (error) => Promise.reject(error)
-    );
-
-    // Response interceptor
+    );
     this.client.interceptors.response.use(
-      (response) => {
-        // Log successful response in development
+      (response) => {
         if (import.meta.env.DEV) {
           console.log(
             `✅ ${response.config.method?.toUpperCase()} ${
@@ -69,8 +55,7 @@ class ApiClient {
         }
         return response;
       },
-      (error: AxiosError) => {
-        // Log error in development
+      (error: AxiosError) => {
         if (import.meta.env.DEV) {
           console.error(
             `❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
@@ -79,21 +64,16 @@ class ApiClient {
               data: error.response?.data,
             }
           );
-        }
-
-        // Handle authentication errors
+        }
         if (error.response?.status === 401) {
-          localStorage.removeItem("admin_token");
-          // Only redirect if we're in an admin route
+          localStorage.removeItem("admin_token");
           if (
             window.location.pathname.startsWith("/admin") &&
             !window.location.pathname.includes("/login")
           ) {
             window.location.href = "/admin/login";
           }
-        }
-
-        // Transform error to our ApiError format
+        }
         const apiError: ApiError = {
           status: error.response?.status || 500,
           code: error.code || "unknown_error",

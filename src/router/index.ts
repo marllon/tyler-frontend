@@ -128,9 +128,7 @@ const router = createRouter({
       return { top: 0 };
     }
   },
-});
-
-// Navigation guard
+});
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 

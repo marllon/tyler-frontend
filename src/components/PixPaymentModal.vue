@@ -190,9 +190,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const { formatCurrency } = useCurrency();
-const { showToast } = useToast();
-
-// State
+const { showToast } = useToast();
 const step = ref<"payment-method" | "pix-payment" | "success" | "error">(
   "payment-method"
 );
@@ -200,9 +198,7 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const pixData = ref<PixPaymentResponse | null>(null);
 const paymentStatus = ref<PaymentStatus>("NEW");
-const pollInterval = ref<number | null>(null);
-
-// Computed
+const pollInterval = ref<number | null>(null);
 const isOpen = computed({
   get: () => props.modelValue,
   set: (value) => emit("update:modelValue", value),
@@ -228,9 +224,7 @@ const qrCodeUrl = computed(() => {
     return pixData.value.qr_codes[0].links[0].href;
   }
   return null;
-});
-
-// Methods
+});
 async function initiatePixPayment() {
   loading.value = true;
   error.value = null;
@@ -244,9 +238,7 @@ async function initiatePixPayment() {
 
     pixData.value = await paymentService.createPixCheckout(paymentRequest);
     paymentStatus.value = pixData.value.status;
-    step.value = "pix-payment";
-
-    // Start polling for payment status
+    step.value = "pix-payment";
     startStatusPolling();
   } catch (err: any) {
     error.value = err.message || "Erro ao gerar PIX";
@@ -330,9 +322,7 @@ function handleClose() {
   stopStatusPolling();
   resetPayment();
   emit("update:modelValue", false);
-}
-
-// Cleanup on unmount
+}
 watch(
   () => props.modelValue,
   (newValue) => {

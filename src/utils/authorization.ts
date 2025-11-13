@@ -1,18 +1,8 @@
-/**
- * Sistema de Autorização - Lista de Administradores Permitidos
- * Suporta Firebase Remote Config, Environment Variables e Firestore
- * Apenas emails nesta lista podem acessar o painel administrativo
- */
-
-import { getAuthorizedAdmins, getAuthorizedDomains } from "./remoteConfig";
-
-// Cache local para melhor performance
+import { getAuthorizedAdmins, getAuthorizedDomains } from "./remoteConfig";
 let cachedAdmins: string[] = [];
 let cachedDomains: string[] = [];
 let lastCacheUpdate = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
-
-// Função para buscar emails autorizados (com cache)
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 async function getAuthorizedEmailsAsync(): Promise<string[]> {
   const now = Date.now();
 
@@ -25,9 +15,7 @@ async function getAuthorizedEmailsAsync(): Promise<string[]> {
     cachedAdmins = emails
       .map((email) => email.trim().toLowerCase())
       .filter(Boolean);
-    lastCacheUpdate = now;
-
-    // Fallback para desenvolvimento se não houver configuração
+    lastCacheUpdate = now;
     if (cachedAdmins.length === 0) {
       console.warn(
         "⚠️ Nenhum admin configurado, usando fallback de desenvolvimento"
@@ -41,13 +29,10 @@ async function getAuthorizedEmailsAsync(): Promise<string[]> {
 
     return cachedAdmins;
   } catch (error) {
-    console.error("Erro ao buscar emails autorizados:", error);
-    // Retornar fallback em caso de erro
+    console.error("Erro ao buscar emails autorizados:", error);
     return ["admin@tylerlimaeler.org", "tyler@gmail.com", "admin@gmail.com"];
   }
-}
-
-// Função para buscar domínios autorizados (com cache)
+}
 async function getAuthorizedDomainsAsync(): Promise<string[]> {
   const now = Date.now();
 
@@ -86,9 +71,7 @@ export interface AuthorizedAdmin {
 }
 
 export const authorizationService = {
-  /**
-   * Verificar se um email tem autorização para acessar o sistema
-   */
+  
   async checkEmailAuthorization(email: string): Promise<AuthorizationResult> {
     if (!email) {
       return {
@@ -99,12 +82,10 @@ export const authorizationService = {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    try {
-      // Verificar se está na lista de emails autorizados
+    try {
       const authorizedEmails = await getAuthorizedEmailsAsync();
 
-      if (authorizedEmails.includes(normalizedEmail)) {
-        // Determinar role baseado no email
+      if (authorizedEmails.includes(normalizedEmail)) {
         const role =
           normalizedEmail.includes("tyler") ||
           normalizedEmail.includes("admin@tylerlimaeler.org")
@@ -115,9 +96,7 @@ export const authorizationService = {
           authorized: true,
           role,
         };
-      }
-
-      // Verificar se o domínio está autorizado
+      }
       const authorizedDomains = await getAuthorizedDomainsAsync();
       const emailDomain = normalizedEmail.split("@")[1];
 
@@ -141,9 +120,6 @@ export const authorizationService = {
     }
   },
 
-  /**
-   * Verificar se usuário tem permissão para uma ação específica
-   */
   hasPermission(
     userRole: string,
     requiredRole: "admin" | "super-admin"
@@ -159,11 +135,6 @@ export const authorizationService = {
     return false;
   },
 
-  /**
-   * Adicionar email à lista de autorizados (apenas super-admin)
-   * Nota: Esta é uma implementação mock para o frontend
-   * Em produção, isso deveria ser feito via API/Firestore
-   */
   async addAuthorizedEmail(
     email: string,
     currentUserRole: string
@@ -175,8 +146,7 @@ export const authorizationService = {
     const normalizedEmail = email.toLowerCase().trim();
     const authorizedEmails = await getAuthorizedEmailsAsync();
 
-    if (!authorizedEmails.includes(normalizedEmail)) {
-      // Invalidar cache para forçar atualização
+    if (!authorizedEmails.includes(normalizedEmail)) {
       cachedAdmins = [];
       console.log(`📧 Email adicionado à autorização: ${normalizedEmail}`);
       return true;
@@ -185,11 +155,6 @@ export const authorizationService = {
     return false; // Email já estava na lista
   },
 
-  /**
-   * Remover email da lista de autorizados (apenas super-admin)
-   * Nota: Esta é uma implementação mock para o frontend
-   * Em produção, isso deveria ser feito via API/Firestore
-   */
   async removeAuthorizedEmail(
     email: string,
     currentUserRole: string
@@ -198,16 +163,12 @@ export const authorizationService = {
       return false;
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
-    // Invalidar cache para forçar atualização
+    const normalizedEmail = email.toLowerCase().trim();
     cachedAdmins = [];
     console.log(`📧 Email removido da autorização: ${normalizedEmail}`);
     return true;
   },
 
-  /**
-   * Obter lista de emails autorizados (apenas admin+)
-   */
   async getAuthorizedEmails(
     currentUserRole: string
   ): Promise<AuthorizedAdmin[]> {
@@ -227,9 +188,6 @@ export const authorizationService = {
     }));
   },
 
-  /**
-   * Validar se configuração inicial está correta
-   */
   async validateConfiguration(): Promise<{ valid: boolean; issues: string[] }> {
     const issues: string[] = [];
 
@@ -238,9 +196,7 @@ export const authorizationService = {
 
       if (authorizedEmails.length === 0) {
         issues.push("Nenhum email de administrador configurado");
-      }
-
-      // Verificar se emails são válidos
+      }
       authorizedEmails.forEach((email) => {
         if (!email.includes("@") || !email.includes(".")) {
           issues.push(`Email inválido: ${email}`);
@@ -256,9 +212,6 @@ export const authorizationService = {
     };
   },
 
-  /**
-   * Limpar cache (útil para testes e atualizações)
-   */
   clearCache(): void {
     cachedAdmins = [];
     cachedDomains = [];

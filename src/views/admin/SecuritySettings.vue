@@ -239,20 +239,14 @@ import { computed, ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import AdminAuthorizationManager from "@/components/admin/AdminAuthorizationManager.vue";
 
-const authStore = useAuthStore();
-
-// Computed
+const authStore = useAuthStore();
 const currentUser = computed(() => authStore.admin);
-const useFirebase = computed(() => authStore.useFirebase);
-
-// Firebase config (apenas para display)
+const useFirebase = computed(() => authStore.useFirebase);
 const firebaseConfig = computed(() => ({
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-}));
-
-// Environment variables
+}));
 const authorizedAdminsEnv = computed(
   () => !!import.meta.env.VITE_AUTHORIZED_ADMINS
 );
@@ -261,9 +255,7 @@ const authorizedDomainsEnv = computed(
 );
 const apiBaseUrl = computed(
   () => import.meta.env.VITE_API_BASE_URL || "Não configurado"
-);
-
-// Mock security logs
+);
 const securityLogs = ref([
   {
     id: 1,
@@ -289,9 +281,7 @@ const securityLogs = ref([
     message: "Firebase connection established",
     level: "success",
   },
-]);
-
-// Methods
+]);
 function getRoleDisplayName(role: string): string {
   const roleNames = {
     "super-admin": "Super Administrador",

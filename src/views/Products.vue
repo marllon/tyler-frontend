@@ -54,8 +54,7 @@ onMounted(() => {
   productsStore.fetchProducts();
 });
 
-function handleBuy(product: Product) {
-  // TODO: Implementar checkout
+function handleBuy(product: Product) {
   console.log("Comprar produto:", product);
   alert("Funcionalidade de checkout será implementada em breve!");
 }

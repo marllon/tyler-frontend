@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import type { Raffle, ApiResponse } from "@/types";
-import { api } from "@/utils/api";
-
-// Dados dummy para demonstração
+import { api } from "@/utils/api";
 const DUMMY_RAFFLES: Raffle[] = [
   {
     id: "1",
@@ -151,18 +149,9 @@ export const useRafflesStore = defineStore("raffles", () => {
   async function fetchRaffles() {
     loading.value = true;
     error.value = null;
-    try {
-      // Simular delay de rede
-      await new Promise(resolve => setTimeout(resolve, 700));
-      
-      // Usar dados dummy por enquanto
-      raffles.value = DUMMY_RAFFLES;
-      
-      // TODO: Quando o backend estiver pronto, descomentar:
-      // const response = await api.get<ApiResponse<Raffle[]>>("/raffles");
-      // if (response.success && response.data) {
-      //   raffles.value = response.data;
-      // }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 700));
+      raffles.value = DUMMY_RAFFLES;
     } catch (err: any) {
       error.value = err.message || "Erro ao carregar rifas";
     } finally {

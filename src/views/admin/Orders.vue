@@ -207,9 +207,7 @@ const { success } = useToast()
 const loading = ref(false)
 const statusFilter = ref('all')
 const showDetailsModal = ref(false)
-const selectedOrder = ref<Order | null>(null)
-
-// Dados de exemplo
+const selectedOrder = ref<Order | null>(null)
 const orders = ref<Order[]>([
   {
     id: '1',
@@ -313,9 +311,7 @@ async function updateStatus(order: Order) {
   }
 
   const next = nextStatus[order.status]
-  if (!next) return
-
-  // Simular atualização
+  if (!next) return
   await new Promise(resolve => setTimeout(resolve, 500))
   order.status = next
   success(`Status atualizado para: ${getStatusLabel(next)}`)

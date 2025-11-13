@@ -366,24 +366,17 @@ const rafflesStore = useRafflesStore();
 const eventsStore = useEventsStore();
 const authStore = useAuthStore();
 const { formatCurrency } = useCurrency();
-const { formatDate } = useDate();
-
-// Authentication info
+const { formatDate } = useDate();
 const currentUser = computed(() => authStore.admin);
 const authMode = computed(() => (authStore.useFirebase ? "firebase" : "mock"));
 
-const loading = ref(true);
-
-// Helper functions for user display
+const loading = ref(true);
 function getUserInitials(name?: string): string {
   if (!name) return "?";
 
-  if (name.includes("@")) {
-    // Se for email, usar primeira letra antes do @
+  if (name.includes("@")) {
     return name.charAt(0).toUpperCase();
-  }
-
-  // Se for nome, usar iniciais
+  }
   return name
     .split(" ")
     .map((word) => word.charAt(0))
@@ -395,13 +388,10 @@ function getUserInitials(name?: string): string {
 function getFirstName(name?: string): string {
   if (!name) return "Usuário";
 
-  if (name.includes("@")) {
-    // Se for email, extrair nome antes do @
+  if (name.includes("@")) {
     const username = name.split("@")[0];
     return username.charAt(0).toUpperCase() + username.slice(1);
-  }
-
-  // Se for nome completo, pegar primeiro nome
+  }
   return name.split(" ")[0];
 }
 

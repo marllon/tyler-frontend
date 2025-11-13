@@ -229,20 +229,17 @@ onMounted(() => {
   rafflesStore.fetchRaffles();
 });
 
-function handleBuy(product: Product) {
-  // TODO: Implementar checkout
+function handleBuy(product: Product) {
   console.log("Comprar produto:", product);
   alert("Funcionalidade de checkout será implementada em breve!");
 }
 
-function handleDonate(goal: Goal) {
-  // TODO: Implementar doação
+function handleDonate(goal: Goal) {
   console.log("Doar para meta:", goal);
   alert("Funcionalidade de doação será implementada em breve!");
 }
 
-function handleBuyTicket(raffle: Raffle) {
-  // TODO: Implementar compra de bilhete
+function handleBuyTicket(raffle: Raffle) {
   console.log("Comprar bilhete:", raffle);
   alert("Funcionalidade de compra de bilhetes será implementada em breve!");
 }

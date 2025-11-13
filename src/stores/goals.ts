@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import type { Goal, GoalFilters, GoalsResponse, ApiError } from "@/types";
-import { api } from "@/utils/api";
-
-// Dados dummy para fallback durante desenvolvimento
+import { api } from "@/utils/api";
 const DUMMY_GOALS: Goal[] = [
   {
     id: "1",
@@ -93,19 +91,14 @@ export const useGoalsStore = defineStore("goals", () => {
   const goals = ref<Goal[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const useDummyData = ref(true); // Flag para controlar uso de dados dummy
-
-  // Fetch goals with filters
+  const useDummyData = ref(true); // Flag para controlar uso de dados dummy
   async function fetchGoals(filters: GoalFilters = {}) {
     loading.value = true;
     error.value = null;
 
     try {
-      if (useDummyData.value) {
-        // Simular delay de rede
-        await new Promise((resolve) => setTimeout(resolve, 600));
-
-        // Filtrar dados dummy baseado nos filtros
+      if (useDummyData.value) {
+        await new Promise((resolve) => setTimeout(resolve, 600));
         let filteredGoals = DUMMY_GOALS;
 
         if (filters.active !== undefined) {
@@ -115,8 +108,7 @@ export const useGoalsStore = defineStore("goals", () => {
         }
 
         goals.value = filteredGoals;
-      } else {
-        // Usar API real
+      } else {
         const params = new URLSearchParams();
         if (filters.active !== undefined)
           params.append("active", filters.active.toString());
@@ -132,24 +124,17 @@ export const useGoalsStore = defineStore("goals", () => {
     } catch (err: any) {
       const apiError = err as ApiError;
       error.value = apiError.message || "Erro ao carregar metas";
-      console.error("Erro ao buscar metas:", apiError);
-
-      // Em caso de erro, usar dados dummy como fallback
+      console.error("Erro ao buscar metas:", apiError);
       if (useDummyData.value) {
         goals.value = DUMMY_GOALS;
       }
     } finally {
       loading.value = false;
     }
-  }
-
-  // Get goal by ID
-  async function getGoalById(id: string): Promise<Goal | null> {
-    // First check in current goals array
+  }
+  async function getGoalById(id: string): Promise<Goal | null> {
     const existingGoal = goals.value.find((goal) => goal.id === id);
-    if (existingGoal) return existingGoal;
-
-    // If not found and using API, fetch from backend
+    if (existingGoal) return existingGoal;
     if (!useDummyData.value) {
       try {
         const goal = await api.get<Goal>(`/goals/${id}`);
@@ -157,16 +142,11 @@ export const useGoalsStore = defineStore("goals", () => {
       } catch (err) {
         console.error(`Erro ao buscar meta ${id}:`, err);
       }
-    }
-
-    // Fallback to dummy data
+    }
     return DUMMY_GOALS.find((goal) => goal.id === id) || null;
-  }
-
-  // Create new goal (admin only)
+  }
   async function createGoal(goalData: Partial<Goal>): Promise<Goal | null> {
-    if (useDummyData.value) {
-      // Simulate API call with dummy data
+    if (useDummyData.value) {
       const newGoal: Goal = {
         id: Date.now().toString(),
         title: goalData.title || "",
@@ -196,16 +176,12 @@ export const useGoalsStore = defineStore("goals", () => {
         return null;
       }
     }
-  }
-
-  // Update goal progress (internal use, usually updated by donations)
+  }
   function updateGoalProgress(goalId: string, amount: number) {
     const goal = goals.value.find((g) => g.id === goalId);
     if (goal) {
       goal.currentAmount += amount;
-      goal.updatedAt = new Date().toISOString();
-
-      // Check if goal is completed
+      goal.updatedAt = new Date().toISOString();
       if (goal.currentAmount >= goal.targetAmount && goal.status === "ACTIVE") {
         goal.status = "COMPLETED";
       }
@@ -215,9 +191,7 @@ export const useGoalsStore = defineStore("goals", () => {
   function getProgressPercentage(goal: Goal): number {
     if (goal.targetAmount === 0) return 0;
     return Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
-  }
-
-  // Computed getters
+  }
   const activeGoals = computed(() =>
     goals.value.filter((goal) => goal.status === "ACTIVE")
   );

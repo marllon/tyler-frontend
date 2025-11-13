@@ -1,4 +1,3 @@
-// Composable para loading states
 import { ref } from "vue";
 
 export function useLoading(initialState = false) {

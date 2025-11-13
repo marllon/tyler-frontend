@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "clean:comments": "node scripts/clean-comments.js",
+    "precommit": "npm run clean:comments && npm run lint"
+  }
+}

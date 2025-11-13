@@ -341,11 +341,8 @@ interface Emits {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const emit = defineEmits<Emits>();
 
-// ============================================
-// STATE
-// ============================================
 const form = ref<ProductCreateRequest>({
   name: "",
   description: "",
@@ -368,11 +365,8 @@ const errors = ref<Record<string, string>>({});
 const isImagesValid = ref(false);
 const existingImages = ref<ProductImage[]>([]);
 const imagesToDelete = ref<string[]>([]);
-const primaryImageId = ref<string | null>(null);
+const primaryImageId = ref<string | null>(null);
 
-// ============================================
-// COMPUTED
-// ============================================
 const isEdit = computed(() => !!props.initialData);
 
 const isFormValid = computed(() => {
@@ -384,11 +378,8 @@ const isFormValid = computed(() => {
     form.value.stock >= 0 &&
     Object.keys(errors.value).length === 0
   );
-});
+});
 
-// ============================================
-// WATCHERS
-// ============================================
 watch(
   () => props.initialData,
   (newData) => {
@@ -399,16 +390,11 @@ watch(
     }
   },
   { immediate: true }
-);
-
-// Validação em tempo real
+);
 watch(() => form.value.name, validateName);
 watch(() => form.value.price, validatePrice);
-watch(() => form.value.stock, validateStock);
+watch(() => form.value.stock, validateStock);
 
-// ============================================
-// METHODS
-// ============================================
 function loadInitialData(product: Product) {
   form.value = {
     name: product.name,
@@ -424,12 +410,8 @@ function loadInitialData(product: Product) {
     color: product.color || "",
     warranty: product.warranty || "",
     tags: product.tags || [],
-  };
-
-  // Converter tags para string
-  tagsInput.value = product.tags?.join(", ") || "";
-
-  // Carregar imagens existentes
+  };
+  tagsInput.value = product.tags?.join(", ") || "";
   if (product.images && product.images.length > 0) {
     console.log("ProductForm - Processando imagens:", product.images);
     existingImages.value = product.images.map((img) => ({
@@ -438,9 +420,7 @@ function loadInitialData(product: Product) {
       isPrimary: img.isPrimary || false,
       isMain: img.isPrimary || false, // Compatibilidade com ProductImageManager
       uploadedAt: img.uploadedAt,
-    }));
-
-    // Encontrar imagem principal
+    }));
     const primaryImage = product.images.find((img) => img.isPrimary);
     primaryImageId.value = primaryImage?.id?.toString() || null;
 
@@ -523,11 +503,8 @@ function validateStock() {
 
 function onImageValidationChange(isValid: boolean) {
   isImagesValid.value = isValid;
-}
+}
 
-// ============================================
-// IMAGE MANAGEMENT FUNCTIONS
-// ============================================
 function updateExistingImages(newImages: ProductImage[]) {
   existingImages.value = newImages;
 }
@@ -544,20 +521,15 @@ function onImagesReordered(newOrder: ProductImage[]) {
   existingImages.value = newOrder;
 }
 
-function handleSubmit() {
-  // Validar formulário
+function handleSubmit() {
   validateName();
   validatePrice();
   validateStock();
 
   if (!isFormValid.value) {
     return;
-  }
-
-  // Processar tags antes de enviar
-  processTags();
-
-  // Limpar campos opcionais vazios
+  }
+  processTags();
   const cleanData = { ...form.value };
   if (!cleanData.brand?.trim()) delete cleanData.brand;
   if (!cleanData.model?.trim()) delete cleanData.model;
@@ -574,13 +546,9 @@ function handleSubmit() {
     imagesToDelete: isEdit.value ? imagesToDelete.value : undefined,
     primaryImageId: isEdit.value ? primaryImageId.value : undefined,
   });
-}
+}
 
-// ============================================
-// LIFECYCLE
-// ============================================
-onMounted(() => {
-  // Validação inicial se há dados
+onMounted(() => {
   if (props.initialData) {
     validateName();
     validatePrice();

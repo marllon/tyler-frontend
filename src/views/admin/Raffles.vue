@@ -332,8 +332,7 @@ function removeImage(index: number) {
   form.images.splice(index, 1)
 }
 
-async function saveRaffle() {
-  // Validação
+async function saveRaffle() {
   let isValid = true
   
   if (!form.prize) {
@@ -354,8 +353,7 @@ async function saveRaffle() {
 
   saving.value = true
 
-  try {
-    // Simular salvamento
+  try {
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     if (editingRaffle.value) {
@@ -365,8 +363,7 @@ async function saveRaffle() {
     }
 
     showModal.value = false
-    resetForm()
-    // Recarregar rifas
+    resetForm()
     await rafflesStore.fetchRaffles()
   } catch (err) {
     showError('Erro ao salvar rifa')
@@ -380,8 +377,7 @@ async function deleteRaffle(raffle: Raffle) {
     return
   }
 
-  try {
-    // Simular exclusão
+  try {
     await new Promise(resolve => setTimeout(resolve, 500))
     success('Rifa excluída com sucesso!')
     await rafflesStore.fetchRaffles()
@@ -395,8 +391,7 @@ async function drawRaffle(raffle: Raffle) {
   
   if (!ticketNumber) return
 
-  try {
-    // Simular sorteio
+  try {
     await new Promise(resolve => setTimeout(resolve, 500))
     success(`Sorteio realizado! Bilhete vencedor: #${ticketNumber}`)
     await rafflesStore.fetchRaffles()
@@ -429,8 +424,6 @@ function getStatusLabel(status: Raffle['status']) {
     default:
       return status
   }
-}
-
-// Carregar rifas ao montar
+}
 rafflesStore.fetchRaffles()
 </script>

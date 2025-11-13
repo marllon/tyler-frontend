@@ -248,8 +248,7 @@ function resetForm() {
   errors.targetAmount = ''
 }
 
-async function saveGoal() {
-  // Validação
+async function saveGoal() {
   let isValid = true
   
   if (!form.title) {
@@ -270,8 +269,7 @@ async function saveGoal() {
 
   saving.value = true
 
-  try {
-    // Simular salvamento
+  try {
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     if (editingGoal.value) {
@@ -281,8 +279,7 @@ async function saveGoal() {
     }
 
     showModal.value = false
-    resetForm()
-    // Recarregar metas
+    resetForm()
     await goalsStore.fetchGoals()
   } catch (err) {
     showError('Erro ao salvar meta')
@@ -296,16 +293,13 @@ async function deleteGoal(goal: Goal) {
     return
   }
 
-  try {
-    // Simular exclusão
+  try {
     await new Promise(resolve => setTimeout(resolve, 500))
     success('Meta excluída com sucesso!')
     await goalsStore.fetchGoals()
   } catch (err) {
     showError('Erro ao excluir meta')
   }
-}
-
-// Carregar metas ao montar
+}
 goalsStore.fetchGoals()
 </script>

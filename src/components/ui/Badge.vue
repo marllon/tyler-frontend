@@ -35,25 +35,19 @@ const badgeClasses = computed(() => {
     "justify-center",
     "font-medium",
     "transition-colors",
-  ];
-
-  // Size
+  ];
   if (props.size === "sm") {
     classes.push("text-xs", "px-2", "py-0.5");
   } else if (props.size === "md") {
     classes.push("text-sm", "px-2.5", "py-1");
   } else {
     classes.push("text-base", "px-3", "py-1.5");
-  }
-
-  // Rounded
+  }
   if (props.rounded) {
     classes.push("rounded-full");
   } else {
     classes.push("rounded-md");
-  }
-
-  // Variant styles
+  }
   if (props.outlined) {
     classes.push("border-2");
 
