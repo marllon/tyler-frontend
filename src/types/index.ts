@@ -338,8 +338,6 @@ export interface ApiError {
   code: string;
   message: string;
 }
-  updatedAt: string;
-}
 
 export interface BuyerInfo {
   name: string;
