@@ -26,7 +26,6 @@ jobs:
         run: npm run build
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL || 'https://api.tylerlimaeler.org/api' }}
-          VITE_API_PRODUCTS_URL: ${{ secrets.VITE_API_PRODUCTS_URL || 'https://api.tylerlimaeler.org/api/products' }}
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}

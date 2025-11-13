@@ -86,9 +86,8 @@ class ProductsService {
   private readonly allowedImageTypes: string[];
 
   constructor() {
-    this.baseUrl =
-      import.meta.env.VITE_API_PRODUCTS_URL ||
-      "http://localhost:8080/api/products";
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+    this.baseUrl = `${baseApiUrl}/products`;
     this.maxImageSize = parseInt(
       import.meta.env.VITE_MAX_IMAGE_SIZE || "10485760"
     ); // 10MB
