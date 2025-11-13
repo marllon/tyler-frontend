@@ -10,15 +10,17 @@ import type {
   ProductTraditionalPaginationResponse,
   ProductFilters,
   ImageUploadResponse,
-} from "@/types";
+} from "@/types";
 
 export const healthService = {
+  
   async checkHealth(): Promise<HealthResponse> {
     return api.get<HealthResponse>("/health");
   },
-};
+};
 
 export const paymentService = {
+  
   async createPixCheckout(
     data: PixPaymentRequest
   ): Promise<PixPaymentResponse> {
@@ -30,11 +32,7 @@ export const paymentService = {
   ): Promise<PaymentStatusResponse> {
     return api.get<PaymentStatusResponse>(`/payments/${transactionId}/status`);
   },
-   * @param transactionId ID da transação
-   * @param onStatusUpdate Callback chamado a cada atualização
-   * @param maxAttempts Número máximo de tentativas (default: 60)
-   * @param interval Intervalo entre tentativas em ms (default: 5000)
-   */
+
   async pollPaymentStatus(
     transactionId: string,
     onStatusUpdate: (status: PaymentStatusResponse) => void,
@@ -92,7 +90,7 @@ class ProductsService {
       "http://localhost:8080/api/products";
     this.maxImageSize = parseInt(
       import.meta.env.VITE_MAX_IMAGE_SIZE || "10485760"
-    );
+    ); // 10MB
     this.maxImagesPerProduct = parseInt(
       import.meta.env.VITE_MAX_IMAGES_PER_PRODUCT || "10"
     );
@@ -100,7 +98,7 @@ class ProductsService {
       import.meta.env.VITE_ALLOWED_IMAGE_TYPES ||
       "image/jpeg,image/jpg,image/png,image/webp"
     ).split(",");
-  }
+  }
 
   async getProductsPaginated(
     filters: ProductFilters = {}
@@ -115,8 +113,7 @@ class ProductsService {
       params.append("sortDirection", filters.sortDirection);
     if (filters.activeOnly !== undefined)
       params.append("activeOnly", filters.activeOnly.toString());
-    if (filters.category) params.append("category", filters.category);
-
+    if (filters.category) params.append("category", filters.category);
     const apiData = await api.get<any>(
       `/products/paginated?${params.toString()}`
     );
