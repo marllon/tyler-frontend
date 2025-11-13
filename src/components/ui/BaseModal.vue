@@ -114,9 +114,7 @@ const handleBackdropClick = () => {
   if (props.closeOnBackdrop) {
     close();
   }
-};
-
-// Prevent body scroll when modal is open
+};
 watch(
   () => props.modelValue,
   (isOpen) => {

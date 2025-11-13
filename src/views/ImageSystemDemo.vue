@@ -186,11 +186,8 @@ import {
   ImageGallery,
   ProductImageManager,
 } from "@/components/ui";
-import type { ProductImage } from "@/types";
+import type { ProductImage } from "@/types";
 
-// ============================================
-// STATE
-// ============================================
 const newProductImages = ref<File[]>([]);
 const showGallery = ref(false);
 const galleryIndex = ref(0);
@@ -240,11 +237,8 @@ const sampleImages = [
     url: "https://picsum.photos/600/600?random=13",
     alt: "Imagem exemplo 4",
   },
-];
+];
 
-// ============================================
-// METHODS
-// ============================================
 function onNewImagesValidationChange(isValid: boolean) {
   console.log("Validação das novas imagens:", isValid);
 }
@@ -277,8 +271,7 @@ function onImagesReordered(newOrder: ProductImage[]) {
 }
 </script>
 
-<style scoped>
-/* Adicione estilos personalizados se necessário */
+<style scoped>
 pre {
   white-space: pre-wrap;
   word-wrap: break-word;

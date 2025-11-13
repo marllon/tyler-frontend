@@ -3,9 +3,7 @@ import {
   fetchAndActivate,
   getValue,
 } from "firebase/remote-config";
-import { app } from "./firebase";
-
-// Firestore será configurado quando necessário
+import { app } from "./firebase";
 let db: any = null;
 
 export interface RemoteConfigManager {
@@ -19,13 +17,10 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
   private remoteConfig: any = null;
   private initialized = false;
 
-  constructor() {
-    // Inicializar Remote Config apenas se app estiver disponível
+  constructor() {
     if (app) {
       try {
-        this.remoteConfig = getRemoteConfig(app);
-
-        // Configurações padrão
+        this.remoteConfig = getRemoteConfig(app);
         this.remoteConfig.defaultConfig = {
           authorized_admins:
             import.meta.env.VITE_AUTHORIZED_ADMINS || "admin@tyler.com",
@@ -36,9 +31,7 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
             minAmount: 1.0,
             maxAmount: 10000.0,
           }),
-        };
-
-        // Configurar intervalo de fetch (em desenvolvimento: 0 para sempre buscar)
+        };
         this.remoteConfig.settings.minimumFetchIntervalMillis = import.meta.env
           .DEV
           ? 0
@@ -67,14 +60,11 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
   }
 
   async getAuthorizedAdmins(): Promise<string[]> {
-    try {
-      // 1. Tentar Firestore primeiro (mais dinâmico)
+    try {
       const firestoreEmails = await this.getFirestoreAuthorizedEmails();
       if (firestoreEmails.length > 0) {
         return firestoreEmails;
-      }
-
-      // 2. Remote Config como backup
+      }
       if (this.initialized && this.remoteConfig) {
         const value = getValue(
           this.remoteConfig,
@@ -87,18 +77,14 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
         if (emails.length > 0) {
           return emails;
         }
-      }
-
-      // 3. Environment variables como último recurso
+      }
       const envEmails =
         import.meta.env.VITE_AUTHORIZED_ADMINS?.split(",").map((e) =>
           e.trim()
         ) || [];
       if (envEmails.length > 0) {
         return envEmails;
-      }
-
-      // 4. Fallback padrão
+      }
       return ["admin@tyler.com"];
     } catch (error) {
       console.error("Erro ao buscar emails autorizados:", error);
@@ -120,9 +106,7 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
         if (domains.length > 0) {
           return domains;
         }
-      }
-
-      // Fallback para env vars
+      }
       const envDomains =
         import.meta.env.VITE_AUTHORIZED_DOMAINS?.split(",").map((d) =>
           d.trim()
@@ -143,9 +127,7 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
       if (this.initialized && this.remoteConfig) {
         const value = getValue(this.remoteConfig, "pix_settings").asString();
         return JSON.parse(value);
-      }
-
-      // Fallback padrão
+      }
       return {
         environment: "sandbox",
         minAmount: 1.0,
@@ -163,8 +145,7 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
 
   private async getFirestoreAuthorizedEmails(): Promise<string[]> {
     try {
-      if (!db && app) {
-        // Tentar inicializar Firestore se disponível
+      if (!db && app) {
         try {
           const { getFirestore } = await import("firebase/firestore");
           db = getFirestore(app);
@@ -195,9 +176,7 @@ class FirebaseRemoteConfigManager implements RemoteConfigManager {
       return [];
     }
   }
-}
-
-// Mock manager para quando Firebase não está disponível
+}
 class MockRemoteConfigManager implements RemoteConfigManager {
   async initializeRemoteConfig(): Promise<void> {
     console.log("🔧 Mock Remote Config Manager inicializado");
@@ -227,12 +206,9 @@ class MockRemoteConfigManager implements RemoteConfigManager {
       maxAmount: 10000.0,
     };
   }
-}
-
-// Factory para criar o manager apropriado
+}
 function createRemoteConfigManager(): RemoteConfigManager {
-  try {
-    // Verificar se Firebase está disponível e corretamente configurado
+  try {
     const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
     const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
 
@@ -243,8 +219,7 @@ function createRemoteConfigManager(): RemoteConfigManager {
       projectId !== "tyler-project" &&
       apiKey !== "your_api_key_here" &&
       apiKey.length > 30
-    ) {
-      // API keys do Firebase são longas
+    ) {
       console.log("📡 Usando Firebase Remote Config Manager");
       return new FirebaseRemoteConfigManager();
     } else {
@@ -257,12 +232,8 @@ function createRemoteConfigManager(): RemoteConfigManager {
   }
 
   return new MockRemoteConfigManager();
-}
-
-// Exportar instância singleton
-export const remoteConfigManager = createRemoteConfigManager();
-
-// Funções utilitárias para compatibilidade
+}
+export const remoteConfigManager = createRemoteConfigManager();
 export async function getAuthorizedAdmins(): Promise<string[]> {
   return remoteConfigManager.getAuthorizedAdmins();
 }

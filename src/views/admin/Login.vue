@@ -156,9 +156,7 @@ const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const showUnauthorizedModal = ref(false);
-const unauthorizedEmail = ref("");
-
-// Verificar se Firebase está configurado
+const unauthorizedEmail = ref("");
 const isFirebaseConfigured = computed(() => {
   return !!(
     import.meta.env.VITE_FIREBASE_API_KEY &&
@@ -210,8 +208,7 @@ async function handleGoogleLogin() {
       if (
         result.error?.includes("não autorizado") ||
         result.error?.includes("unauthorized")
-      ) {
-        // Pegar o email do usuário que tentou fazer login
+      ) {
         const user = authStore.getCurrentFirebaseUser();
         unauthorizedEmail.value = user?.email || "email desconhecido";
         showUnauthorizedModal.value = true;
@@ -232,8 +229,7 @@ function handleCloseUnauthorizedModal() {
   unauthorizedEmail.value = "";
 }
 
-function handleTryAgainUnauthorized() {
-  // Limpar dados e permitir nova tentativa
+function handleTryAgainUnauthorized() {
   email.value = "";
   password.value = "";
   error.value = "";

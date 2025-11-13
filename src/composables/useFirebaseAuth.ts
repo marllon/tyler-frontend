@@ -9,37 +9,22 @@ export function useFirebaseAuth() {
   const user = computed(() => authStore.user);
   const isAuthenticated = computed(() => authStore.isAuthenticated);
 
-  /**
-   * Login com Google
-   */
   async function signInWithGoogle() {
     return authStore.loginWithGoogle();
   }
 
-  /**
-   * Login com email e senha
-   */
   async function signIn(email: string, password: string) {
     return authStore.login(email, password);
   }
 
-  /**
-   * Logout
-   */
   async function signOut() {
     return authStore.logout();
   }
 
-  /**
-   * Obter token atual do usuário
-   */
   async function getToken(): Promise<string | null> {
     return firebaseService.getCurrentUserToken();
   }
 
-  /**
-   * Verificar se token ainda é válido
-   */
   async function refreshToken(): Promise<string | null> {
     const currentUser = firebaseService.getCurrentUser();
     if (currentUser) {
@@ -48,16 +33,10 @@ export function useFirebaseAuth() {
     return null;
   }
 
-  /**
-   * Verificar se usuário tem permissões de admin
-   */
   function isAdmin(): boolean {
     return authStore.admin?.role === "admin";
   }
 
-  /**
-   * Aguardar inicialização do Firebase Auth
-   */
   function waitForAuthInit(): Promise<User | null> {
     return new Promise((resolve) => {
       const unsubscribe = firebaseService.onAuthStateChanged((user) => {
@@ -67,13 +46,10 @@ export function useFirebaseAuth() {
     });
   }
 
-  return {
-    // State
+  return {
     loading,
     user,
-    isAuthenticated,
-
-    // Actions
+    isAuthenticated,
     signIn,
     signInWithGoogle,
     signOut,

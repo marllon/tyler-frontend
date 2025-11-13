@@ -224,9 +224,7 @@ interface Emits {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
-
-// Computed
+const emit = defineEmits<Emits>();
 const primaryImageIndex = computed(() => {
   return props.images.findIndex((img) => img.isPrimary || img.isMain) || 0;
 });
@@ -237,19 +235,13 @@ const primaryImage = computed(() => {
 
 const otherImages = computed(() => {
   return props.images.filter((_, index) => index !== primaryImageIndex.value);
-});
-
-// Methods
+});
 function setAsPrimary(newIndex: number) {
-  const newImages = [...props.images];
-
-  // Remove primary from all images
+  const newImages = [...props.images];
   newImages.forEach((img) => {
     img.isPrimary = false;
     img.isMain = false;
-  });
-
-  // Set new primary
+  });
   if (newImages[newIndex]) {
     newImages[newIndex].isPrimary = true;
     newImages[newIndex].isMain = true;
@@ -263,9 +255,7 @@ function deleteImage(index: number) {
   const imageToDelete = props.images[index];
   if (!imageToDelete) return;
 
-  const newImages = props.images.filter((_, i) => i !== index);
-
-  // If we deleted the primary image, make the first one primary
+  const newImages = props.images.filter((_, i) => i !== index);
   if (
     (imageToDelete.isPrimary || imageToDelete.isMain) &&
     newImages.length > 0
@@ -291,13 +281,10 @@ function handleDragStart(event: DragEvent, index: number) {
 function handleDrop(event: DragEvent, targetIndex: number) {
   event.preventDefault();
 
-  if (draggedIndex === -1 || draggedIndex === targetIndex) return;
-
-  // If dropping on the main image area (index 0), make the dragged image primary
+  if (draggedIndex === -1 || draggedIndex === targetIndex) return;
   if (targetIndex === 0) {
     setAsPrimary(draggedIndex);
-  } else {
-    // Otherwise, just reorder
+  } else {
     const newImages = [...props.images];
     const draggedImage = newImages[draggedIndex];
     newImages.splice(draggedIndex, 1);

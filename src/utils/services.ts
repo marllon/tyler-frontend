@@ -12,42 +12,24 @@ import type {
   ImageUploadResponse,
 } from "@/types";
 
-// ============================================
-// Health Check Service
-// ============================================
 export const healthService = {
-  /**
-   * Verifica o status da API
-   */
   async checkHealth(): Promise<HealthResponse> {
     return api.get<HealthResponse>("/health");
   },
 };
 
-// ============================================
-// Payment Service (PIX)
-// ============================================
 export const paymentService = {
-  /**
-   * Criar checkout PIX
-   */
   async createPixCheckout(
     data: PixPaymentRequest
   ): Promise<PixPaymentResponse> {
     return api.post<PixPaymentResponse>("/payments/checkout", data);
   },
 
-  /**
-   * Consultar status do pagamento
-   */
   async getPaymentStatus(
     transactionId: string
   ): Promise<PaymentStatusResponse> {
     return api.get<PaymentStatusResponse>(`/payments/${transactionId}/status`);
   },
-
-  /**
-   * Polling para verificar status do pagamento
    * @param transactionId ID da transação
    * @param onStatusUpdate Callback chamado a cada atualização
    * @param maxAttempts Número máximo de tentativas (default: 60)
@@ -66,15 +48,11 @@ export const paymentService = {
         try {
           attempts++;
           const status = await this.getPaymentStatus(transactionId);
-          onStatusUpdate(status);
-
-          // Payment completed successfully
+          onStatusUpdate(status);
           if (status.status === "PAID") {
             resolve(status);
             return;
-          }
-
-          // Payment failed or cancelled
+          }
           if (
             status.status === "FAILED" ||
             status.status === "CANCELLED" ||
@@ -82,9 +60,7 @@ export const paymentService = {
           ) {
             reject(new Error(`Pagamento ${status.status.toLowerCase()}`));
             return;
-          }
-
-          // Continue polling if still waiting and under max attempts
+          }
           if (attempts < maxAttempts && status.status === "WAITING_PAYMENT") {
             setTimeout(poll, interval);
           } else if (attempts >= maxAttempts) {
@@ -102,11 +78,8 @@ export const paymentService = {
       poll();
     });
   },
-};
+};
 
-// ============================================
-// Products Service
-// ============================================
 class ProductsService {
   private readonly baseUrl: string;
   private readonly maxImageSize: number;
@@ -119,7 +92,7 @@ class ProductsService {
       "http://localhost:8080/api/products";
     this.maxImageSize = parseInt(
       import.meta.env.VITE_MAX_IMAGE_SIZE || "10485760"
-    ); // 10MB
+    );
     this.maxImagesPerProduct = parseInt(
       import.meta.env.VITE_MAX_IMAGES_PER_PRODUCT || "10"
     );
@@ -129,13 +102,6 @@ class ProductsService {
     ).split(",");
   }
 
-  // ============================================
-  // LISTAGEM DE PRODUTOS
-  // ============================================
-
-  /**
-   * Lista produtos usando cursor pagination (RECOMENDADO)
-   */
   async getProductsPaginated(
     filters: ProductFilters = {}
   ): Promise<ProductPaginationResponse> {
@@ -151,7 +117,6 @@ class ProductsService {
       params.append("activeOnly", filters.activeOnly.toString());
     if (filters.category) params.append("category", filters.category);
 
-    // api.get() já retorna response.data, não o response completo
     const apiData = await api.get<any>(
       `/products/paginated?${params.toString()}`
     );
@@ -170,16 +135,12 @@ class ProductsService {
       throw new Error(
         "API não retornou produtos válidos - campo products não encontrado"
       );
-    }
-
-    // Normalizar produtos para garantir estrutura consistente
+    }
     const normalizedProducts = apiData.products.map((product: any) => ({
       ...product,
       images: product.images || [], // Garantir que images seja sempre um array
       tags: product.tags || [], // Garantir que tags seja sempre um array
-    }));
-
-    // Mapear para nossa interface
+    }));
     const mappedResponse: ProductPaginationResponse = {
       products: normalizedProducts,
       pageSize: apiData.pageSize || 20,
@@ -194,9 +155,6 @@ class ProductsService {
     return mappedResponse;
   }
 
-  /**
-   * Lista produtos usando paginação tradicional (para compatibilidade)
-   */
   async getProducts(
     page: number = 1,
     pageSize: number = 20,
@@ -208,12 +166,8 @@ class ProductsService {
     params.append("pageSize", pageSize.toString());
     if (activeOnly !== undefined)
       params.append("activeOnly", activeOnly.toString());
-    if (category) params.append("category", category);
-
-    // api.get() já retorna response.data
-    const apiData = await api.get<any>(`/products?${params.toString()}`);
-
-    // Normalizar produtos para garantir estrutura consistente
+    if (category) params.append("category", category);
+    const apiData = await api.get<any>(`/products?${params.toString()}`);
     const normalizedProducts = (apiData.products || []).map((product: any) => ({
       ...product,
       images: product.images || [], // Garantir que images seja sempre um array
@@ -224,35 +178,21 @@ class ProductsService {
       ...apiData,
       products: normalizedProducts,
     };
-  }
+  }
 
-  // ============================================
-  // OPERAÇÕES INDIVIDUAIS
-  // ============================================
-
-  /**
-   * Busca produto por ID
-   */
   async getProductById(id: string): Promise<Product> {
     const product = await api.get<Product>(`/products/${id}`);
     return product;
   }
 
-  /**
-   * Cria novo produto (SEM imagens) - usando multipart para compatibilidade
-   * CACHE BUST: v2.0
-   */
   async createProduct(
     productData: ProductCreateRequest
   ): Promise<{ id: string; message: string }> {
     console.log(
       "🔄 [CREATE PRODUCT] Creating product without images using FormData"
-    );
-
-    // Usar FormData mesmo sem imagens para compatibilidade com o backend
+    );
     const formData = new FormData();
-    formData.append("productData", JSON.stringify(productData));
-    // Não adicionar imagens (array vazio)
+    formData.append("productData", JSON.stringify(productData));
 
     console.log(
       "🚀 [CREATE PRODUCT] Sending POST request to /products with FormData"
@@ -263,10 +203,6 @@ class ProductsService {
     return result;
   }
 
-  /**
-   * Cria novo produto COM imagens usando endpoint unificado
-   * CACHE BUST: v2.0
-   */
   async createProductWithImages(
     productData: ProductCreateRequest,
     images: File[],
@@ -308,13 +244,8 @@ class ProductsService {
       updateProgress(
         "create-product-with-images",
         "Criando produto com imagens..."
-      );
-
-      // Usar FormData para enviar produto + imagens juntos
-      const formData = new FormData();
-
-      // Filtrar apenas campos que o backend aceita (baseado no curl de exemplo)
-      // VERSÃO 2 - APENAS CAMPOS BÁSICOS
+      );
+      const formData = new FormData();
       const backendProductData = {
         name: productData.name,
         description: productData.description,
@@ -327,9 +258,7 @@ class ProductsService {
         "🔧 [UNIFIED-v2] Backend product data:",
         JSON.stringify(backendProductData, null, 2)
       );
-      formData.append("productData", JSON.stringify(backendProductData));
-
-      // Adicionar imagens se existirem
+      formData.append("productData", JSON.stringify(backendProductData));
       if (images && images.length > 0) {
         console.log(
           `📤 [UNIFIED METHOD] Adding ${images.length} images to FormData`
@@ -367,9 +296,6 @@ class ProductsService {
     }
   }
 
-  /**
-   * Atualiza produto existente (não inclui imagens)
-   */
   async updateProduct(
     id: string,
     productData: Partial<ProductCreateRequest>
@@ -378,9 +304,6 @@ class ProductsService {
     return response;
   }
 
-  /**
-   * Atualiza produto com gerenciamento completo de imagens
-   */
   async updateProductWithImages(
     id: string,
     productData: Partial<ProductCreateRequest>,
@@ -391,38 +314,28 @@ class ProductsService {
       primaryImageId?: string | null;
     }
   ): Promise<Product> {
-    const formData = new FormData();
-
-    // Adicionar dados do produto como blob com Content-Type application/json
+    const formData = new FormData();
     const productBlob = new Blob([JSON.stringify(productData)], {
       type: "application/json",
     });
-    formData.append("product", productBlob);
-
-    // Adicionar novas imagens
+    formData.append("product", productBlob);
     if (imageChanges.newImages?.length) {
       imageChanges.newImages.forEach((file, index) => {
         formData.append(`newImages`, file);
       });
-    }
-
-    // Adicionar informações sobre imagens existentes
+    }
     if (imageChanges.existingImages?.length) {
       formData.append(
         "existingImages",
         JSON.stringify(imageChanges.existingImages)
       );
-    }
-
-    // Adicionar lista de imagens para deletar
+    }
     if (imageChanges.imagesToDelete?.length) {
       formData.append(
         "imagesToDelete",
         JSON.stringify(imageChanges.imagesToDelete)
       );
-    }
-
-    // Adicionar ID da imagem principal
+    }
     if (imageChanges.primaryImageId) {
       formData.append("primaryImageId", imageChanges.primaryImageId);
     }
@@ -440,20 +353,10 @@ class ProductsService {
     return response;
   }
 
-  /**
-   * Remove produto
-   */
   async deleteProduct(id: string): Promise<void> {
     await api.delete(`/products/${id}`);
-  }
+  }
 
-  // ============================================
-  // GERENCIAMENTO DE IMAGENS
-  // ============================================
-
-  /**
-   * Adiciona imagem a produto existente
-   */
   async uploadImageToProduct(
     productId: string,
     image: File,
@@ -477,23 +380,13 @@ class ProductsService {
     return response;
   }
 
-  /**
-   * Remove imagem de produto
-   */
   async removeImageFromProduct(
     productId: string,
     imageId: string
   ): Promise<void> {
     await api.delete(`/products/${productId}/images/${imageId}`);
-  }
+  }
 
-  // ============================================
-  // VALIDAÇÕES E UTILIDADES
-  // ============================================
-
-  /**
-   * Valida arquivos de imagem
-   */
   private validateImages(images: File[]): void {
     if (images.length > this.maxImagesPerProduct) {
       throw new Error(
@@ -501,8 +394,7 @@ class ProductsService {
       );
     }
 
-    images.forEach((image, index) => {
-      // Verifica tipo
+    images.forEach((image, index) => {
       if (!this.allowedImageTypes.includes(image.type)) {
         throw new Error(
           `Imagem ${
@@ -511,9 +403,7 @@ class ProductsService {
             ", "
           )}`
         );
-      }
-
-      // Verifica tamanho
+      }
       if (image.size > this.maxImageSize) {
         const maxSizeMB = (this.maxImageSize / 1024 / 1024).toFixed(1);
         throw new Error(
@@ -523,9 +413,6 @@ class ProductsService {
     });
   }
 
-  /**
-   * Formata tamanho de arquivo
-   */
   formatFileSize(bytes: number): string {
     if (bytes === 0) return "0 B";
     const k = 1024;
@@ -534,20 +421,12 @@ class ProductsService {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
-  /**
-   * Verifica se tipo de arquivo é válido
-   */
   isValidImageType(file: File): boolean {
     return this.allowedImageTypes.includes(file.type);
   }
 
-  /**
-   * Verifica se tamanho do arquivo é válido
-   */
   isValidImageSize(file: File): boolean {
     return file.size <= this.maxImageSize;
   }
-}
-
-// Instância singleton
+}
 export const productsService = new ProductsService();

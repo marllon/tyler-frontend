@@ -1,6 +1,3 @@
-// UI Microcomponents Barrel Export
-// Facilita imports: import { BaseButton, BaseCard } from '@/components/ui'
-
 export { default as BaseButton } from "./BaseButton.vue";
 export { default as BaseInput } from "./BaseInput.vue";
 export { default as BaseCard } from "./BaseCard.vue";

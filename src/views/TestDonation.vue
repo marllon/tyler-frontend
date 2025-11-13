@@ -198,9 +198,7 @@ import { useGoalsStore } from "@/stores/goals";
 import { useDonations } from "@/composables/useDonations";
 import { useToast } from "@/composables/useToast";
 import { healthService } from "@/utils/services";
-import type { DonationRequest, PaymentStatusResponse } from "@/types";
-
-// Stores e composables
+import type { DonationRequest, PaymentStatusResponse } from "@/types";
 const goalsStore = useGoalsStore();
 const {
   createDonation,
@@ -208,16 +206,12 @@ const {
   validateDonationData,
   formatDocument,
 } = useDonations();
-const { showToast } = useToast();
-
-// State
+const { showToast } = useToast();
 const processing = ref(false);
 const showPaymentModal = ref(false);
 const checkingHealth = ref(false);
 const healthStatus = ref<"healthy" | "unhealthy">("unhealthy");
-const healthMessage = ref("");
-
-// Form data
+const healthMessage = ref("");
 const donationForm = reactive<Partial<DonationRequest>>({
   amount: 0,
   goalId: "",
@@ -228,9 +222,7 @@ const donationForm = reactive<Partial<DonationRequest>>({
     email: "",
     document: "",
   },
-});
-
-// Computed
+});
 const activeGoals = computed(() => goalsStore.activeGoals);
 
 const validationErrors = computed(() => {
@@ -264,9 +256,7 @@ const payerData = computed(() => ({
   document: donationForm.anonymous
     ? "00000000000"
     : donationForm.donor?.document?.replace(/\D/g, "") || "00000000000",
-}));
-
-// Methods
+}));
 async function checkApiHealth() {
   checkingHealth.value = true;
   try {
@@ -281,8 +271,7 @@ async function checkApiHealth() {
   }
 }
 
-async function handleSubmit() {
-  // Validate form
+async function handleSubmit() {
   const errors = validationErrors.value;
   if (errors.length > 0) {
     showToast("Corrija os erros no formulário", "error");
@@ -326,9 +315,7 @@ function resetForm() {
     },
   });
   processing.value = false;
-}
-
-// Lifecycle
+}
 onMounted(() => {
   goalsStore.fetchGoals({ active: true });
   checkApiHealth();

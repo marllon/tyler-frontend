@@ -9,16 +9,12 @@ import type {
 import { productsService } from "@/utils/services";
 import { useToast } from "@/composables/useToast";
 
-export const useProductsStore = defineStore("products", () => {
-  // ============================================
-  // STATE
-  // ============================================
+export const useProductsStore = defineStore("products", () => {
+  
   const products = ref<Product[]>([]);
   const currentProduct = ref<Product | null>(null);
   const loading = ref(false);
-  const error = ref<string | null>(null);
-
-  // Paginação
+  const error = ref<string | null>(null);
   const pagination = ref<{
     hasNext: boolean;
     nextCursor?: string;
@@ -29,19 +25,14 @@ export const useProductsStore = defineStore("products", () => {
     hasNext: false,
     hasPrevious: false,
     pageSize: 20,
-  });
-
-  // Filtros ativos
+  });
   const currentFilters = ref<ProductFilters>({
     limit: 20,
     sortBy: "CREATED_AT",
     sortDirection: "DESC",
     activeOnly: true,
-  });
-
-  // ============================================
-  // COMPUTED
-  // ============================================
+  });
+  
   const activeProducts = computed(() =>
     products.value.filter((product) => product.active)
   );
@@ -59,15 +50,8 @@ export const useProductsStore = defineStore("products", () => {
 
   const availableCategories = computed(() =>
     [...new Set(products.value.map((product) => product.category))].sort()
-  );
+  );
 
-  // ============================================
-  // ACTIONS - LISTAGEM
-  // ============================================
-
-  /**
-   * Busca produtos com cursor pagination (RECOMENDADO)
-   */
   async function fetchProductsPaginated(
     filters: ProductFilters = {},
     resetList: boolean = true
@@ -76,9 +60,7 @@ export const useProductsStore = defineStore("products", () => {
     error.value = null;
 
     try {
-      const mergedFilters = { ...currentFilters.value, ...filters };
-
-      // Tentar primeiro cursor pagination, se falhar usar paginação tradicional
+      const mergedFilters = { ...currentFilters.value, ...filters };
       let response: any;
       try {
         response = await productsService.getProductsPaginated(mergedFilters);
@@ -87,9 +69,7 @@ export const useProductsStore = defineStore("products", () => {
         console.warn(
           "Cursor pagination failed, falling back to traditional pagination:",
           paginatedError
-        );
-
-        // Fallback para paginação tradicional
+        );
         const page = 1; // Para simplificar, sempre primeira página
         const pageSize = mergedFilters.limit || 20;
         const traditionalResponse = await productsService.getProducts(
@@ -97,9 +77,7 @@ export const useProductsStore = defineStore("products", () => {
           pageSize,
           mergedFilters.activeOnly,
           mergedFilters.category
-        );
-
-        // Converter para formato de cursor pagination
+        );
         response = {
           products: traditionalResponse.products,
           pageSize: pageSize,
@@ -116,9 +94,7 @@ export const useProductsStore = defineStore("products", () => {
 
       if (!response || !response.products) {
         throw new Error("Resposta da API inválida ou vazia");
-      }
-
-      // Debug: verificar produtos recebidos
+      }
       console.log("Produtos recebidos no store:", response.products);
       response.products.forEach((product, index) => {
         console.log(`Produto ${index}:`, {
@@ -131,21 +107,16 @@ export const useProductsStore = defineStore("products", () => {
 
       if (resetList) {
         products.value = response.products;
-      } else {
-        // Adicionar produtos na lista (para scroll infinito)
+      } else {
         products.value.push(...response.products);
-      }
-
-      // Atualizar paginação
+      }
       pagination.value = {
         hasNext: response.hasNext,
         nextCursor: response.nextCursor,
         hasPrevious: response.hasPrevious,
         previousCursor: response.previousCursor,
         pageSize: response.pageSize,
-      };
-
-      // Salvar filtros ativos
+      };
       currentFilters.value = mergedFilters;
     } catch (err: any) {
       error.value = err.message || "Erro ao carregar produtos";
@@ -155,9 +126,6 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Busca próxima página (cursor pagination)
-   */
   async function fetchNextPage() {
     if (!pagination.value.hasNext || !pagination.value.nextCursor) return;
 
@@ -171,9 +139,6 @@ export const useProductsStore = defineStore("products", () => {
     );
   }
 
-  /**
-   * Busca página anterior (cursor pagination)
-   */
   async function fetchPreviousPage() {
     if (!pagination.value.hasPrevious || !pagination.value.previousCursor)
       return;
@@ -188,9 +153,6 @@ export const useProductsStore = defineStore("products", () => {
     );
   }
 
-  /**
-   * Busca produtos com paginação tradicional (compatibilidade)
-   */
   async function fetchProducts(
     page: number = 1,
     pageSize: number = 20,
@@ -220,15 +182,8 @@ export const useProductsStore = defineStore("products", () => {
     } finally {
       loading.value = false;
     }
-  }
+  }
 
-  // ============================================
-  // ACTIONS - PRODUTO INDIVIDUAL
-  // ============================================
-
-  /**
-   * Busca produto por ID
-   */
   async function fetchProduct(id: string): Promise<Product | null> {
     loading.value = true;
     error.value = null;
@@ -246,9 +201,6 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Cria novo produto (sem imagens)
-   */
   async function createProduct(
     productData: ProductCreateRequest
   ): Promise<boolean> {
@@ -257,9 +209,7 @@ export const useProductsStore = defineStore("products", () => {
 
     try {
       const response = await productsService.createProduct(productData);
-      console.log("Produto criado com sucesso!");
-
-      // Recarregar lista
+      console.log("Produto criado com sucesso!");
       await fetchProductsPaginated(currentFilters.value);
       return true;
     } catch (err: any) {
@@ -271,10 +221,6 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Cria novo produto com imagens
-   * CACHE BUST: v2.0
-   */
   async function createProductWithImages(
     productData: ProductCreateRequest,
     images: File[],
@@ -304,9 +250,7 @@ export const useProductsStore = defineStore("products", () => {
 
       success(
         `Produto "${productData.name}" criado com sucesso! ${response.imagesUploaded} imagem(ns) enviada(s).`
-      );
-
-      // Recarregar lista
+      );
       await fetchProductsPaginated(currentFilters.value);
       return true;
     } catch (err: any) {
@@ -318,9 +262,6 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Atualiza produto existente
-   */
   async function updateProduct(
     id: string,
     productData: Partial<ProductCreateRequest>
@@ -332,15 +273,11 @@ export const useProductsStore = defineStore("products", () => {
       const updatedProduct = await productsService.updateProduct(
         id,
         productData
-      );
-
-      // Atualizar na lista local
+      );
       const index = products.value.findIndex((p) => p.id === id);
       if (index !== -1) {
         products.value[index] = updatedProduct;
-      }
-
-      // Atualizar produto atual se for o mesmo
+      }
       if (currentProduct.value?.id === id) {
         currentProduct.value = updatedProduct;
       }
@@ -356,9 +293,6 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Atualiza produto com gerenciamento completo de imagens
-   */
   async function updateProductWithImages(
     id: string,
     productData: Partial<ProductCreateRequest>,
@@ -377,15 +311,11 @@ export const useProductsStore = defineStore("products", () => {
         id,
         productData,
         imageChanges
-      );
-
-      // Atualizar na lista local
+      );
       const index = products.value.findIndex((p) => p.id === id);
       if (index !== -1) {
         products.value[index] = updatedProduct;
-      }
-
-      // Atualizar produto atual se for o mesmo
+      }
       if (currentProduct.value?.id === id) {
         currentProduct.value = updatedProduct;
       }
@@ -401,20 +331,13 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Remove produto
-   */
   async function deleteProduct(id: string): Promise<boolean> {
     loading.value = true;
     error.value = null;
 
     try {
-      await productsService.deleteProduct(id);
-
-      // Remover da lista local
-      products.value = products.value.filter((p) => p.id !== id);
-
-      // Limpar produto atual se for o mesmo
+      await productsService.deleteProduct(id);
+      products.value = products.value.filter((p) => p.id !== id);
       if (currentProduct.value?.id === id) {
         currentProduct.value = null;
       }
@@ -428,15 +351,8 @@ export const useProductsStore = defineStore("products", () => {
     } finally {
       loading.value = false;
     }
-  }
+  }
 
-  // ============================================
-  // ACTIONS - GERENCIAMENTO DE IMAGENS
-  // ============================================
-
-  /**
-   * Adiciona imagem a produto
-   */
   async function uploadImageToProduct(
     productId: string,
     image: File,
@@ -448,9 +364,7 @@ export const useProductsStore = defineStore("products", () => {
         image,
         isPrimary
       );
-      console.log(" Toast message ");
-
-      // Atualizar produto atual
+      console.log(" Toast message ");
       if (currentProduct.value?.id === productId) {
         await fetchProduct(productId);
       }
@@ -462,18 +376,13 @@ export const useProductsStore = defineStore("products", () => {
     }
   }
 
-  /**
-   * Remove imagem de produto
-   */
   async function removeImageFromProduct(
     productId: string,
     imageId: string
   ): Promise<boolean> {
     try {
       await productsService.removeImageFromProduct(productId, imageId);
-      console.log(" Toast message ");
-
-      // Atualizar produto atual
+      console.log(" Toast message ");
       if (currentProduct.value?.id === productId) {
         await fetchProduct(productId);
       }
@@ -483,15 +392,8 @@ export const useProductsStore = defineStore("products", () => {
       console.log(" Toast message ");
       return false;
     }
-  }
+  }
 
-  // ============================================
-  // UTILITIES
-  // ============================================
-
-  /**
-   * Limpa estado
-   */
   function clearState() {
     products.value = [];
     currentProduct.value = null;
@@ -503,46 +405,32 @@ export const useProductsStore = defineStore("products", () => {
     };
   }
 
-  /**
-   * Busca produto local por ID (sem fazer request)
-   */
   function findProductById(id: string): Product | undefined {
     return products.value.find((product) => product.id === id);
   }
 
-  return {
-    // State
+  return {
     products,
     currentProduct,
     loading,
     error,
     pagination,
-    currentFilters,
-
-    // Computed
+    currentFilters,
     activeProducts,
     productsByCategory,
-    availableCategories,
-
-    // Actions - Listagem
+    availableCategories,
     fetchProductsPaginated,
     fetchNextPage,
     fetchPreviousPage,
-    fetchProducts,
-
-    // Actions - Produto Individual
+    fetchProducts,
     fetchProduct,
     createProduct,
     createProductWithImages,
     updateProduct,
     updateProductWithImages,
-    deleteProduct,
-
-    // Actions - Imagens
+    deleteProduct,
     uploadImageToProduct,
-    removeImageFromProduct,
-
-    // Utilities
+    removeImageFromProduct,
     clearState,
     findProductById,
   };

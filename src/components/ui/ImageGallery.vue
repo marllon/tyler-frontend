@@ -261,20 +261,14 @@ const props = withDefaults(defineProps<Props>(), {
   showThumbnails: true,
   aspectRatio: "auto",
   size: "medium",
-});
-
-// State
+});
 const currentIndex = ref(0);
 const imageLoading = ref(false);
-const fullscreenOpen = ref(false);
-
-// Computed
+const fullscreenOpen = ref(false);
 const currentImage = computed(() => {
   if (props.images.length === 0) return null;
   return props.images[currentIndex.value] || props.images[0];
-});
-
-// Methods
+});
 const setCurrentImage = (index: number) => {
   if (index >= 0 && index < props.images.length) {
     currentIndex.value = index;
@@ -310,9 +304,7 @@ const openFullscreen = () => {
 const closeFullscreen = () => {
   fullscreenOpen.value = false;
   document.body.style.overflow = "auto";
-};
-
-// Keyboard navigation
+};
 const handleKeydown = (event: KeyboardEvent) => {
   if (!fullscreenOpen.value) return;
 
@@ -323,9 +315,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   } else if (event.key === "Escape") {
     closeFullscreen();
   }
-};
-
-// Watchers
+};
 watch(
   () => props.images,
   () => {
@@ -336,9 +326,7 @@ watch(
 
 watch(currentIndex, () => {
   imageLoading.value = true;
-});
-
-// Lifecycle
+});
 onMounted(() => {
   document.addEventListener("keydown", handleKeydown);
 });
@@ -483,9 +471,7 @@ onUnmounted(() => {
 
 .fullscreen-counter {
   @apply bg-black bg-opacity-75 text-white px-4 py-2 rounded-full text-sm font-medium;
-}
-
-/* Responsive adjustments */
+}
 @media (max-width: 640px) {
   .main-image {
     @apply h-64;

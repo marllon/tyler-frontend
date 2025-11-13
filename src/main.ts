@@ -8,22 +8,15 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
-
-// Inicializar Firebase Auth e Remote Config após montar o app
-app.mount("#app");
-
-// Inicializar serviços depois que o app estiver montado
-async function initializeServices() {
-  // Inicializar Remote Config
+app.use(router);
+app.mount("#app");
+async function initializeServices() {
   try {
     const { initRemoteConfig } = await import("@/utils/remoteConfig");
     await initRemoteConfig();
   } catch (error) {
     console.warn("⚠️ Erro ao inicializar Remote Config:", error);
-  }
-
-  // Inicializar auth
+  }
   const { useAuthStore } = await import("@/stores/auth");
   const authStore = useAuthStore();
   authStore.initializeAuth();

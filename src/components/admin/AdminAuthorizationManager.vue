@@ -163,20 +163,14 @@ import { authorizationService } from "@/utils/authorization";
 import { useToast } from "@/composables/useToast";
 
 const authStore = useAuthStore();
-const { showToast } = useToast();
-
-// State
+const { showToast } = useToast();
 const loading = ref(false);
 const newEmail = ref("");
-const authorizedEmails = ref<string[]>([]);
-
-// Computed
+const authorizedEmails = ref<string[]>([]);
 const currentUser = computed(() => authStore.admin);
 const isSuperAdmin = computed(() => currentUser.value?.role === "super-admin");
 
-const configStatus = ref({ valid: true, issues: [] });
-
-// Atualizar status da configuração
+const configStatus = ref({ valid: true, issues: [] });
 async function updateConfigStatus() {
   try {
     configStatus.value = await authorizationService.validateConfiguration();
@@ -186,9 +180,7 @@ async function updateConfigStatus() {
       issues: ["Erro ao validar configuração"],
     };
   }
-}
-
-// Methods
+}
 async function loadAuthorizedEmails() {
   if (currentUser.value) {
     loading.value = true;
@@ -206,8 +198,7 @@ async function loadAuthorizedEmails() {
   }
 }
 
-function getRoleDisplayName(email: string): string {
-  // Determinar role baseado no email (lógica simples para o frontend)
+function getRoleDisplayName(email: string): string {
   const role =
     email.includes("tyler") || email.includes("admin@tylerlimaeler.org")
       ? "super-admin"
@@ -231,8 +222,7 @@ async function addEmail() {
 
   loading.value = true;
 
-  try {
-    // Verificar se email é válido
+  try {
     const authResult = await authorizationService.checkEmailAuthorization(
       newEmail.value
     );
@@ -286,9 +276,7 @@ async function removeEmail(email: string) {
   } finally {
     loading.value = false;
   }
-}
-
-// Lifecycle
+}
 onMounted(async () => {
   await Promise.all([loadAuthorizedEmails(), updateConfigStatus()]);
 });

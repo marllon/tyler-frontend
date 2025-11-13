@@ -1,4 +1,3 @@
-// Composable para notificações/toasts
 import { ref } from "vue";
 
 export type ToastType = "success" | "error" | "warning" | "info";

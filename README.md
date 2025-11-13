@@ -490,12 +490,42 @@ export default {
 };
 ```
 
-## 📚 Additional Documentation
+## � Deploy & CI/CD
+
+### Automatic Deploy with Firebase & GitHub Actions
+
+This project includes automated deployment to Firebase Hosting using GitHub Actions.
+
+**Quick Setup:**
+```bash
+# Run setup script
+chmod +x setup-deploy.sh
+./setup-deploy.sh
+```
+
+**Manual Setup:**
+1. Install Firebase CLI: `npm install -g firebase-tools`
+2. Login to Firebase: `firebase login`
+3. Configure your project ID in `.firebaserc`
+4. Set up GitHub Secrets (see [DEPLOY.md](./DEPLOY.md))
+5. Push to `main` branch → automatic deploy!
+
+**Deploy Triggers:**
+- ✅ Push to `main` branch → Production deploy
+- ✅ Pull Request → Preview deploy
+- ✅ Manual trigger via GitHub Actions
+
+**Detailed Instructions:** See [DEPLOY.md](./DEPLOY.md) for complete setup guide.
+
+---
+
+## �📚 Additional Documentation
 
 - [Microcomponents Guide](./MICROCOMPONENTS.md) - UI components documentation
 - [Main README](../README.md) - Overall project documentation
 - [Admin Area Guide](../ADMIN_AREA.md) - Admin panel documentation
 - [Dummy Data Reference](../DUMMY_DATA.md) - Development data
+- [Deploy Guide](./DEPLOY.md) - Firebase deployment setup
 
 ## 🤝 Contributing
 

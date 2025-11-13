@@ -1,4 +1,3 @@
-// Composable para formatação de datas
 export function useDate() {
   const formatDate = (
     dateString: string,

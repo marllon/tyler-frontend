@@ -22,7 +22,19 @@ yarn-error.log*
 public/dist/
 
 # =====================================
-# 🧩 SYSTEM FILES
+# � AI GENERATED DOCUMENTATION (IGNORED)
+# =====================================
+DEPLOY.md
+MICROCOMPONENTS.md
+ADMIN_AREA.md
+DUMMY_DATA.md
+setup-deploy.sh
+docs/ai-generated/
+*.ai.md
+*-ai-generated.*
+
+# =====================================
+# �🧩 SYSTEM FILES
 # =====================================
 .DS_Store
 Thumbs.db
@@ -58,11 +70,19 @@ desktop.ini
 *.enc
 secrets.json
 credentials.json
-firebase.json
+# firebase.json  # ← REMOVIDO - precisamos do firebase.json no repo
 google-services.json
 serviceAccount*.json
 config.private.js
 config.secret.js
+
+# =====================================
+# 🔥 FIREBASE ESPECÍFICO
+# =====================================
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # =====================================
 # 🧰 TOOLING

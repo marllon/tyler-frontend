@@ -372,11 +372,8 @@ interface Emits {
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<Emits>();
+const emit = defineEmits<Emits>();
 
-// ============================================
-// STATE
-// ============================================
 const form = ref<ProductCreateRequest>({
   name: "",
   description: "",
@@ -402,14 +399,9 @@ const existingImages = ref<ProductImage[]>([]);
 const imagesToDelete = ref<string[]>([]);
 const primaryImageId = ref<string | null>(null);
 const showImageUpload = ref(true); // Mostrar upload por padrão
-const showAdditionalInfo = ref(false);
+const showAdditionalInfo = ref(false);
+const allImages = ref<any[]>([]);
 
-// Estado unificado para todas as imagens (existentes + novas)
-const allImages = ref<any[]>([]);
-
-// ============================================
-// PROGRESS STATE
-// ============================================
 const showProgress = ref(false);
 const progressState = ref({
   step: "",
@@ -420,17 +412,13 @@ const progressState = ref({
 });
 
 const progressSteps = computed(() => {
-  const steps = [{ name: "Criando produto", status: "pending" as const }];
-
-  // Adicionar steps para cada imagem
+  const steps = [{ name: "Criando produto", status: "pending" as const }];
   newImageFiles.value.forEach((file, index) => {
     steps.push({
       name: `Imagem ${index + 1}: ${file.name}`,
       status: "pending" as const,
     });
-  });
-
-  // Atualizar status baseado no progresso atual
+  });
   return steps.map((step, index) => ({
     ...step,
     status:
@@ -440,11 +428,8 @@ const progressSteps = computed(() => {
         ? "current"
         : "pending",
   }));
-});
+});
 
-// ============================================
-// COMPUTED
-// ============================================
 const isEdit = computed(() => !!props.initialData);
 
 const isFormValid = computed(() => {
@@ -456,11 +441,8 @@ const isFormValid = computed(() => {
     form.value.stock >= 0 &&
     Object.keys(errors.value).length === 0
   );
-});
+});
 
-// ============================================
-// WATCHERS
-// ============================================
 watch(
   () => props.initialData,
   (newData) => {
@@ -471,14 +453,10 @@ watch(
     }
   },
   { immediate: true }
-);
-
-// Validação em tempo real
+);
 watch(() => form.value.name, validateName);
 watch(() => form.value.price, validatePrice);
-watch(() => form.value.stock, validateStock);
-
-// Detectar mudanças no formulário
+watch(() => form.value.stock, validateStock);
 watch(
   () => form.value,
   () => {
@@ -500,11 +478,8 @@ watch(
   () => {
     emit("form-change");
   }
-);
+);
 
-// ============================================
-// METHODS
-// ============================================
 function loadInitialData(product: Product) {
   form.value = {
     name: product.name,
@@ -520,12 +495,8 @@ function loadInitialData(product: Product) {
     color: product.color || "",
     warranty: product.warranty || "",
     tags: product.tags || [],
-  };
-
-  // Converter tags para string
-  tagsInput.value = product.tags?.join(", ") || "";
-
-  // Carregar imagens existentes
+  };
+  tagsInput.value = product.tags?.join(", ") || "";
   if (product.images && product.images.length > 0) {
     existingImages.value = product.images.map((img) => ({
       id: img.id,
@@ -533,17 +504,13 @@ function loadInitialData(product: Product) {
       isPrimary: img.isPrimary || false,
       isMain: img.isPrimary || false, // Compatibilidade com SimpleImageManager
       uploadedAt: img.uploadedAt,
-    }));
-
-    // Encontrar imagem principal
+    }));
     const primaryImage = product.images.find((img) => img.isPrimary);
     primaryImageId.value = primaryImage?.id?.toString() || null;
   } else {
     existingImages.value = [];
     primaryImageId.value = null;
-  }
-
-  // Expandir informações adicionais se houver dados
+  }
   showAdditionalInfo.value = !!(
     product.brand ||
     product.model ||
@@ -635,8 +602,7 @@ function onFilesSelected(files: File[]) {
   selectedImages.value = files;
 }
 
-function closeImageUpload() {
-  // Ocultar apenas se há imagens já existentes
+function closeImageUpload() {
   if (existingImages.value.length > 0) {
     showImageUpload.value = false;
   }
@@ -644,12 +610,8 @@ function closeImageUpload() {
 }
 
 function addSelectedImages() {
-  if (selectedImages.value.length === 0) return;
-
-  // Armazenar os Files originais
-  newImageFiles.value.push(...selectedImages.value);
-
-  // Converter File[] para ImageData[] e adicionar aos existingImages para preview
+  if (selectedImages.value.length === 0) return;
+  newImageFiles.value.push(...selectedImages.value);
   const newImageData: ProductImage[] = selectedImages.value.map(
     (file, index) => ({
       id: `temp-${Date.now()}-${index}`, // ID temporário para novas imagens
@@ -660,40 +622,25 @@ function addSelectedImages() {
       _fileIndex:
         newImageFiles.value.length - selectedImages.value.length + index, // Índice para encontrar o File original
     })
-  );
-
-  // Adicionar as novas imagens às existentes
-  existingImages.value.push(...newImageData);
-
-  // Emitir mudança
-  emit("form-change");
-
-  // Fechar modal e limpar seleção
+  );
+  existingImages.value.push(...newImageData);
+  emit("form-change");
   showImageUpload.value = false;
   selectedImages.value = [];
-}
+}
 
-// ============================================
-// IMAGE MANAGEMENT FUNCTIONS
-// ============================================
 function updateExistingImages(newImages: ProductImage[]) {
   existingImages.value = newImages;
 }
 
 function updateAllImages(newImages: any[]) {
-  console.log("🖼️ UpdateAllImages called:", newImages);
-  
-  // Separar imagens novas (com file) das existentes
-  const existing = newImages.filter(img => !img.file);
-  const newFiles = newImages.filter(img => img.file);
-  
-  // Atualizar estados separados
+  console.log("🖼️ UpdateAllImages called:", newImages);
+  const existing = newImages.filter((img) => !img.file);
+  const newFiles = newImages.filter((img) => img.file);
   existingImages.value = existing;
-  newImageFiles.value = newFiles.map(img => img.file);
-  
-  // Atualizar estado unificado
+  newImageFiles.value = newFiles.map((img) => img.file);
   allImages.value = newImages;
-  
+
   emit("form-change");
 }
 
@@ -706,20 +653,15 @@ function onImageDeleted(imageId: string | number) {
   emit("form-change");
 }
 
-function handleSubmit() {
-  // Validar formulário
+function handleSubmit() {
   validateName();
   validatePrice();
   validateStock();
 
   if (!isFormValid.value) {
     return;
-  }
-
-  // Processar tags antes de enviar
-  processTags();
-
-  // Limpar campos opcionais vazios
+  }
+  processTags();
   const cleanData = { ...form.value };
   if (!cleanData.brand?.trim()) delete cleanData.brand;
   if (!cleanData.model?.trim()) delete cleanData.model;
@@ -727,14 +669,10 @@ function handleSubmit() {
   if (!cleanData.dimensions?.trim()) delete cleanData.dimensions;
   if (!cleanData.color?.trim()) delete cleanData.color;
   if (!cleanData.warranty?.trim()) delete cleanData.warranty;
-  if (!cleanData.tags?.length) delete cleanData.tags;
-
-  // Extrair imagens dos allImages (separar files das existentes)
+  if (!cleanData.tags?.length) delete cleanData.tags;
   const imagesToSubmit = allImages.value
-    .filter(img => img.file) // Apenas imagens novas com arquivo
-    .map(img => img.file);
-
-  // Mostrar progresso se houver imagens
+    .filter((img) => img.file) // Apenas imagens novas com arquivo
+    .map((img) => img.file);
   if (imagesToSubmit.length > 0) {
     showProgress.value = true;
     progressState.value = {
@@ -749,7 +687,7 @@ function handleSubmit() {
   console.log("🚀 Submitting product with images:", {
     productData: cleanData,
     images: imagesToSubmit,
-    imagesCount: imagesToSubmit.length
+    imagesCount: imagesToSubmit.length,
   });
 
   emit("submit", {
@@ -759,9 +697,7 @@ function handleSubmit() {
     imagesToDelete: isEdit.value ? imagesToDelete.value : undefined,
     primaryImageId: isEdit.value ? primaryImageId.value : undefined,
   });
-}
-
-// Função para atualizar progresso (será chamada pelo componente pai)
+}
 function updateProgress(progress: {
   step: string;
   current: number;
@@ -771,9 +707,7 @@ function updateProgress(progress: {
 }) {
   progressState.value = progress;
   emit("progress", progress);
-}
-
-// Função para finalizar progresso
+}
 function finishProgress() {
   showProgress.value = false;
   progressState.value = {
@@ -783,26 +717,18 @@ function finishProgress() {
     percentage: 0,
     message: "",
   };
-}
-
-// Exposar funções para o componente pai
+}
 defineExpose({
   updateProgress,
   finishProgress,
-});
+});
 
-// ============================================
-// LIFECYCLE
-// ============================================
-onMounted(() => {
-  // Validação inicial se há dados
+onMounted(() => {
   if (props.initialData) {
     validateName();
     validatePrice();
     validateStock();
-  }
-  
-  // Inicializar allImages com existingImages
+  }
   allImages.value = [...existingImages.value];
 });
 </script>

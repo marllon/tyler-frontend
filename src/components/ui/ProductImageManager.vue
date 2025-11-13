@@ -293,48 +293,33 @@ const props = withDefaults(defineProps<Props>(), {
   baseUrl: "",
 });
 
-const emit = defineEmits<Emits>();
+const emit = defineEmits<Emits>();
 
-// ============================================
-// STATE
-// ============================================
 const loadingStates = reactive<Record<number, boolean>>({});
 const showDeleteModal = ref(false);
 const imageToDelete = ref<number | null>(null);
 const showImageViewer = ref(false);
 const viewerIndex = ref(0);
-const draggedIndex = ref<number | null>(null);
+const draggedIndex = ref<number | null>(null);
 
-// ============================================
-// COMPUTED
-// ============================================
 const galleryImages = computed(() =>
   props.images.map((image) => ({
     id: image.id,
     url: getImageUrl(image),
     alt: image.alt || "Imagem do produto",
   }))
-);
+);
 
-// ============================================
-// IMAGE HANDLING
-// ============================================
 const getImageUrl = (image: ProductImage): string => {
-  if (!image.url) return "";
-
-  // Se já é uma URL completa
+  if (!image.url) return "";
   if (image.url.startsWith("http")) {
     return image.url;
-  }
-
-  // Se tem baseUrl, usar ela
+  }
   if (props.baseUrl) {
     return `${props.baseUrl}${image.url.startsWith("/") ? "" : "/"}${
       image.url
     }`;
-  }
-
-  // Assumir que é relativo ao servidor atual
+  }
   return image.url;
 };
 
@@ -344,29 +329,18 @@ const onImageError = (event: Event) => {
     "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgMTQwQzEyMi4wOTEgMTQwIDE0MCAxMjIuMDkxIDE0MCAxMDBDMTQwIDc3LjkwODYgMTIyLjA5MSA2MCAxMDAgNjBDNzcuOTA4NiA2MCA2MCA3Ny45MDg2IDYwIDEwMEM2MCAxMjIuMDkxIDc3LjkwODYgMTQwIDEwMCAxNDBaIiBzdHJva2U9IiM5Q0E0QUYiIHN0cm9rZS13aWR0aD0iNCIvPgo8cGF0aCBkPSJNODUgOTVMMTAwIDExMEwxMTUgOTUiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+Cg==";
 };
 
-const onImageLoad = (event: Event) => {
-  // Image loaded successfully
-};
+const onImageLoad = (event: Event) => {
+};
 
-// ============================================
-// PRIMARY IMAGE MANAGEMENT
-// ============================================
 const setAsPrimary = (index: number) => {
-  const newImages = [...props.images];
-
-  // Remove primary flag from all images
-  newImages.forEach((image) => (image.isMain = false));
-
-  // Set new primary
+  const newImages = [...props.images];
+  newImages.forEach((image) => (image.isMain = false));
   newImages[index].isMain = true;
 
   emit("update:images", newImages);
   emit("primary-changed", newImages[index].id);
-};
+};
 
-// ============================================
-// DELETE FUNCTIONALITY
-// ============================================
 const confirmDelete = (index: number) => {
   imageToDelete.value = index;
   showDeleteModal.value = true;
@@ -376,9 +350,7 @@ const deleteImage = () => {
   if (imageToDelete.value === null) return;
 
   const newImages = [...props.images];
-  const deletedImage = newImages.splice(imageToDelete.value, 1)[0];
-
-  // If deleted image was primary, set first image as primary
+  const deletedImage = newImages.splice(imageToDelete.value, 1)[0];
   if (deletedImage.isMain && newImages.length > 0) {
     newImages[0].isMain = true;
   }
@@ -392,11 +364,8 @@ const deleteImage = () => {
 const cancelDelete = () => {
   imageToDelete.value = null;
   showDeleteModal.value = false;
-};
+};
 
-// ============================================
-// IMAGE VIEWER
-// ============================================
 const openImageViewer = (index: number) => {
   viewerIndex.value = index;
   showImageViewer.value = true;
@@ -405,11 +374,8 @@ const openImageViewer = (index: number) => {
 const closeImageViewer = () => {
   showImageViewer.value = false;
   viewerIndex.value = 0;
-};
+};
 
-// ============================================
-// DRAG & DROP REORDERING
-// ============================================
 const onDragStart = (event: DragEvent, index: number) => {
   draggedIndex.value = index;
   if (event.dataTransfer) {
@@ -452,10 +418,8 @@ const onDrop = (event: DragEvent, dropIndex: number) => {
 };
 </script>
 
-<style scoped>
-/* ============================================ */
-/* DRAG & DROP STYLES */
-/* ============================================ */
+<style scoped>
+
 .image-item {
   transition: all 0.2s ease;
   cursor: grab;
@@ -478,11 +442,8 @@ const onDrop = (event: DragEvent, dropIndex: number) => {
 .image-item.drag-over {
   border-color: #3b82f6;
   background-color: #eff6ff;
-}
+}
 
-/* ============================================ */
-/* LOADING SPINNER */
-/* ============================================ */
 .spinner {
   width: 24px;
   height: 24px;
@@ -499,11 +460,8 @@ const onDrop = (event: DragEvent, dropIndex: number) => {
   100% {
     transform: rotate(360deg);
   }
-}
+}
 
-/* ============================================ */
-/* RESPONSIVE ADJUSTMENTS */
-/* ============================================ */
 @media (max-width: 640px) {
   .image-item .absolute.inset-0 {
     background-opacity: 20;
@@ -516,11 +474,8 @@ const onDrop = (event: DragEvent, dropIndex: number) => {
   .image-item .absolute.inset-0 button {
     padding: 0.75rem;
   }
-}
+}
 
-/* ============================================ */
-/* ACCESSIBILITY IMPROVEMENTS */
-/* ============================================ */
 .image-item:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
