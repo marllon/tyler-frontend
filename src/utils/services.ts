@@ -10,17 +10,15 @@ import type {
   ProductTraditionalPaginationResponse,
   ProductFilters,
   ImageUploadResponse,
-} from "@/types";
+} from "@/types";
 
 export const healthService = {
-  
   async checkHealth(): Promise<HealthResponse> {
     return api.get<HealthResponse>("/health");
   },
-};
+};
 
 export const paymentService = {
-  
   async createPixCheckout(
     data: PixPaymentRequest
   ): Promise<PixPaymentResponse> {
@@ -46,11 +44,13 @@ export const paymentService = {
         try {
           attempts++;
           const status = await this.getPaymentStatus(transactionId);
-          onStatusUpdate(status);
+          onStatusUpdate(status);
+
           if (status.status === "PAID") {
             resolve(status);
             return;
-          }
+          }
+
           if (
             status.status === "FAILED" ||
             status.status === "CANCELLED" ||
@@ -58,7 +58,8 @@ export const paymentService = {
           ) {
             reject(new Error(`Pagamento ${status.status.toLowerCase()}`));
             return;
-          }
+          }
+
           if (attempts < maxAttempts && status.status === "WAITING_PAYMENT") {
             setTimeout(poll, interval);
           } else if (attempts >= maxAttempts) {
@@ -76,7 +77,7 @@ export const paymentService = {
       poll();
     });
   },
-};
+};
 
 class ProductsService {
   private readonly baseUrl: string;
@@ -98,7 +99,7 @@ class ProductsService {
       import.meta.env.VITE_ALLOWED_IMAGE_TYPES ||
       "image/jpeg,image/jpg,image/png,image/webp"
     ).split(",");
-  }
+  }
 
   async getProductsPaginated(
     filters: ProductFilters = {}
@@ -113,7 +114,8 @@ class ProductsService {
       params.append("sortDirection", filters.sortDirection);
     if (filters.activeOnly !== undefined)
       params.append("activeOnly", filters.activeOnly.toString());
-    if (filters.category) params.append("category", filters.category);
+    if (filters.category) params.append("category", filters.category);
+
     const apiData = await api.get<any>(
       `/products/paginated?${params.toString()}`
     );
@@ -132,12 +134,14 @@ class ProductsService {
       throw new Error(
         "API não retornou produtos válidos - campo products não encontrado"
       );
-    }
+    }
+
     const normalizedProducts = apiData.products.map((product: any) => ({
       ...product,
       images: product.images || [], // Garantir que images seja sempre um array
       tags: product.tags || [], // Garantir que tags seja sempre um array
-    }));
+    }));
+
     const mappedResponse: ProductPaginationResponse = {
       products: normalizedProducts,
       pageSize: apiData.pageSize || 20,
@@ -163,8 +167,10 @@ class ProductsService {
     params.append("pageSize", pageSize.toString());
     if (activeOnly !== undefined)
       params.append("activeOnly", activeOnly.toString());
-    if (category) params.append("category", category);
-    const apiData = await api.get<any>(`/products?${params.toString()}`);
+    if (category) params.append("category", category);
+
+    const apiData = await api.get<any>(`/products?${params.toString()}`);
+
     const normalizedProducts = (apiData.products || []).map((product: any) => ({
       ...product,
       images: product.images || [], // Garantir que images seja sempre um array
@@ -175,7 +181,7 @@ class ProductsService {
       ...apiData,
       products: normalizedProducts,
     };
-  }
+  }
 
   async getProductById(id: string): Promise<Product> {
     const product = await api.get<Product>(`/products/${id}`);
@@ -187,9 +193,10 @@ class ProductsService {
   ): Promise<{ id: string; message: string }> {
     console.log(
       "🔄 [CREATE PRODUCT] Creating product without images using FormData"
-    );
+    );
+
     const formData = new FormData();
-    formData.append("productData", JSON.stringify(productData));
+    formData.append("productData", JSON.stringify(productData));
 
     console.log(
       "🚀 [CREATE PRODUCT] Sending POST request to /products with FormData"
@@ -241,8 +248,10 @@ class ProductsService {
       updateProgress(
         "create-product-with-images",
         "Criando produto com imagens..."
-      );
-      const formData = new FormData();
+      );
+
+      const formData = new FormData();
+
       const backendProductData = {
         name: productData.name,
         description: productData.description,
@@ -255,7 +264,8 @@ class ProductsService {
         "🔧 [UNIFIED-v2] Backend product data:",
         JSON.stringify(backendProductData, null, 2)
       );
-      formData.append("productData", JSON.stringify(backendProductData));
+      formData.append("productData", JSON.stringify(backendProductData));
+
       if (images && images.length > 0) {
         console.log(
           `📤 [UNIFIED METHOD] Adding ${images.length} images to FormData`
@@ -311,28 +321,33 @@ class ProductsService {
       primaryImageId?: string | null;
     }
   ): Promise<Product> {
-    const formData = new FormData();
+    const formData = new FormData();
+
     const productBlob = new Blob([JSON.stringify(productData)], {
       type: "application/json",
     });
-    formData.append("product", productBlob);
+    formData.append("product", productBlob);
+
     if (imageChanges.newImages?.length) {
       imageChanges.newImages.forEach((file, index) => {
         formData.append(`newImages`, file);
       });
-    }
+    }
+
     if (imageChanges.existingImages?.length) {
       formData.append(
         "existingImages",
         JSON.stringify(imageChanges.existingImages)
       );
-    }
+    }
+
     if (imageChanges.imagesToDelete?.length) {
       formData.append(
         "imagesToDelete",
         JSON.stringify(imageChanges.imagesToDelete)
       );
-    }
+    }
+
     if (imageChanges.primaryImageId) {
       formData.append("primaryImageId", imageChanges.primaryImageId);
     }
@@ -352,7 +367,7 @@ class ProductsService {
 
   async deleteProduct(id: string): Promise<void> {
     await api.delete(`/products/${id}`);
-  }
+  }
 
   async uploadImageToProduct(
     productId: string,
@@ -382,7 +397,7 @@ class ProductsService {
     imageId: string
   ): Promise<void> {
     await api.delete(`/products/${productId}/images/${imageId}`);
-  }
+  }
 
   private validateImages(images: File[]): void {
     if (images.length > this.maxImagesPerProduct) {
@@ -391,7 +406,7 @@ class ProductsService {
       );
     }
 
-    images.forEach((image, index) => {
+    images.forEach((image, index) => {
       if (!this.allowedImageTypes.includes(image.type)) {
         throw new Error(
           `Imagem ${
@@ -400,7 +415,8 @@ class ProductsService {
             ", "
           )}`
         );
-      }
+      }
+
       if (image.size > this.maxImageSize) {
         const maxSizeMB = (this.maxImageSize / 1024 / 1024).toFixed(1);
         throw new Error(
@@ -425,5 +441,6 @@ class ProductsService {
   isValidImageSize(file: File): boolean {
     return file.size <= this.maxImageSize;
   }
-}
+}
+
 export const productsService = new ProductsService();

@@ -1,16 +1,19 @@
-export type PaymentStatus = 'NEW' | 'WAITING_PAYMENT' | 'PAID' | 'FAILED' | 'CANCELLED' | 'EXPIRED';
+export type PaymentStatus = 'NEW' | 'WAITING_PAYMENT' | 'PAID' | 'FAILED' | 'CANCELLED' | 'EXPIRED';
+
 export interface HealthResponse {
   status: string;
   message: string;
   timestamp: string;
   version: string;
-}
+}
+
 export interface ProductImage {
   id: string;
   url: string;
   isPrimary: boolean;
   uploadedAt: string;
-}
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -30,7 +33,8 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
-}
+}
+
 export interface ProductCreateRequest {
   name: string;
   description: string;
@@ -45,14 +49,16 @@ export interface ProductCreateRequest {
   color?: string;
   warranty?: string;
   tags?: string[];
-}
+}
+
 export interface ProductTraditionalPaginationResponse {
   products: Product[];
   totalProducts: number;
   currentPage: number;
   totalPages: number;
   pageSize: number;
-}
+}
+
 export interface ProductPaginationResponse {
   products: Product[];
   pageSize: number;
@@ -60,7 +66,8 @@ export interface ProductPaginationResponse {
   nextCursor?: string;
   hasPrevious: boolean;
   previousCursor?: string;
-}
+}
+
 export interface ProductFilters {
   limit?: number;
   cursor?: string;
@@ -69,13 +76,15 @@ export interface ProductFilters {
   sortDirection?: 'ASC' | 'DESC';
   activeOnly?: boolean;
   category?: string;
-}
+}
+
 export interface ImageUploadResponse {
   id: string;
   url: string;
   isPrimary: boolean;
   message: string;
-}
+}
+
 export interface Goal {
   id: string;
   title: string;
@@ -88,13 +97,15 @@ export interface Goal {
   imageUrl?: string;
   createdAt: string;
   updatedAt: string;
-}
+}
+
 export interface Customer {
   name: string;
   email: string;
   document: string;
   phone?: string;
-}
+}
+
 export interface Donation {
   id: string;
   amount: number;
@@ -109,12 +120,14 @@ export interface Donation {
   paymentId: string;
   status: PaymentStatus;
   createdAt: string;
-}
+}
+
 export interface OrderItem {
   productId: string;
   quantity: number;
   price: number;
-}
+}
+
 export interface Order {
   id: string;
   items: OrderItem[];
@@ -125,7 +138,8 @@ export interface Order {
   goalId?: string;
   createdAt: string;
   updatedAt: string;
-}
+}
+
 export interface PixPaymentRequest {
   amount: number;
   description: string;
@@ -134,7 +148,8 @@ export interface PixPaymentRequest {
     email: string;
     document: string;
   };
-}
+}
+
 export interface PixQrCode {
   id: string;
   text: string;
@@ -142,7 +157,8 @@ export interface PixQrCode {
     media: string;
     href: string;
   }>;
-}
+}
+
 export interface PixPaymentResponse {
   id: string;
   qr_codes: PixQrCode[];
@@ -152,7 +168,8 @@ export interface PixPaymentResponse {
     currency: string;
   };
   created_at: string;
-}
+}
+
 export interface PaymentStatusResponse {
   id: string;
   status: PaymentStatus;
@@ -161,7 +178,8 @@ export interface PaymentStatusResponse {
     currency: string;
   };
   paid_at?: string;
-}
+}
+
 export interface Raffle {
   id: string;
   title: string;
@@ -179,7 +197,8 @@ export interface Raffle {
   goalId?: string;
   createdAt: string;
   updatedAt: string;
-}
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -191,21 +210,24 @@ export interface Event {
   status: "UPCOMING" | "PAST" | "CANCELLED";
   createdAt: string;
   updatedAt: string;
-}
+}
+
 export interface RaffleTicket {
   id: string;
   raffleId: string;
   number: number;
   buyer: Customer;
   purchasedAt: string;
-}
+}
+
 export interface EventRegistration {
   id: string;
   eventId: string;
   participant: Customer;
   ticketType?: string;
   registeredAt: string;
-}
+}
+
 export interface DonationRequest {
   amount: number;
   goalId?: string;
@@ -232,7 +254,8 @@ export interface RaffleTicketPurchaseRequest {
 export interface EventRegistrationRequest {
   participant: Customer;
   ticketType?: string;
-}
+}
+
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
@@ -250,7 +273,8 @@ export interface PaginatedResponse<T> {
 
 export interface GoalsResponse extends PaginatedResponse<Goal> {
   goals: Goal[];
-}
+}
+
 export interface DashboardSummary {
   totalDonations: number;
   totalOrders: number;
@@ -263,7 +287,8 @@ export interface AdminDashboard {
   recentTransactions: Array<Donation | Order>;
   goalProgress: Goal[];
   topProducts: Product[];
-}
+}
+
 export interface ProductFilters {
   page?: number;
   pageSize?: number;
@@ -275,7 +300,8 @@ export interface GoalFilters {
   active?: boolean;
   page?: number;
   pageSize?: number;
-}
+}
+
 export interface ApiError {
   status: number;
   code: string;
