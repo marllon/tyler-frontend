@@ -226,17 +226,22 @@ export const useGoalsStore = defineStore("goals", () => {
 
   function getProgressPercentage(goal: Goal): number {
     if (goal.targetAmount === 0) return 0;
-    return Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100);
+    return Math.min(
+      Math.round((goal.currentAmount / goal.targetAmount) * 100),
+      100
+    );
   }
 
-  return {
+  return {
     goals,
     loading,
     error,
-    pagination,
+    pagination,
+
     activeGoals,
     completedGoals,
-    pausedGoals,
+    pausedGoals,
+
     fetchGoals,
     fetchGoalById,
     createGoal,
@@ -244,7 +249,8 @@ export const useGoalsStore = defineStore("goals", () => {
     deleteGoal,
     uploadImage,
     removeImage,
-    addAmount,
+    addAmount,
+
     getProgressPercentage,
   };
 });

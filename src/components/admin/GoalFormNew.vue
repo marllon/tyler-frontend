@@ -10,7 +10,10 @@
 
       <div class="space-y-4">
         <!-- Preview da Imagem Atual -->
-        <div v-if="form.imageUrl || previewUrl" class="relative w-full h-64 rounded-lg overflow-hidden bg-gray-100">
+        <div
+          v-if="form.imageUrl || previewUrl"
+          class="relative w-full h-64 rounded-lg overflow-hidden bg-gray-100"
+        >
           <img
             :src="previewUrl || form.imageUrl"
             alt="Preview da meta"
@@ -21,20 +24,46 @@
             @click="removeImage"
             class="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-colors"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         <!-- Upload de Imagem -->
-        <div v-else class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors">
+        <div
+          v-else
+          class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-400 transition-colors"
+        >
           <div class="space-y-1 text-center">
-            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <svg
+              class="mx-auto h-12 w-12 text-gray-400"
+              stroke="currentColor"
+              fill="none"
+              viewBox="0 0 48 48"
+            >
+              <path
+                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
             <div class="flex text-sm text-gray-600">
-              <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-tyler-blue hover:text-blue-700 focus-within:outline-none">
+              <label
+                for="file-upload"
+                class="relative cursor-pointer bg-white rounded-md font-medium text-tyler-blue hover:text-blue-700 focus-within:outline-none"
+              >
                 <span>Upload uma imagem</span>
                 <input
                   id="file-upload"
@@ -64,7 +93,10 @@
       <div class="space-y-6">
         <!-- Título -->
         <div>
-          <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            for="title"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
             Título da Meta *
           </label>
           <BaseInput
@@ -79,7 +111,10 @@
 
         <!-- Descrição -->
         <div>
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            for="description"
+            class="block text-sm font-medium text-gray-700 mb-2"
+          >
             Descrição *
           </label>
           <textarea
@@ -124,7 +159,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Data de Início -->
           <div>
-            <label for="startDate" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="startDate"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               Data de Início
             </label>
             <input
@@ -133,12 +171,17 @@
               type="date"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <p class="mt-1 text-xs text-gray-500">Deixe em branco para usar data atual</p>
+            <p class="mt-1 text-xs text-gray-500">
+              Deixe em branco para usar data atual
+            </p>
           </div>
 
           <!-- Data de Término -->
           <div>
-            <label for="endDate" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="endDate"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               Data de Término
             </label>
             <input
@@ -147,7 +190,9 @@
               type="date"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <p class="mt-1 text-xs text-gray-500">Deixe em branco se não houver prazo</p>
+            <p class="mt-1 text-xs text-gray-500">
+              Deixe em branco se não houver prazo
+            </p>
           </div>
         </div>
 
@@ -155,7 +200,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Status -->
           <div>
-            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              for="status"
+              class="block text-sm font-medium text-gray-700 mb-2"
+            >
               Status *
             </label>
             <select
@@ -193,16 +241,16 @@
         Cancelar
       </BaseButton>
       <BaseButton type="submit" :loading="loading">
-        {{ isEditing ? 'Atualizar Meta' : 'Criar Meta' }}
+        {{ isEditing ? "Atualizar Meta" : "Criar Meta" }}
       </BaseButton>
     </div>
   </form>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue';
-import { BaseButton, BaseInput, PriceInput } from '@/components/ui';
-import type { Goal, GoalCreateRequest, GoalUpdateRequest } from '@/types';
+import { ref, reactive, watch, computed } from "vue";
+import { BaseButton, BaseInput, PriceInput } from "@/components/ui";
+import type { Goal, GoalCreateRequest, GoalUpdateRequest } from "@/types";
 
 interface Props {
   initialData?: Goal | null;
@@ -210,12 +258,15 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'submit', data: {
-    goalData: GoalCreateRequest | GoalUpdateRequest;
-    image: File | null;
-  }): void;
-  (e: 'cancel'): void;
-  (e: 'form-change'): void;
+  (
+    e: "submit",
+    data: {
+      goalData: GoalCreateRequest | GoalUpdateRequest;
+      image: File | null;
+    }
+  ): void;
+  (e: "cancel"): void;
+  (e: "form-change"): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -228,25 +279,26 @@ const emit = defineEmits<Emits>();
 const isEditing = computed(() => !!props.initialData);
 
 const form = reactive({
-  title: '',
-  description: '',
+  title: "",
+  description: "",
   targetAmount: 0,
   currentAmount: 0,
-  startDate: '',
-  endDate: '',
-  status: 'ACTIVE' as 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED',
-  imageUrl: '',
+  startDate: "",
+  endDate: "",
+  status: "ACTIVE" as "ACTIVE" | "PAUSED" | "COMPLETED" | "CANCELLED",
+  imageUrl: "",
   active: true,
 });
 
 const errors = reactive({
-  title: '',
-  targetAmount: '',
+  title: "",
+  targetAmount: "",
 });
 
 const selectedFile = ref<File | null>(null);
 const previewUrl = ref<string | null>(null);
-const fileInput = ref<HTMLInputElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+
 watch(
   () => props.initialData,
   (newData) => {
@@ -255,67 +307,76 @@ watch(
       form.description = newData.description;
       form.targetAmount = newData.targetAmount;
       form.currentAmount = newData.currentAmount;
-      form.startDate = newData.startDate ? newData.startDate.split('T')[0] : '';
-      form.endDate = newData.endDate ? newData.endDate.split('T')[0] : '';
+      form.startDate = newData.startDate ? newData.startDate.split("T")[0] : "";
+      form.endDate = newData.endDate ? newData.endDate.split("T")[0] : "";
       form.status = newData.status;
-      form.imageUrl = newData.imageUrl || '';
+      form.imageUrl = newData.imageUrl || "";
       form.active = newData.active;
     }
   },
   { immediate: true }
-);
-watch(form, () => {
-  emit('form-change');
-}, { deep: true });
+);
+
+watch(
+  form,
+  () => {
+    emit("form-change");
+  },
+  { deep: true }
+);
 
 function handleFileSelect(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
-  if (file) {
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      alert('Formato inválido. Use JPG, PNG ou WebP');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Arquivo muito grande. Tamanho máximo: 5 MB');
+  if (file) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      alert("Formato inválido. Use JPG, PNG ou WebP");
       return;
     }
 
-    selectedFile.value = file;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Arquivo muito grande. Tamanho máximo: 5 MB");
+      return;
+    }
+
+    selectedFile.value = file;
+
     const reader = new FileReader();
     reader.onload = (e) => {
       previewUrl.value = e.target?.result as string;
     };
     reader.readAsDataURL(file);
 
-    emit('form-change');
+    emit("form-change");
   }
 }
 
 function removeImage() {
   selectedFile.value = null;
   previewUrl.value = null;
-  form.imageUrl = '';
+  form.imageUrl = "";
   if (fileInput.value) {
-    fileInput.value.value = '';
+    fileInput.value.value = "";
   }
-  emit('form-change');
+  emit("form-change");
 }
 
 function validate(): boolean {
-  let isValid = true;
+  let isValid = true;
+
   if (!form.title.trim()) {
-    errors.title = 'Título é obrigatório';
+    errors.title = "Título é obrigatório";
     isValid = false;
   } else {
-    errors.title = '';
-  }
+    errors.title = "";
+  }
+
   if (form.targetAmount <= 0) {
-    errors.targetAmount = 'Valor alvo deve ser maior que zero';
+    errors.targetAmount = "Valor alvo deve ser maior que zero";
     isValid = false;
   } else {
-    errors.targetAmount = '';
+    errors.targetAmount = "";
   }
 
   return isValid;
@@ -337,26 +398,27 @@ function handleSubmit() {
     active: form.active,
   };
 
-  emit('submit', {
+  emit("submit", {
     goalData,
     image: selectedFile.value,
   });
-}
+}
+
 defineExpose({
   reset: () => {
-    form.title = '';
-    form.description = '';
+    form.title = "";
+    form.description = "";
     form.targetAmount = 0;
     form.currentAmount = 0;
-    form.startDate = '';
-    form.endDate = '';
-    form.status = 'ACTIVE';
-    form.imageUrl = '';
+    form.startDate = "";
+    form.endDate = "";
+    form.status = "ACTIVE";
+    form.imageUrl = "";
     form.active = true;
     selectedFile.value = null;
     previewUrl.value = null;
-    errors.title = '';
-    errors.targetAmount = '';
+    errors.title = "";
+    errors.targetAmount = "";
   },
 });
 </script>

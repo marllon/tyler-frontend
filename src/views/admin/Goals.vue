@@ -155,10 +155,7 @@
     </div>
 
     <!-- Empty State -->
-    <div
-      v-else-if="goalsStore.goals.length === 0"
-      class="text-center py-16"
-    >
+    <div v-else-if="goalsStore.goals.length === 0" class="text-center py-16">
       <svg
         class="w-16 h-16 text-gray-400 mx-auto mb-4"
         fill="none"
@@ -272,7 +269,9 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {{ formatCurrency(goal.targetAmount) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-tyler-blue">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-sm font-medium text-tyler-blue"
+              >
                 {{ formatCurrency(goal.currentAmount) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -284,11 +283,13 @@
                       :style="{ width: `${Math.min(goal.progress, 100)}%` }"
                     ></div>
                   </div>
-                  <span class="text-sm text-gray-900 font-medium">{{ goal.progress }}%</span>
+                  <span class="text-sm text-gray-900 font-medium"
+                    >{{ goal.progress }}%</span
+                  >
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {{ goal.endDate ? formatDate(goal.endDate) : 'Sem prazo' }}
+                {{ goal.endDate ? formatDate(goal.endDate) : "Sem prazo" }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <Badge :variant="getStatusVariant(goal.status)">
@@ -318,10 +319,7 @@
     </BaseCard>
 
     <!-- Rodapé de Paginação -->
-    <div
-      v-if="!goalsStore.loading && goalsStore.goals.length > 0"
-      class="mt-6"
-    >
+    <div v-if="!goalsStore.loading && goalsStore.goals.length > 0" class="mt-6">
       <div class="bg-white rounded-lg border border-gray-200 p-4">
         <div
           class="flex flex-col sm:flex-row items-center justify-between gap-4"
@@ -577,7 +575,9 @@ function getProgressColor(progress: number): string {
   return "bg-red-500";
 }
 
-function getStatusVariant(status: GoalStatus): "success" | "warning" | "default" | "danger" {
+function getStatusVariant(
+  status: GoalStatus
+): "success" | "warning" | "default" | "danger" {
   switch (status) {
     case "ACTIVE":
       return "success";
@@ -655,13 +655,15 @@ async function handleGoalSubmit({
   try {
     let success = false;
 
-    if (editingGoal.value) {
-      success = await goalsStore.updateGoal(editingGoal.value.id, goalData);
+    if (editingGoal.value) {
+      success = await goalsStore.updateGoal(editingGoal.value.id, goalData);
+
       if (success && image) {
         await goalsStore.uploadImage(editingGoal.value.id, image);
       }
-    } else {
-      success = await goalsStore.createGoal(goalData as GoalCreateRequest);
+    } else {
+      success = await goalsStore.createGoal(goalData as GoalCreateRequest);
+
       if (success && image && goalsStore.goals[0]) {
         await goalsStore.uploadImage(goalsStore.goals[0].id, image);
       }

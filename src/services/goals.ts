@@ -7,7 +7,9 @@ import type {
   GoalFilters,
 } from "@/types";
 
-export async function getGoals(filters?: GoalFilters): Promise<GoalPageResponse> {
+export async function getGoals(
+  filters?: GoalFilters
+): Promise<GoalPageResponse> {
   const params: Record<string, any> = {};
 
   if (filters?.page !== undefined) params.page = filters.page;
