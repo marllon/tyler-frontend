@@ -124,10 +124,10 @@
             @change="applyFilters"
             class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="CREATED_AT">Data de criação</option>
-            <option value="NAME">Nome</option>
-            <option value="PRICE">Preço</option>
-            <option value="STOCK">Estoque</option>
+            <option value="createdAt">Data de criação</option>
+            <option value="name">Nome</option>
+            <option value="price">Preço</option>
+            <option value="stock">Estoque</option>
           </select>
         </div>
 
@@ -603,7 +603,7 @@ const pageHistory = ref<string[]>([]);
 
 const filters = reactive<ProductFilters>({
   limit: 20,
-  sortBy: "CREATED_AT",
+  sortBy: "createdAt",
   sortDirection: "DESC",
   activeOnly: true,
   category: "",

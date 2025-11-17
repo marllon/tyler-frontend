@@ -1,215 +1,250 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type { Goal, GoalFilters, GoalsResponse, ApiError } from "@/types";
-import { api } from "@/utils/api";
-const DUMMY_GOALS: Goal[] = [
-  {
-    id: "1",
-    title: "Tratamento Médico Especializado",
-    description:
-      "Arrecadação para consultas e exames médicos especializados para Tyler.",
-    targetAmount: 1500000, // em centavos: R$ 15.000,00
-    currentAmount: 875000, // em centavos: R$ 8.750,00
-    status: "ACTIVE",
-    startDate: new Date().toISOString(),
-    endDate: new Date(2024, 11, 31).toISOString(), // 31/12/2024
-    imageUrl: undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Equipamento de Fisioterapia",
-    description: "Compra de equipamentos para sessões de fisioterapia em casa.",
-    targetAmount: 800000, // em centavos: R$ 8.000,00
-    currentAmount: 520000, // em centavos: R$ 5.200,00
-    status: "ACTIVE",
-    startDate: new Date().toISOString(),
-    endDate: new Date(2024, 10, 15).toISOString(), // 15/11/2024
-    imageUrl: undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Medicamentos Mensais",
-    description: "Custeio de medicamentos de uso contínuo por 6 meses.",
-    targetAmount: 600000, // em centavos: R$ 6.000,00
-    currentAmount: 600000, // em centavos: R$ 6.000,00
-    status: "COMPLETED",
-    startDate: new Date().toISOString(),
-    endDate: new Date().toISOString(),
-    imageUrl: undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    title: "Adaptação da Casa",
-    description:
-      "Reformas para tornar a casa mais acessível e segura para Tyler.",
-    targetAmount: 2000000, // em centavos: R$ 20.000,00
-    currentAmount: 350000, // em centavos: R$ 3.500,00
-    status: "ACTIVE",
-    startDate: new Date().toISOString(),
-    endDate: new Date(2025, 2, 31).toISOString(), // 31/03/2025
-    imageUrl: undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    title: "Material Escolar Adaptado",
-    description:
-      "Aquisição de material pedagógico adaptado para desenvolvimento de Tyler.",
-    targetAmount: 400000, // em centavos: R$ 4.000,00
-    currentAmount: 280000, // em centavos: R$ 2.800,00
-    status: "ACTIVE",
-    startDate: new Date().toISOString(),
-    endDate: new Date(2025, 0, 31).toISOString(), // 31/01/2025
-    imageUrl: undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "6",
-    title: "Cadeira de Rodas Motorizada",
-    description:
-      "Meta especial para aquisição de cadeira de rodas motorizada de última geração.",
-    targetAmount: 3500000, // em centavos: R$ 35.000,00
-    currentAmount: 1250000, // em centavos: R$ 12.500,00
-    status: "ACTIVE",
-    startDate: new Date().toISOString(),
-    endDate: new Date(2025, 5, 30).toISOString(), // 30/06/2025
-    imageUrl: undefined,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+import type {
+  Goal,
+  GoalCreateRequest,
+  GoalUpdateRequest,
+  GoalFilters,
+  GoalPageResponse,
+  ApiError,
+} from "@/types";
+import {
+  getGoals,
+  getGoalById,
+  createGoal as createGoalApi,
+  updateGoal as updateGoalApi,
+  deleteGoal as deleteGoalApi,
+  uploadGoalImage,
+  deleteGoalImage as deleteGoalImageApi,
+  addAmountToGoal,
+} from "@/services/goals";
+import { useToast } from "@/composables";
 
 export const useGoalsStore = defineStore("goals", () => {
   const goals = ref<Goal[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  const useDummyData = ref(true); // Flag para controlar uso de dados dummy
-  async function fetchGoals(filters: GoalFilters = {}) {
+
+  const pagination = ref({
+    page: 0,
+    pageSize: 20,
+    totalElements: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false,
+    nextCursor: null as string | null,
+    previousCursor: null as string | null,
+  });
+
+  const { success: showSuccess, error: showError } = useToast();
+
+  async function fetchGoals(filters?: GoalFilters): Promise<void> {
     loading.value = true;
     error.value = null;
 
     try {
-      if (useDummyData.value) {
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        let filteredGoals = DUMMY_GOALS;
+      const response: GoalPageResponse = await getGoals(filters);
 
-        if (filters.active !== undefined) {
-          filteredGoals = filteredGoals.filter((goal) =>
-            filters.active ? goal.status === "ACTIVE" : goal.status !== "ACTIVE"
-          );
-        }
+      goals.value = response.goals || [];
 
-        goals.value = filteredGoals;
-      } else {
-        const params = new URLSearchParams();
-        if (filters.active !== undefined)
-          params.append("active", filters.active.toString());
-        if (filters.page) params.append("page", filters.page.toString());
-        if (filters.pageSize)
-          params.append("pageSize", filters.pageSize.toString());
-
-        const response = await api.get<GoalsResponse>(
-          `/goals?${params.toString()}`
-        );
-        goals.value = response.goals || response.data || [];
-      }
+      pagination.value = {
+        page: response.page,
+        pageSize: response.pageSize,
+        totalElements: response.totalElements,
+        totalPages: response.totalPages,
+        hasNext: response.hasNext,
+        hasPrevious: response.hasPrevious,
+        nextCursor: null,
+        previousCursor: null,
+      };
     } catch (err: any) {
       const apiError = err as ApiError;
       error.value = apiError.message || "Erro ao carregar metas";
-      console.error("Erro ao buscar metas:", apiError);
-      if (useDummyData.value) {
-        goals.value = DUMMY_GOALS;
-      }
+      console.error("Erro ao buscar metas:", apiError);
+      showError("Erro ao carregar metas");
     } finally {
       loading.value = false;
     }
-  }
-  async function getGoalById(id: string): Promise<Goal | null> {
-    const existingGoal = goals.value.find((goal) => goal.id === id);
-    if (existingGoal) return existingGoal;
-    if (!useDummyData.value) {
-      try {
-        const goal = await api.get<Goal>(`/goals/${id}`);
-        return goal;
-      } catch (err) {
-        console.error(`Erro ao buscar meta ${id}:`, err);
-      }
-    }
-    return DUMMY_GOALS.find((goal) => goal.id === id) || null;
-  }
-  async function createGoal(goalData: Partial<Goal>): Promise<Goal | null> {
-    if (useDummyData.value) {
-      const newGoal: Goal = {
-        id: Date.now().toString(),
-        title: goalData.title || "",
-        description: goalData.description || "",
-        targetAmount: goalData.targetAmount || 0,
-        currentAmount: 0,
-        status: "ACTIVE",
-        startDate: new Date().toISOString(),
-        endDate:
-          goalData.endDate ||
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        imageUrl: goalData.imageUrl,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+  }
 
-      goals.value.unshift(newGoal);
-      return newGoal;
-    } else {
-      try {
-        const newGoal = await api.post<Goal>("/goals", goalData);
-        goals.value.unshift(newGoal);
-        return newGoal;
-      } catch (err) {
-        const apiError = err as ApiError;
-        error.value = apiError.message || "Erro ao criar meta";
-        return null;
-      }
-    }
-  }
-  function updateGoalProgress(goalId: string, amount: number) {
-    const goal = goals.value.find((g) => g.id === goalId);
-    if (goal) {
-      goal.currentAmount += amount;
-      goal.updatedAt = new Date().toISOString();
-      if (goal.currentAmount >= goal.targetAmount && goal.status === "ACTIVE") {
-        goal.status = "COMPLETED";
-      }
+  async function fetchGoalById(id: string): Promise<Goal | null> {
+    const existingGoal = goals.value.find((goal) => goal.id === id);
+    if (existingGoal) return existingGoal;
+
+    try {
+      const goal = await getGoalById(id);
+      return goal;
+    } catch (err) {
+      console.error(`Erro ao buscar meta ${id}:`, err);
+      return null;
     }
   }
 
-  function getProgressPercentage(goal: Goal): number {
-    if (goal.targetAmount === 0) return 0;
-    return Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
-  }
+  async function createGoal(data: GoalCreateRequest): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const newGoal = await createGoalApi(data);
+      goals.value.unshift(newGoal);
+      showSuccess("Meta criada com sucesso!");
+      return true;
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      error.value = apiError.message || "Erro ao criar meta";
+      showError(error.value);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function updateGoal(
+    id: string,
+    data: GoalUpdateRequest
+  ): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const updatedGoal = await updateGoalApi(id, data);
+
+      const index = goals.value.findIndex((g) => g.id === id);
+      if (index !== -1) {
+        goals.value[index] = updatedGoal;
+      }
+
+      showSuccess("Meta atualizada com sucesso!");
+      return true;
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      error.value = apiError.message || "Erro ao atualizar meta";
+      showError(error.value);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function deleteGoal(id: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      await deleteGoalApi(id);
+
+      goals.value = goals.value.filter((g) => g.id !== id);
+
+      showSuccess("Meta excluída com sucesso!");
+      return true;
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      error.value = apiError.message || "Erro ao excluir meta";
+      showError(error.value);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function uploadImage(id: string, file: File): Promise<string | null> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const result = await uploadGoalImage(id, file);
+
+      const goal = goals.value.find((g) => g.id === id);
+      if (goal) {
+        goal.imageUrl = result.imageUrl;
+      }
+
+      showSuccess("Imagem enviada com sucesso!");
+      return result.imageUrl;
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      error.value = apiError.message || "Erro ao fazer upload da imagem";
+      showError(error.value);
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function removeImage(id: string): Promise<boolean> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      await deleteGoalImageApi(id);
+
+      const goal = goals.value.find((g) => g.id === id);
+      if (goal) {
+        goal.imageUrl = undefined;
+      }
+
+      showSuccess("Imagem removida com sucesso!");
+      return true;
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      error.value = apiError.message || "Erro ao remover imagem";
+      showError(error.value);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function addAmount(id: string, amount: number): Promise<boolean> {
+    try {
+      const updatedGoal = await addAmountToGoal(id, amount);
+
+      const index = goals.value.findIndex((g) => g.id === id);
+      if (index !== -1) {
+        goals.value[index] = updatedGoal;
+      }
+
+      return true;
+    } catch (err: any) {
+      const apiError = err as ApiError;
+      error.value = apiError.message || "Erro ao adicionar valor à meta";
+      return false;
+    }
+  }
+
   const activeGoals = computed(() =>
-    goals.value.filter((goal) => goal.status === "ACTIVE")
+    goals.value.filter((goal) => goal.status === "ACTIVE" && goal.active)
   );
+
   const completedGoals = computed(() =>
     goals.value.filter((goal) => goal.status === "COMPLETED")
   );
 
-  return {
+  const pausedGoals = computed(() =>
+    goals.value.filter((goal) => goal.status === "PAUSED")
+  );
+
+  function getProgressPercentage(goal: Goal): number {
+    if (goal.targetAmount === 0) return 0;
+    return Math.min(Math.round((goal.currentAmount / goal.targetAmount) * 100), 100);
+  }
+
+  return {
     goals,
     loading,
     error,
-    useDummyData,
+    pagination,
     activeGoals,
     completedGoals,
+    pausedGoals,
     fetchGoals,
-    getGoalById,
+    fetchGoalById,
     createGoal,
-    updateGoalProgress,
+    updateGoal,
+    deleteGoal,
+    uploadImage,
+    removeImage,
+    addAmount,
     getProgressPercentage,
   };
 });

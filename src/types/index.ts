@@ -72,7 +72,7 @@ export interface ProductFilters {
   limit?: number;
   cursor?: string;
   direction?: 'NEXT' | 'PREVIOUS';
-  sortBy?: 'CREATED_AT' | 'NAME' | 'PRICE' | 'STOCK';
+  sortBy?: 'createdAt' | 'name' | 'price' | 'stock';
   sortDirection?: 'ASC' | 'DESC';
   activeOnly?: boolean;
   category?: string;
@@ -88,18 +88,47 @@ export interface ImageUploadResponse {
   message: string;
 }
 
+export type GoalStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED';
+
 export interface Goal {
   id: string;
   title: string;
   description: string;
-  targetAmount: number;
-  currentAmount: number;
-  startDate: string;
-  endDate: string;
-  status: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED';
+  targetAmount: number;        // em reais (não centavos)
+  currentAmount: number;        // em reais (não centavos)
+  progress: number;             // percentual calculado pelo backend (0-100)
+  startDate: string;            // ISO 8601
+  endDate?: string;             // ISO 8601, opcional
+  status: GoalStatus;
   imageUrl?: string;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;           // UID do admin que criou (Firebase)
+}
+
+export interface GoalCreateRequest {
+  title: string;
+  description: string;
+  targetAmount: number;
+  currentAmount?: number;
+  startDate?: string;           // Se null, backend usa data atual
+  endDate?: string;
+  status?: GoalStatus;
+  imageUrl?: string;
+  active?: boolean;
+}
+
+export interface GoalUpdateRequest {
+  title?: string;
+  description?: string;
+  targetAmount?: number;
+  currentAmount?: number;
+  startDate?: string;
+  endDate?: string;
+  status?: GoalStatus;
+  imageUrl?: string;
+  active?: boolean;
 }
 
 export interface Customer {
@@ -274,8 +303,30 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export interface GoalPageResponse {
+  goals: Goal[];
+  page: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
 export interface GoalsResponse extends PaginatedResponse<Goal> {
   goals: Goal[];
+}
+
+export interface GoalFilters {
+  page?: number;
+  pageSize?: number;
+  status?: GoalStatus;
+  activeOnly?: boolean;
+  sortBy?: 'createdAt' | 'targetAmount' | 'currentAmount' | 'title' | 'endDate';
+  sortDirection?: 'ASC' | 'DESC';
+  searchTerm?: string;
+  cursor?: string;
+  direction?: 'NEXT' | 'PREVIOUS';
 }
 
 export interface DashboardSummary {
@@ -297,12 +348,6 @@ export interface ProductFilters {
   pageSize?: number;
   activeOnly?: boolean;
   category?: string;
-}
-
-export interface GoalFilters {
-  active?: boolean;
-  page?: number;
-  pageSize?: number;
 }
 
 export interface ApiError {
