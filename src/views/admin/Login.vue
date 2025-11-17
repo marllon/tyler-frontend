@@ -143,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import UnauthorizedModal from "@/components/admin/UnauthorizedModal.vue";
@@ -156,13 +156,26 @@ const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const showUnauthorizedModal = ref(false);
-const unauthorizedEmail = ref("");
+const unauthorizedEmail = ref("");
+
 const isFirebaseConfigured = computed(() => {
   return !!(
     import.meta.env.VITE_FIREBASE_API_KEY &&
     import.meta.env.VITE_FIREBASE_PROJECT_ID &&
     !import.meta.env.VITE_FIREBASE_API_KEY.startsWith("AIzaSy...")
   );
+});
+
+onMounted(async () => {
+  console.log("🔐 [LOGIN] Página de login montada");
+  await authStore.checkAuth();
+  console.log("🔐 [LOGIN] isAuthenticated:", authStore.isAuthenticated);
+  if (authStore.isAuthenticated) {
+    console.log("🔐 [LOGIN] Já autenticado, redirecionando para dashboard");
+    router.replace("/admin");
+  } else {
+    console.log("🔐 [LOGIN] Não autenticado, exibindo formulário");
+  }
 });
 
 async function handleLogin() {
@@ -208,7 +221,7 @@ async function handleGoogleLogin() {
       if (
         result.error?.includes("não autorizado") ||
         result.error?.includes("unauthorized")
-      ) {
+      ) {
         const user = authStore.getCurrentFirebaseUser();
         unauthorizedEmail.value = user?.email || "email desconhecido";
         showUnauthorizedModal.value = true;
@@ -229,7 +242,7 @@ function handleCloseUnauthorizedModal() {
   unauthorizedEmail.value = "";
 }
 
-function handleTryAgainUnauthorized() {
+function handleTryAgainUnauthorized() {
   email.value = "";
   password.value = "";
   error.value = "";

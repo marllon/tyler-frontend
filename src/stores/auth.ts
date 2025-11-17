@@ -11,23 +11,36 @@ export const useAuthStore = defineStore("auth", () => {
   const token = ref<string | null>(localStorage.getItem("admin_token"));
   const loading = ref(false);
   const useFirebase = ref(true); // Flag para controlar se usa Firebase ou mock
+  const authInitialized = ref(false); // Flag para indicar que auth foi inicializado
+  const authStateReady = ref(false); // Flag para indicar que o estado de auth está pronto
 
-  const isAuthenticated = computed(
-    () => !!token.value && (!!user.value || !!admin.value)
-  );
+  const isAuthenticated = computed(() => {
+    const hasToken = !!token.value;
+    const hasUser = !!user.value || !!admin.value;
+    const result = hasToken && hasUser;
+    console.log(
+      "🔐 [AUTH COMPUTED] isAuthenticated:",
+      result,
+      "| token:",
+      hasToken,
+      "| user:",
+      hasUser
+    );
+    return result;
+  });
 
   async function loginWithGoogle() {
     loading.value = true;
 
-    try {
+    try {
       const firebaseResult = await firebaseService.signInWithGoogle();
 
-      if (firebaseResult.success) {
+      if (firebaseResult.success) {
         const authResult = await authorizationService.checkEmailAuthorization(
           firebaseResult.user!.email || ""
         );
 
-        if (!authResult.authorized) {
+        if (!authResult.authorized) {
           await firebaseService.signOut();
           return {
             success: false,
@@ -35,7 +48,8 @@ export const useAuthStore = defineStore("auth", () => {
               authResult.reason ||
               "Email não autorizado para acessar o sistema",
           };
-        }
+        }
+
         useFirebase.value = true;
         user.value = firebaseResult.user!;
         token.value = firebaseResult.token!;
@@ -52,7 +66,8 @@ export const useAuthStore = defineStore("auth", () => {
 
         localStorage.setItem("admin_token", firebaseResult.token!);
         return { success: true };
-      }
+      }
+
       console.warn(
         "⚠️ Firebase Google Auth não disponível, usando mock para desenvolvimento"
       );
@@ -65,7 +80,8 @@ export const useAuthStore = defineStore("auth", () => {
           success: false,
           error: mockResult.error || "Erro ao fazer login com Google",
         };
-      }
+      }
+
       const authResult = await authorizationService.checkEmailAuthorization(
         mockResult.user!.email || ""
       );
@@ -78,7 +94,8 @@ export const useAuthStore = defineStore("auth", () => {
             authResult.reason ||
             "Email não autorizado para acessar o sistema (modo desenvolvimento)",
         };
-      }
+      }
+
       user.value = mockResult.user!;
       token.value = mockResult.token!;
 
@@ -104,15 +121,15 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(email: string, password: string) {
     loading.value = true;
 
-    try {
+    try {
       const firebaseResult = await firebaseService.signIn(email, password);
 
-      if (firebaseResult.success) {
+      if (firebaseResult.success) {
         const authResult = await authorizationService.checkEmailAuthorization(
           firebaseResult.user!.email || ""
         );
 
-        if (!authResult.authorized) {
+        if (!authResult.authorized) {
           await firebaseService.signOut();
           return {
             success: false,
@@ -120,7 +137,8 @@ export const useAuthStore = defineStore("auth", () => {
               authResult.reason ||
               "Email não autorizado para acessar o sistema",
           };
-        }
+        }
+
         useFirebase.value = true;
         user.value = firebaseResult.user!;
         token.value = firebaseResult.token!;
@@ -137,7 +155,8 @@ export const useAuthStore = defineStore("auth", () => {
 
         localStorage.setItem("admin_token", firebaseResult.token!);
         return { success: true };
-      }
+      }
+
       console.warn(
         "⚠️ Firebase não disponível, usando autenticação mock para desenvolvimento"
       );
@@ -150,7 +169,8 @@ export const useAuthStore = defineStore("auth", () => {
           success: false,
           error: mockResult.error || "Erro ao fazer login",
         };
-      }
+      }
+
       user.value = mockResult.user!;
       token.value = mockResult.token!;
 
@@ -159,7 +179,8 @@ export const useAuthStore = defineStore("auth", () => {
         name: mockResult.user!.displayName || mockResult.user!.email || "Admin",
         email: mockResult.user!.email || "",
         role: "admin",
-      };
+      };
+
       mockAuthService.saveMockUser(mockResult.user!, mockResult.token!);
       localStorage.setItem("admin_token", mockResult.token!);
 
@@ -192,7 +213,8 @@ export const useAuthStore = defineStore("auth", () => {
 
       return { success: true };
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
+      console.error("Erro ao fazer logout:", error);
+
       token.value = null;
       admin.value = null;
       user.value = null;
@@ -206,10 +228,18 @@ export const useAuthStore = defineStore("auth", () => {
     } finally {
       loading.value = false;
     }
-  }
-  function initializeAuth() {
+  }
+
+  function initializeAuth() {
+    console.log("🔧 [AUTH] Inicializando listeners de autenticação...");
+
     try {
       return firebaseService.onAuthStateChanged((firebaseUser) => {
+        console.log(
+          "🔧 [AUTH] onAuthStateChanged Firebase:",
+          firebaseUser ? firebaseUser.email : "null"
+        );
+
         if (firebaseUser) {
           useFirebase.value = true;
           user.value = firebaseUser;
@@ -218,25 +248,41 @@ export const useAuthStore = defineStore("auth", () => {
             name: firebaseUser.displayName || firebaseUser.email || "Admin",
             email: firebaseUser.email || "",
             role: "admin",
-          };
+          };
+
           firebaseUser.getIdToken().then((newToken) => {
             token.value = newToken;
             localStorage.setItem("admin_token", newToken);
+            console.log("✅ [AUTH] Sessão Firebase restaurada");
+            authStateReady.value = true;
           });
-        } else {
+        } else {
+          console.log("🔧 [AUTH] Firebase sem usuário, verificando Mock...");
           checkMockAuth();
+        }
+
+        if (!authInitialized.value) {
+          authInitialized.value = true;
+          console.log("✅ [AUTH] Autenticação inicializada");
         }
       });
     } catch (error) {
-      console.warn("Firebase não disponível, usando sistema mock");
+      console.warn("⚠️ [AUTH] Firebase não disponível, usando sistema mock");
       checkMockAuth();
+      authInitialized.value = true;
       return () => {}; // Retorna função vazia para cleanup
     }
-  }
+  }
+
   function checkMockAuth() {
     useFirebase.value = false;
 
     mockAuthService.onAuthStateChanged((mockUser) => {
+      console.log(
+        "🔧 [AUTH] onAuthStateChanged Mock:",
+        mockUser ? mockUser.email : "null"
+      );
+
       if (mockUser) {
         user.value = mockUser;
         admin.value = {
@@ -244,44 +290,128 @@ export const useAuthStore = defineStore("auth", () => {
           name: mockUser.displayName || mockUser.email || "Admin",
           email: mockUser.email || "",
           role: "admin",
-        };
+        };
+
         const mockToken = localStorage.getItem("mock_token");
         if (mockToken) {
           token.value = mockToken;
           localStorage.setItem("admin_token", mockToken);
         }
+        console.log("✅ [AUTH] Sessão Mock restaurada");
       } else {
         user.value = null;
         admin.value = null;
         token.value = null;
         localStorage.removeItem("admin_token");
+        console.log("❌ [AUTH] Nenhuma sessão ativa");
       }
+
+      authStateReady.value = true;
     });
-  }
+  }
+
   async function checkAuth() {
-    if (token.value) {
-      try {
-        const currentUser = firebaseService.getCurrentUser();
-        if (currentUser) {
-          user.value = currentUser;
-          admin.value = {
-            id: currentUser.uid,
-            name: currentUser.displayName || currentUser.email || "Admin",
-            email: currentUser.email || "",
-            role: "admin",
-          };
-          const freshToken = await firebaseService.getCurrentUserToken();
-          if (freshToken) {
-            token.value = freshToken;
-            localStorage.setItem("admin_token", freshToken);
+    console.log("🔍 [AUTH] Iniciando checkAuth()");
+    if (!authInitialized.value) {
+      console.log("⏳ [AUTH] Aguardando inicialização...");
+      await new Promise<void>((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (authInitialized.value) {
+            clearInterval(checkInterval);
+            resolve();
           }
-        } else {
-          logout();
+        }, 50);
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          console.log("⚠️ [AUTH] Timeout ao aguardar inicialização");
+          resolve();
+        }, 3000);
+      });
+    }
+    if (!authStateReady.value) {
+      console.log("⏳ [AUTH] Aguardando estado de autenticação...");
+      await new Promise<void>((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (authStateReady.value || !localStorage.getItem("admin_token")) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 50);
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          console.log("⚠️ [AUTH] Timeout ao aguardar estado");
+          resolve();
+        }, 2000);
+      });
+    }
+
+    const storedToken = localStorage.getItem("admin_token");
+    console.log("🔍 [AUTH] Token armazenado:", storedToken ? "SIM" : "NÃO");
+
+    if (!storedToken) {
+      console.log("❌ [AUTH] Sem token, limpando dados");
+      user.value = null;
+      admin.value = null;
+      token.value = null;
+      return false;
+    }
+
+    try {
+      console.log("🔍 [AUTH] Verificando Firebase...");
+      const currentUser = firebaseService.getCurrentUser();
+      if (currentUser) {
+        console.log(
+          "✅ [AUTH] Usuário Firebase encontrado:",
+          currentUser.email
+        );
+        useFirebase.value = true;
+        user.value = currentUser;
+        admin.value = {
+          id: currentUser.uid,
+          name: currentUser.displayName || currentUser.email || "Admin",
+          email: currentUser.email || "",
+          role: "admin",
+        };
+
+        const freshToken = await firebaseService.getCurrentUserToken();
+        if (freshToken) {
+          token.value = freshToken;
+          localStorage.setItem("admin_token", freshToken);
+          console.log("✅ [AUTH] Token atualizado");
+        } else {
+          token.value = storedToken;
+          console.log("✅ [AUTH] Usando token armazenado");
         }
-      } catch (error) {
-        console.error("Erro ao verificar autenticação:", error);
-        logout();
+        console.log("✅ [AUTH] Autenticação Firebase confirmada");
+        return true;
       }
+
+      console.log(
+        "🔍 [AUTH] Firebase não disponível, verificando Mock Auth..."
+      );
+      const mockUser = mockAuthService.getCurrentUser();
+      if (mockUser) {
+        console.log("✅ [AUTH] Usuário Mock encontrado:", mockUser.email);
+        useFirebase.value = false;
+        user.value = mockUser;
+        admin.value = {
+          id: mockUser.uid,
+          name: mockUser.displayName || mockUser.email || "Admin",
+          email: mockUser.email || "",
+          role: "admin",
+        };
+        token.value = storedToken;
+        console.log("✅ [AUTH] Autenticação Mock confirmada");
+        return true;
+      }
+
+      console.log("❌ [AUTH] Nenhum usuário encontrado, fazendo logout");
+      await logout();
+      return false;
+    } catch (error) {
+      console.error("❌ [AUTH] Erro ao verificar autenticação:", error);
+      await logout();
+      return false;
     }
   }
 
@@ -299,6 +429,8 @@ export const useAuthStore = defineStore("auth", () => {
     loading,
     useFirebase,
     isAuthenticated,
+    authInitialized,
+    authStateReady,
     login,
     loginWithGoogle,
     logout,

@@ -1,5 +1,6 @@
 <template>
   <aside
+    v-if="admin"
     class="fixed left-0 top-0 h-full w-64 bg-gray-900 text-white p-6 overflow-y-auto"
   >
     <div class="mb-8">
@@ -7,10 +8,10 @@
       <div class="mt-2">
         <p class="text-sm text-gray-300">Seja bem-vindo,</p>
         <p class="text-sm font-medium text-white break-words">
-          {{ admin?.email || "Usuário" }}
+          {{ admin.email || "Usuário" }}
         </p>
         <p class="text-xs text-gray-400 mt-1">
-          {{ getRoleDisplayName(admin?.role) }}
+          {{ getRoleDisplayName(admin.role) }}
         </p>
       </div>
     </div>

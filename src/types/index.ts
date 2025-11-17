@@ -76,6 +76,9 @@ export interface ProductFilters {
   sortDirection?: 'ASC' | 'DESC';
   activeOnly?: boolean;
   category?: string;
+  searchTerm?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
 export interface ImageUploadResponse {

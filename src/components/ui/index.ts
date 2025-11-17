@@ -16,3 +16,5 @@ export { default as ImageUpload } from "./ImageUpload.vue";
 export { default as ProductImageManager } from "./ProductImageManager.vue";
 export { default as SimpleImageManager } from "./SimpleImageManager.vue";
 export { default as UnifiedImageUpload } from "./UnifiedImageUpload.vue";
+export { default as PriceInput } from "./PriceInput.vue";
+export { default as NumberInput } from "./NumberInput.vue";

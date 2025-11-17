@@ -1,7 +1,7 @@
 <template>
   <BaseModal
-    :show="show"
-    @close="handleClose"
+    :model-value="show"
+    @update:model-value="handleClose"
     :closable="true"
     title="Acesso Não Autorizado"
   >

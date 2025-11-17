@@ -128,17 +128,34 @@ const router = createRouter({
       return { top: 0 };
     }
   },
-});
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
+});
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: "admin-login" });
-  } else if (to.name === "admin-login" && authStore.isAuthenticated) {
+router.beforeEach(async (to, from, next) => {
+  console.log("🛣️ [ROUTER] Navegando de", from.path, "para", to.path);
+  const authStore = useAuthStore();
+  if (to.meta.requiresAuth) {
+    console.log("🔒 [ROUTER] Rota protegida, verificando autenticação...");
+    const isAuth = await authStore.checkAuth();
+    console.log(
+      "🔒 [ROUTER] Resultado da verificação:",
+      isAuth ? "AUTENTICADO" : "NÃO AUTENTICADO"
+    );
+
+    if (!authStore.isAuthenticated) {
+      console.log("❌ [ROUTER] Não autenticado, redirecionando para login");
+      next({ name: "admin-login", query: { redirect: to.fullPath } });
+      return;
+    }
+    console.log("✅ [ROUTER] Autenticado, permitindo acesso");
+  }
+  if (to.name === "admin-login" && authStore.isAuthenticated) {
+    console.log("🔄 [ROUTER] Já autenticado, redirecionando para dashboard");
     next({ name: "admin-dashboard" });
-  } else {
-    next();
+    return;
   }
+
+  console.log("✅ [ROUTER] Navegação permitida");
+  next();
 });
 
 export default router;

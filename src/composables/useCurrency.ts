@@ -3,6 +3,8 @@ export function useCurrency() {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
   };
 

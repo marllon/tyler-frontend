@@ -86,7 +86,8 @@ class ProductsService {
   private readonly allowedImageTypes: string[];
 
   constructor() {
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+    const baseApiUrl =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
     this.baseUrl = `${baseApiUrl}/products`;
     this.maxImageSize = parseInt(
       import.meta.env.VITE_MAX_IMAGE_SIZE || "10485760"
@@ -114,6 +115,11 @@ class ProductsService {
     if (filters.activeOnly !== undefined)
       params.append("activeOnly", filters.activeOnly.toString());
     if (filters.category) params.append("category", filters.category);
+    if (filters.searchTerm) params.append("searchTerm", filters.searchTerm);
+    if (filters.minPrice !== undefined)
+      params.append("minPrice", filters.minPrice.toString());
+    if (filters.maxPrice !== undefined)
+      params.append("maxPrice", filters.maxPrice.toString());
 
     const apiData = await api.get<any>(
       `/products/paginated?${params.toString()}`
