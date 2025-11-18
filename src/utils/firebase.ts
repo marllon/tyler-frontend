@@ -104,12 +104,8 @@ export type { User };
 export const firebaseService = {
   async getAuthorizedEmails(): Promise<string[]> {
     if (!db) {
-      console.warn("⚠️ Firestore não inicializado, usando e-mails do .env");
-      const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
-      return envEmails
-        .split(",")
-        .map((email: string) => email.trim())
-        .filter(Boolean);
+      console.warn("⚠️ Firestore não inicializado. Configure o Firebase para usar autenticação.");
+      return [];
     }
 
     try {
@@ -123,21 +119,13 @@ export const firebaseService = {
         return emails;
       } else {
         console.warn(
-          "⚠️ Documento settings/admins não encontrado no Firestore"
-        );
-        const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
-        return envEmails
-          .split(",")
-          .map((email: string) => email.trim())
-          .filter(Boolean);
+          "⚠️ Documento settings/admins não encontrado no Firestore. Crie o documento com a lista de e-mails autorizados."
+        );
+        return [];
       }
     } catch (error) {
-      console.error("❌ Erro ao buscar e-mails autorizados:", error);
-      const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
-      return envEmails
-        .split(",")
-        .map((email: string) => email.trim())
-        .filter(Boolean);
+      console.error("❌ Erro ao buscar e-mails autorizados:", error);
+      return [];
     }
   },
 

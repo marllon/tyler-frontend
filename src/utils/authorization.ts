@@ -24,28 +24,13 @@ async function getAuthorizedEmailsAsync(): Promise<string[]> {
       console.log("✅ E-mails autorizados carregados do Firestore");
       return cachedAdmins;
     }
-    const emails = await getAuthorizedAdmins();
-    cachedAdmins = emails
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean);
-    lastCacheUpdate = now;
-
-    if (cachedAdmins.length === 0) {
-      console.warn(
-        "⚠️ Nenhum admin configurado, usando fallback de desenvolvimento"
-      );
-      cachedAdmins = [
-        "admin@tylerlimaeler.org",
-        "tyler@gmail.com",
-        "admin@gmail.com", // Para testes de desenvolvimento
-      ];
-    }
-
-    return cachedAdmins;
+    console.error(
+      "❌ Firestore inacessível ou sem e-mails configurados. Nenhum acesso autorizado."
+    );
+    return [];
   } catch (error) {
-    console.error("Erro ao buscar emails autorizados:", error);
-
-    return ["admin@tylerlimaeler.org", "tyler@gmail.com", "admin@gmail.com"];
+    console.error("❌ Erro ao buscar emails autorizados:", error);
+    return [];
   }
 }
 
@@ -63,13 +48,13 @@ async function getAuthorizedDomainsAsync(): Promise<string[]> {
       .filter(Boolean);
 
     if (cachedDomains.length === 0) {
-      cachedDomains = ["gmail.com", "hotmail.com"]; // Fallback padrão
+      cachedDomains = []; // Sem domínios autorizados por padrão
     }
 
     return cachedDomains;
   } catch (error) {
     console.error("Erro ao buscar domínios autorizados:", error);
-    return ["gmail.com", "hotmail.com"];
+    return []; // Sem domínios autorizados em caso de erro
   }
 }
 
