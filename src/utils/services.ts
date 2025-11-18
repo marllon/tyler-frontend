@@ -25,6 +25,20 @@ export const paymentService = {
     return api.post<PixPaymentResponse>("/payments/checkout", data);
   },
 
+  async createSimpleDonation(data: {
+    amount: number;
+    anonymous: boolean;
+    message?: string;
+    donor?: {
+      name: string;
+      email: string;
+      phone?: string;
+      document?: string;
+    };
+  }): Promise<PixPaymentResponse> {
+    return api.post<PixPaymentResponse>("/donations/simple", data);
+  },
+
   async getPaymentStatus(
     transactionId: string
   ): Promise<PaymentStatusResponse> {

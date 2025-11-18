@@ -54,6 +54,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/TestDonation.vue"),
         meta: { title: "Teste de Doação" },
       },
+      {
+        path: "donation/:id",
+        name: "donation-payment",
+        component: () => import("@/views/DonationPayment.vue"),
+        meta: { title: "Pagamento da Doação" },
+      },
     ],
   },
   {
@@ -132,9 +138,11 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   console.log("🛣️ [ROUTER] Navegando de", from.path, "para", to.path);
-  const authStore = useAuthStore();
+  const authStore = useAuthStore();
+
   if (to.meta.requiresAuth) {
-    console.log("🔒 [ROUTER] Rota protegida, verificando autenticação...");
+    console.log("🔒 [ROUTER] Rota protegida, verificando autenticação...");
+
     const isAuth = await authStore.checkAuth();
     console.log(
       "🔒 [ROUTER] Resultado da verificação:",
@@ -142,12 +150,14 @@ router.beforeEach(async (to, from, next) => {
     );
 
     if (!authStore.isAuthenticated) {
-      console.log("❌ [ROUTER] Não autenticado, redirecionando para login");
+      console.log("❌ [ROUTER] Não autenticado, redirecionando para login");
+
       next({ name: "admin-login", query: { redirect: to.fullPath } });
       return;
     }
     console.log("✅ [ROUTER] Autenticado, permitindo acesso");
-  }
+  }
+
   if (to.name === "admin-login" && authStore.isAuthenticated) {
     console.log("🔄 [ROUTER] Já autenticado, redirecionando para dashboard");
     next({ name: "admin-dashboard" });

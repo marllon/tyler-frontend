@@ -16,19 +16,29 @@ export function useDonations() {
     error.value = null;
 
     try {
-      const pixRequest = {
-        amount: donationData.amount,
-        description: `Doação${donationData.goalId ? " para meta" : ""}: ${
-          donationData.message || "Contribuição solidária"
-        }`,
-        payer: {
-          name: donationData.donor.name || "Doador Anônimo",
-          email: donationData.donor.email || "anonimo@tyler.com",
-          document: donationData.donor.document || "00000000000",
-        },
+      const request: any = {
+        amount: donationData.amount, // Já está em reais
+        anonymous: donationData.anonymous,
       };
 
-      return await paymentService.createPixCheckout(pixRequest);
+      console.log('Enviando para API:', request);
+      if (donationData.message) {
+        request.message = donationData.message;
+      }
+      if (!donationData.anonymous && donationData.donor) {
+        request.donor = {
+          name: donationData.donor.name,
+          email: donationData.donor.email,
+        };
+        if (donationData.donor.phone) {
+          request.donor.phone = donationData.donor.phone;
+        }
+        if (donationData.donor.document) {
+          request.donor.document = donationData.donor.document.replace(/\D/g, '');
+        }
+      }
+
+      return await paymentService.createSimpleDonation(request);
     } catch (err) {
       const apiError = err as ApiError;
       error.value = apiError.message || "Erro ao processar doação";
@@ -41,7 +51,8 @@ export function useDonations() {
   function handlePaymentSuccess(
     paymentData: PaymentStatusResponse,
     goalId?: string
-  ) {
+  ) {
+
     if (goalId) {
       goalsStore.updateGoalProgress(goalId, paymentData.amount.value);
     }
@@ -61,7 +72,8 @@ export function useDonations() {
       errors.push("Valor da doação deve ser maior que zero");
     }
 
-    if (data.amount && data.amount < 100) {
+    if (data.amount && data.amount < 1) {
+
       errors.push("Valor mínimo da doação é R$ 1,00");
     }
 
@@ -89,9 +101,12 @@ export function useDonations() {
     return emailRegex.test(email);
   }
 
-  function isValidDocument(doc: string): boolean {
-    const cleanDoc = doc.replace(/\D/g, "");
-    if (cleanDoc.length !== 11) return false;
+  function isValidDocument(doc: string): boolean {
+
+    const cleanDoc = doc.replace(/\D/g, "");
+
+    if (cleanDoc.length !== 11) return false;
+
     if (/^(\d)\1{10}$/.test(cleanDoc)) return false;
 
     return true; // Validação básica - implementar algoritmo completo se necessário

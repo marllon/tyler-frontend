@@ -192,22 +192,27 @@ export interface PixQrCode {
 }
 
 export interface PixPaymentResponse {
-  id: string;
-  qr_codes: PixQrCode[];
-  status: PaymentStatus;
-  amount: {
-    value: number;
-    currency: string;
-  };
-  created_at: string;
+  id: string; // ID interno Firestore
+  paymentId: string; // ID PagBank
+  qrCode: string;
+  qrCodeImage?: string;
+  status: string;
+  amount?: number;
+  expiresAt?: string;
+  qr_codes?: PixQrCode[];
+  created_at?: string;
 }
 
 export interface PaymentStatusResponse {
-  id: string;
-  status: PaymentStatus;
-  amount: {
-    value: number;
-    currency: string;
+  id: string; // ID interno Firestore
+  paymentId: string; // ID PagBank
+  status: string;
+  amount: number; // Valor em centavos
+  qrCode?: string;
+  qrCodeImage?: string;
+  expiresAt?: string;
+  createdAt?: string;
+}
   };
   paid_at?: string;
 }

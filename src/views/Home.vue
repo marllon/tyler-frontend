@@ -14,15 +14,15 @@
             diferença na vida de Tyler e sua família.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <RouterLink
-              to="/goals"
-              class="btn-primary bg-white text-tyler-blue hover:bg-gray-100"
+            <button
+              @click="showDonationModal = true"
+              class="btn-primary bg-white text-tyler-blue hover:bg-gray-100 px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
             >
-              Fazer uma doação
-            </RouterLink>
+              💝 Fazer uma Doação
+            </button>
             <RouterLink
               to="/about"
-              class="btn-outline border-white text-white hover:bg-white hover:text-tyler-blue"
+              class="btn-outline border-white text-white hover:bg-white hover:text-tyler-blue px-8 py-4 rounded-lg font-semibold text-lg transition-all"
             >
               Conheça a história
             </RouterLink>
@@ -191,11 +191,14 @@
         </div>
       </div>
     </section>
+
+    <!-- Modal de Doação -->
+    <DonationModal v-model="showDonationModal" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { RouterLink } from "vue-router";
 import { useProductsStore } from "@/stores/products";
 import { useGoalsStore } from "@/stores/goals";
@@ -203,11 +206,13 @@ import { useRafflesStore } from "@/stores/raffles";
 import CardProduto from "@/components/CardProduto.vue";
 import BarraProgressoMeta from "@/components/BarraProgressoMeta.vue";
 import CardRifa from "@/components/CardRifa.vue";
+import DonationModal from "@/components/DonationModal.vue";
 import type { Product, Goal, Raffle, RaffleFilters } from "@/types";
 
 const productsStore = useProductsStore();
 const goalsStore = useGoalsStore();
 const rafflesStore = useRafflesStore();
+const showDonationModal = ref(false);
 
 const instagramUrl =
   import.meta.env.VITE_INSTAGRAM_URL ||
@@ -219,14 +224,16 @@ const activeProducts = computed(() =>
 
 const activeGoals = computed(() => goalsStore.goals.filter((g) => g.active));
 
-const activeRaffles = computed(() => {
+const activeRaffles = computed(() => {
+
   console.log("Rifas carregadas na home:", rafflesStore.raffles);
   return rafflesStore.raffles;
 });
 
 onMounted(() => {
   productsStore.fetchProducts();
-  goalsStore.fetchGoals();
+  goalsStore.fetchGoals();
+
   rafflesStore.fetchRaffles({
     activeOnly: true,
     status: "ACTIVE",
