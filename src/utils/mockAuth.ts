@@ -1,3 +1,5 @@
+import { firebaseService } from "./firebase";
+
 export interface MockUser {
   uid: string;
   email: string;
@@ -8,13 +10,14 @@ export const mockAuthService = {
   
   async signInWithGoogle() {
     console.log("🔧 Usando MOCK Google Auth (Firebase não configurado)");
-    const authorizedEmails = (
-      import.meta.env.VITE_AUTHORIZED_ADMINS || ""
-    ).split(",");
+    const authorizedEmails = await firebaseService.getAuthorizedEmails();
+    
     const userEmail =
       authorizedEmails.find((email) => email.includes("marllon.nasser")) ||
       authorizedEmails.find((email) => email.includes("gmail.com")) ||
-      "admin@gmail.com";
+      authorizedEmails[0] ||
+      "admin@gmail.com";
+
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     const mockUser: MockUser = {
@@ -23,7 +26,8 @@ export const mockAuthService = {
       displayName: `${userEmail.split("@")[0]} (Mock)`,
     };
 
-    const mockToken = "mock-google-jwt-token-" + Date.now();
+    const mockToken = "mock-google-jwt-token-" + Date.now();
+
     this.saveMockUser(mockUser, mockToken);
 
     return {
@@ -33,8 +37,10 @@ export const mockAuthService = {
     };
   },
 
-  async signIn(email: string, password: string) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  async signIn(email: string, password: string) {
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     if (email.includes("@") && password.length >= 4) {
       const mockUser: MockUser = {
         uid: "mock-user-123",
@@ -72,10 +78,13 @@ export const mockAuthService = {
     return userData ? JSON.parse(userData) : null;
   },
 
-  onAuthStateChanged(callback: (user: MockUser | null) => void) {
+  onAuthStateChanged(callback: (user: MockUser | null) => void) {
+
     const userData = localStorage.getItem("mock_user");
-    const user = userData ? JSON.parse(userData) : null;
-    setTimeout(() => callback(user), 100);
+    const user = userData ? JSON.parse(userData) : null;
+
+    setTimeout(() => callback(user), 100);
+
     return () => {};
   },
 

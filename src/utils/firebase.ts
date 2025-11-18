@@ -7,7 +7,13 @@ import {
   signOut,
   onAuthStateChanged,
   type User,
-} from "firebase/auth";
+} from "firebase/auth";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+} from "firebase/firestore";
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -15,7 +21,8 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-};
+};
+
 function isValidFirebaseConfig(config: any): boolean {
   const requiredFields = ["apiKey", "authDomain", "projectId"];
 
@@ -24,13 +31,15 @@ function isValidFirebaseConfig(config: any): boolean {
     if (!value || value === "undefined" || value.length < 10) {
       return false;
     }
-  }
+  }
+
   if (
     config.projectId === "tyler-project" ||
     config.apiKey === "your_api_key_here"
   ) {
     return false;
-  }
+  }
+
   if (config.apiKey && config.apiKey.startsWith("GOCSPX-")) {
     console.error(
       "❌ Erro: Você está usando uma chave do Google Console, não do Firebase!"
@@ -55,16 +64,20 @@ if (!isFirebaseConfigValid) {
   console.info("   VITE_FIREBASE_API_KEY=sua_chave_aqui");
   console.info("   VITE_FIREBASE_PROJECT_ID=seu_projeto_aqui");
   console.info("   VITE_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com");
-}
+}
+
 let app;
 let auth;
 let googleProvider;
+let db;
 
 if (isFirebaseConfigValid) {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
-    googleProvider = new GoogleAuthProvider();
+    db = getFirestore(app);
+    googleProvider = new GoogleAuthProvider();
+
     googleProvider.addScope("email");
     googleProvider.addScope("profile");
 
@@ -73,6 +86,7 @@ if (isFirebaseConfigValid) {
     console.warn("⚠️ Erro ao inicializar Firebase:", error);
     app = undefined;
     auth = undefined;
+    db = undefined;
     googleProvider = undefined;
   }
 } else {
@@ -82,15 +96,44 @@ if (isFirebaseConfigValid) {
 export {
   app,
   auth,
+  db,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
 };
-export type { User };
-export const db = null;
+export type { User };
+
 export const firebaseService = {
+  
+  async getAuthorizedEmails(): Promise<string[]> {
+    if (!db) {
+      console.warn("⚠️ Firestore não inicializado, usando e-mails do .env");
+      const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
+      return envEmails.split(",").map((email: string) => email.trim()).filter(Boolean);
+    }
+
+    try {
+      const docRef = doc(db, "settings", "admins");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const emails = data.authorizedEmails || data.emails || [];
+        console.log("✅ E-mails autorizados carregados do Firestore:", emails);
+        return emails;
+      } else {
+        console.warn("⚠️ Documento settings/admins não encontrado no Firestore");
+        const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
+        return envEmails.split(",").map((email: string) => email.trim()).filter(Boolean);
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar e-mails autorizados:", error);
+      const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
+      return envEmails.split(",").map((email: string) => email.trim()).filter(Boolean);
+    }
+  },
   
   async signInWithGoogle() {
     console.log("🔑 Iniciando login com Google...");
@@ -195,7 +238,8 @@ export const firebaseService = {
   },
 
   onAuthStateChanged(callback: (user: User | null) => void) {
-    if (!auth) {
+    if (!auth) {
+
       callback(null);
       return () => {}; // Retorna função vazia para unsubscribe
     }

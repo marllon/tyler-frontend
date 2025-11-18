@@ -1,8 +1,11 @@
-import { getAuthorizedAdmins, getAuthorizedDomains } from "./remoteConfig";
+import { getAuthorizedAdmins, getAuthorizedDomains } from "./remoteConfig";
+import { firebaseService } from "./firebase";
+
 let cachedAdmins: string[] = [];
 let cachedDomains: string[] = [];
 let lastCacheUpdate = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 async function getAuthorizedEmailsAsync(): Promise<string[]> {
   const now = Date.now();
 
@@ -10,12 +13,23 @@ async function getAuthorizedEmailsAsync(): Promise<string[]> {
     return cachedAdmins;
   }
 
-  try {
+  try {
+    const firestoreEmails = await firebaseService.getAuthorizedEmails();
+    
+    if (firestoreEmails.length > 0) {
+      cachedAdmins = firestoreEmails
+        .map((email) => email.trim().toLowerCase())
+        .filter(Boolean);
+      lastCacheUpdate = now;
+      console.log("✅ E-mails autorizados carregados do Firestore");
+      return cachedAdmins;
+    }
     const emails = await getAuthorizedAdmins();
     cachedAdmins = emails
       .map((email) => email.trim().toLowerCase())
       .filter(Boolean);
-    lastCacheUpdate = now;
+    lastCacheUpdate = now;
+
     if (cachedAdmins.length === 0) {
       console.warn(
         "⚠️ Nenhum admin configurado, usando fallback de desenvolvimento"
@@ -29,10 +43,12 @@ async function getAuthorizedEmailsAsync(): Promise<string[]> {
 
     return cachedAdmins;
   } catch (error) {
-    console.error("Erro ao buscar emails autorizados:", error);
+    console.error("Erro ao buscar emails autorizados:", error);
+
     return ["admin@tylerlimaeler.org", "tyler@gmail.com", "admin@gmail.com"];
   }
-}
+}
+
 async function getAuthorizedDomainsAsync(): Promise<string[]> {
   const now = Date.now();
 
@@ -82,10 +98,12 @@ export const authorizationService = {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    try {
+    try {
+
       const authorizedEmails = await getAuthorizedEmailsAsync();
 
-      if (authorizedEmails.includes(normalizedEmail)) {
+      if (authorizedEmails.includes(normalizedEmail)) {
+
         const role =
           normalizedEmail.includes("tyler") ||
           normalizedEmail.includes("admin@tylerlimaeler.org")
@@ -96,7 +114,8 @@ export const authorizationService = {
           authorized: true,
           role,
         };
-      }
+      }
+
       const authorizedDomains = await getAuthorizedDomainsAsync();
       const emailDomain = normalizedEmail.split("@")[1];
 
@@ -146,7 +165,8 @@ export const authorizationService = {
     const normalizedEmail = email.toLowerCase().trim();
     const authorizedEmails = await getAuthorizedEmailsAsync();
 
-    if (!authorizedEmails.includes(normalizedEmail)) {
+    if (!authorizedEmails.includes(normalizedEmail)) {
+
       cachedAdmins = [];
       console.log(`📧 Email adicionado à autorização: ${normalizedEmail}`);
       return true;
@@ -163,7 +183,8 @@ export const authorizationService = {
       return false;
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedEmail = email.toLowerCase().trim();
+
     cachedAdmins = [];
     console.log(`📧 Email removido da autorização: ${normalizedEmail}`);
     return true;
@@ -196,7 +217,8 @@ export const authorizationService = {
 
       if (authorizedEmails.length === 0) {
         issues.push("Nenhum email de administrador configurado");
-      }
+      }
+
       authorizedEmails.forEach((email) => {
         if (!email.includes("@") || !email.includes(".")) {
           issues.push(`Email inválido: ${email}`);
