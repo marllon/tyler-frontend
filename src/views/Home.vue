@@ -203,7 +203,7 @@ import { useRafflesStore } from "@/stores/raffles";
 import CardProduto from "@/components/CardProduto.vue";
 import BarraProgressoMeta from "@/components/BarraProgressoMeta.vue";
 import CardRifa from "@/components/CardRifa.vue";
-import type { Product, Goal, Raffle } from "@/types";
+import type { Product, Goal, Raffle, RaffleFilters } from "@/types";
 
 const productsStore = useProductsStore();
 const goalsStore = useGoalsStore();
@@ -219,27 +219,35 @@ const activeProducts = computed(() =>
 
 const activeGoals = computed(() => goalsStore.goals.filter((g) => g.active));
 
-const activeRaffles = computed(() =>
-  rafflesStore.raffles.filter((r) => r.status === "ACTIVE")
-);
+const activeRaffles = computed(() => {
+  console.log('Rifas carregadas na home:', rafflesStore.raffles);
+  return rafflesStore.raffles;
+});
 
 onMounted(() => {
   productsStore.fetchProducts();
-  goalsStore.fetchGoals();
-  rafflesStore.fetchRaffles();
+  goalsStore.fetchGoals();
+  rafflesStore.fetchRaffles({
+    activeOnly: true,
+    status: 'ACTIVE',
+    pageSize: 6,
+  });
 });
 
-function handleBuy(product: Product) {
+function handleBuy(product: Product) {
+
   console.log("Comprar produto:", product);
   alert("Funcionalidade de checkout será implementada em breve!");
 }
 
-function handleDonate(goal: Goal) {
+function handleDonate(goal: Goal) {
+
   console.log("Doar para meta:", goal);
   alert("Funcionalidade de doação será implementada em breve!");
 }
 
-function handleBuyTicket(raffle: Raffle) {
+function handleBuyTicket(raffle: Raffle) {
+
   console.log("Comprar bilhete:", raffle);
   alert("Funcionalidade de compra de bilhetes será implementada em breve!");
 }
