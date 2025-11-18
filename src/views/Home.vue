@@ -220,7 +220,7 @@ const activeProducts = computed(() =>
 const activeGoals = computed(() => goalsStore.goals.filter((g) => g.active));
 
 const activeRaffles = computed(() => {
-  console.log('Rifas carregadas na home:', rafflesStore.raffles);
+  console.log("Rifas carregadas na home:", rafflesStore.raffles);
   return rafflesStore.raffles;
 });
 
@@ -229,25 +229,22 @@ onMounted(() => {
   goalsStore.fetchGoals();
   rafflesStore.fetchRaffles({
     activeOnly: true,
-    status: 'ACTIVE',
+    status: "ACTIVE",
     pageSize: 6,
   });
 });
 
 function handleBuy(product: Product) {
-
   console.log("Comprar produto:", product);
   alert("Funcionalidade de checkout será implementada em breve!");
 }
 
 function handleDonate(goal: Goal) {
-
   console.log("Doar para meta:", goal);
   alert("Funcionalidade de doação será implementada em breve!");
 }
 
 function handleBuyTicket(raffle: Raffle) {
-
   console.log("Comprar bilhete:", raffle);
   alert("Funcionalidade de compra de bilhetes será implementada em breve!");
 }

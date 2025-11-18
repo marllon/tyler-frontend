@@ -7,7 +7,10 @@
         :images="galleryImages"
         :showThumbnails="false"
       />
-      <div v-else class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center h-48">
+      <div
+        v-else
+        class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center h-48"
+      >
         <svg
           class="w-20 h-20 text-gray-300"
           fill="none"
@@ -22,12 +25,12 @@
           />
         </svg>
       </div>
-      
+
       <!-- Badge de Status -->
       <div
         :class="[
           'absolute top-4 right-4 px-4 py-1.5 rounded-full text-sm font-bold shadow-lg backdrop-blur-sm',
-          statusBadgeClass
+          statusBadgeClass,
         ]"
       >
         {{ statusLabel }}
@@ -44,14 +47,25 @@
 
     <div class="px-6 pb-6">
       <!-- Título e Descrição -->
-      <h3 class="text-xl font-bold mb-2 text-gray-900 line-clamp-2">{{ raffle.title }}</h3>
-      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ raffle.description }}</p>
+      <h3 class="text-xl font-bold mb-2 text-gray-900 line-clamp-2">
+        {{ raffle.title }}
+      </h3>
+      <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+        {{ raffle.description }}
+      </p>
 
       <!-- Prêmio em Destaque -->
-      <div class="bg-gradient-to-r from-tyler-pink/10 to-tyler-blue/10 rounded-lg p-4 mb-4 border border-gray-100">
+      <div
+        class="bg-gradient-to-r from-tyler-pink/10 to-tyler-blue/10 rounded-lg p-4 mb-4 border border-gray-100"
+      >
         <div class="text-center">
-          <span class="text-gray-600 text-xs font-medium uppercase tracking-wide">Prêmio</span>
-          <p class="text-lg font-bold text-tyler-blue mt-1">{{ raffle.prize }}</p>
+          <span
+            class="text-gray-600 text-xs font-medium uppercase tracking-wide"
+            >Prêmio</span
+          >
+          <p class="text-lg font-bold text-tyler-blue mt-1">
+            {{ raffle.prize }}
+          </p>
         </div>
       </div>
 
@@ -66,14 +80,18 @@
         />
         <div class="flex justify-between text-sm text-gray-600">
           <span class="font-medium">{{ raffle.soldTickets }} vendidos</span>
-          <span :class="{ 'text-red-600 font-semibold': remainingTickets < 10 }">
+          <span
+            :class="{ 'text-red-600 font-semibold': remainingTickets < 10 }"
+          >
             {{ remainingTickets }} disponíveis
           </span>
         </div>
       </div>
 
       <!-- Valor do Bilhete -->
-      <div class="flex items-baseline justify-between mb-4 bg-gray-50 rounded-lg p-3">
+      <div
+        class="flex items-baseline justify-between mb-4 bg-gray-50 rounded-lg p-3"
+      >
         <span class="text-gray-600 text-sm font-medium">Valor do bilhete:</span>
         <div class="flex items-baseline gap-1">
           <span class="text-3xl font-bold text-tyler-pink">
@@ -83,12 +101,31 @@
       </div>
 
       <!-- Data do Sorteio -->
-      <div class="flex items-center gap-2 text-sm text-gray-600 mb-4 bg-blue-50 rounded-lg p-3">
-        <svg class="w-4 h-4 text-tyler-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <div
+        class="flex items-center gap-2 text-sm text-gray-600 mb-4 bg-blue-50 rounded-lg p-3"
+      >
+        <svg
+          class="w-4 h-4 text-tyler-blue"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
         <span class="font-medium">
-          Sorteio em {{ formatDate(raffle.drawDate, { month: "long", day: "2-digit", year: "numeric" }) }}
+          Sorteio em
+          {{
+            formatDate(raffle.drawDate, {
+              month: "long",
+              day: "2-digit",
+              year: "numeric",
+            })
+          }}
         </span>
       </div>
 
@@ -105,12 +142,16 @@
 
       <!-- Resultado do Sorteio -->
       <div
-        v-if="raffle.status === 'DRAWN' && raffle.winnerTicketNumber !== undefined"
+        v-if="
+          raffle.status === 'DRAWN' && raffle.winnerTicketNumber !== undefined
+        "
         class="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg"
       >
         <p class="text-center text-green-800 font-semibold">
           🎉 Número sorteado:
-          <span class="text-3xl block mt-2 font-bold">{{ raffle.winnerTicketNumber }}</span>
+          <span class="text-3xl block mt-2 font-bold">{{
+            raffle.winnerTicketNumber
+          }}</span>
         </p>
       </div>
     </div>
@@ -141,7 +182,7 @@ const galleryImages = computed(() => {
   if (!props.raffle.imageUrls || props.raffle.imageUrls.length === 0) {
     return [];
   }
-  
+
   return props.raffle.imageUrls.map((url, index) => ({
     id: `${props.raffle.id}-${index}`,
     url: url,
@@ -163,28 +204,29 @@ const progressPercentage = computed(() => {
 
 const statusLabel = computed(() => {
   const labels: Record<string, string> = {
-    ACTIVE: 'Ativa',
-    ENDED: 'Encerrada',
-    DRAWN: 'Sorteada',
-    CANCELLED: 'Cancelada',
+    ACTIVE: "Ativa",
+    ENDED: "Encerrada",
+    DRAWN: "Sorteada",
+    CANCELLED: "Cancelada",
   };
-  return labels[props.raffle.status] || 'Ativa';
+  return labels[props.raffle.status] || "Ativa";
 });
 
 const statusBadgeClass = computed(() => {
   const classes: Record<string, string> = {
-    ACTIVE: 'bg-green-500 text-white',
-    ENDED: 'bg-orange-500 text-white',
-    DRAWN: 'bg-blue-500 text-white',
-    CANCELLED: 'bg-red-500 text-white',
+    ACTIVE: "bg-green-500 text-white",
+    ENDED: "bg-orange-500 text-white",
+    DRAWN: "bg-blue-500 text-white",
+    CANCELLED: "bg-red-500 text-white",
   };
-  return classes[props.raffle.status] || 'bg-green-500 text-white';
+  return classes[props.raffle.status] || "bg-green-500 text-white";
 });
 
 const buttonLabel = computed(() => {
-  if (props.raffle.status !== 'ACTIVE') return 'Rifa Encerrada';
-  if (remainingTickets.value === 0) return 'Esgotada';
-  if (remainingTickets.value < 10) return `Últimos ${remainingTickets.value} bilhetes!`;
-  return 'Comprar Bilhetes';
+  if (props.raffle.status !== "ACTIVE") return "Rifa Encerrada";
+  if (remainingTickets.value === 0) return "Esgotada";
+  if (remainingTickets.value < 10)
+    return `Últimos ${remainingTickets.value} bilhetes!`;
+  return "Comprar Bilhetes";
 });
 </script>
