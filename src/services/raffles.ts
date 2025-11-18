@@ -12,31 +12,94 @@ import type {
   RaffleDrawResponse,
   DrawVerificationResponse,
   RaffleFilters,
-} from "@/types";
+} from "@/types";
+interface RaffleApiResponse {
+  id: string;
+  title: string;
+  description: string;
+  prize: string;
+  images: string[]; // API usa 'images'
+  ticketPrice: number;
+  totalTickets: number;
+  soldTickets: number;
+  remainingTickets: number;
+  progressPercentage: number;
+  status: string;
+  deadline: string; // API usa 'deadline'
+  expiresAt?: string | null;
+  committedEntropy?: string;
+  revealEntropy?: string | null;
+  winnerTicketNumber?: number | null;
+  goalId?: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+}
 
- ENDPOINTS PÚBLICOS ============
+interface RafflePageApiResponse {
+  raffles: RaffleApiResponse[];
+  page: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+function adaptRaffleFromApi(apiRaffle: RaffleApiResponse): Raffle {
+  return {
+    id: apiRaffle.id,
+    title: apiRaffle.title,
+    description: apiRaffle.description,
+    prize: apiRaffle.prize,
+    imageUrls: apiRaffle.images, // images -> imageUrls
+    ticketPrice: apiRaffle.ticketPrice,
+    totalTickets: apiRaffle.totalTickets,
+    soldTickets: apiRaffle.soldTickets,
+    availableTickets: apiRaffle.remainingTickets, // remainingTickets -> availableTickets
+    status: apiRaffle.status as any,
+    drawDate: apiRaffle.deadline, // deadline -> drawDate
+    expiresAt: apiRaffle.expiresAt || null,
+    committedEntropy: apiRaffle.committedEntropy,
+    revealEntropy: apiRaffle.revealEntropy || undefined,
+    winnerTicketNumber: apiRaffle.winnerTicketNumber || undefined,
+    goalId: apiRaffle.goalId || undefined,
+    active: apiRaffle.active,
+    createdAt: apiRaffle.createdAt,
+    updatedAt: apiRaffle.updatedAt,
+    createdBy: apiRaffle.createdBy,
+  };
+}
 
 export async function getRaffles(
   filters?: RaffleFilters
 ): Promise<RafflePageResponse> {
   const params: Record<string, any> = {
     page: filters?.page ?? 0,
-    pageSize: filters?.pageSize ?? 10,
+    pageSize: filters?.pageSize ?? 20,
   };
 
   if (filters?.status) params.status = filters.status;
-  if (filters?.activeOnly !== undefined) params.activeOnly = filters.activeOnly;
+  if (filters?.activeOnly !== undefined) params.active = filters.activeOnly;
   if (filters?.sortBy) params.sortBy = filters.sortBy;
   if (filters?.sortDirection) params.sortDirection = filters.sortDirection;
   if (filters?.searchTerm) params.searchTerm = filters.searchTerm;
 
-  const response = await api.get<RafflePageResponse>("/raffles", { params });
-  return response.data;
+  const response = await api.get<RafflePageApiResponse>("/raffles", params);
+  return {
+    raffles: response.raffles.map(adaptRaffleFromApi),
+    page: response.page,
+    pageSize: response.pageSize,
+    totalElements: response.totalElements,
+    totalPages: response.totalPages,
+    hasNext: response.hasNext,
+    hasPrevious: response.hasPrevious,
+  };
 }
 
 export async function getRaffleById(id: string): Promise<Raffle> {
-  const response = await api.get<Raffle>(`/raffles/${id}`);
-  return response.data;
+  const response = await api.get<RaffleApiResponse>(`/raffles/${id}`);
+  return adaptRaffleFromApi(response);
 }
 
 export async function getRaffleTickets(
@@ -46,9 +109,9 @@ export async function getRaffleTickets(
   const params = status ? { status } : {};
   const response = await api.get<RaffleTicket[]>(
     `/raffles/${raffleId}/tickets`,
-    { params }
+    params
   );
-  return response.data;
+  return response;
 }
 
 export async function getAvailableTickets(
@@ -57,7 +120,7 @@ export async function getAvailableTickets(
   const response = await api.get<AvailableTicketsResponse>(
     `/raffles/${raffleId}/tickets/available`
   );
-  return response.data;
+  return response;
 }
 
 export async function purchaseTickets(
@@ -68,7 +131,7 @@ export async function purchaseTickets(
     `/raffles/${raffleId}/purchase`,
     data
   );
-  return response.data;
+  return response;
 }
 
 export async function verifyDraw(
@@ -77,22 +140,20 @@ export async function verifyDraw(
   const response = await api.get<DrawVerificationResponse>(
     `/raffles/${raffleId}/verify-draw`
   );
-  return response.data;
+  return response;
 }
 
- ENDPOINTS ADMIN (requerem autenticação) ============
-
 export async function createRaffle(data: RaffleCreateRequest): Promise<Raffle> {
-  const response = await api.post<Raffle>("/raffles", data);
-  return response.data;
+  const response = await api.post<RaffleApiResponse>("/raffles", data);
+  return adaptRaffleFromApi(response);
 }
 
 export async function updateRaffle(
   id: string,
   data: RaffleUpdateRequest
 ): Promise<Raffle> {
-  const response = await api.put<Raffle>(`/raffles/${id}`, data);
-  return response.data;
+  const response = await api.put<RaffleApiResponse>(`/raffles/${id}`, data);
+  return adaptRaffleFromApi(response);
 }
 
 export async function deleteRaffle(id: string): Promise<void> {
@@ -102,19 +163,20 @@ export async function deleteRaffle(id: string): Promise<void> {
 export async function uploadRaffleImages(
   raffleId: string,
   files: File[]
-): Promise<{ raffleId: string; uploadedImages: string[] }> {
+): Promise<string[]> {
   const formData = new FormData();
   files.forEach((file) => formData.append("files", file));
 
-  const response = await api.post<{
-    raffleId: string;
-    uploadedImages: string[];
-  }>(`/raffles/${raffleId}/upload-images`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-  return response.data;
+  const response = await api.post<string[]>(
+    `/raffles/${raffleId}/upload-images`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return response;
 }
 
 export async function deleteRaffleImage(

@@ -1,167 +1,14 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
-    <!-- Título -->
-    <div>
-      <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
-        Título da Rifa *
-      </label>
-      <input
-        id="title"
-        v-model="formData.title"
-        type="text"
-        required
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
-        placeholder="Ex: Rifa do iPhone 15 Pro Max"
-      />
-    </div>
-
-    <!-- Descrição -->
-    <div>
-      <label
-        for="description"
-        class="block text-sm font-medium text-gray-700 mb-1"
-      >
-        Descrição *
-      </label>
-      <textarea
-        id="description"
-        v-model="formData.description"
-        required
-        rows="4"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent resize-none"
-        placeholder="Descreva detalhadamente o prêmio e as condições..."
-      ></textarea>
-    </div>
-
-    <!-- Prêmio -->
-    <div>
-      <label for="prize" class="block text-sm font-medium text-gray-700 mb-1">
-        Prêmio *
-      </label>
-      <input
-        id="prize"
-        v-model="formData.prize"
-        type="text"
-        required
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
-        placeholder="Ex: iPhone 15 Pro Max 256GB"
-      />
-    </div>
-
-    <!-- Preço e Quantidade -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Preço do Bilhete -->
-      <div>
-        <label
-          for="ticketPrice"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Preço do Bilhete (R$) *
-        </label>
-        <PriceInput
-          id="ticketPrice"
-          v-model="formData.ticketPrice"
-          placeholder="0,00"
-          required
-        />
-      </div>
-
-      <!-- Total de Bilhetes -->
-      <div>
-        <label
-          for="totalTickets"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Total de Bilhetes *
-        </label>
-        <NumberInput
-          id="totalTickets"
-          v-model="formData.totalTickets"
-          :min="1"
-          placeholder="Ex: 1000"
-          required
-        />
-      </div>
-    </div>
-
-    <!-- Datas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Data do Sorteio -->
-      <div>
-        <label
-          for="drawDate"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Data do Sorteio *
-        </label>
-        <input
-          id="drawDate"
-          v-model="formData.drawDate"
-          type="datetime-local"
-          required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
-        />
-      </div>
-
-      <!-- Data de Expiração (Opcional) -->
-      <div>
-        <label
-          for="expiresAt"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Prazo para Compra (Opcional)
-        </label>
-        <input
-          id="expiresAt"
-          v-model="formData.expiresAt"
-          type="datetime-local"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
-        />
-        <p class="text-xs text-gray-500 mt-1">
-          Se não informado, expira automaticamente na data do sorteio
-        </p>
-      </div>
-    </div>
-
-    <!-- Status (apenas em edição) -->
-    <div v-if="raffle">
-      <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
-        Status
-      </label>
-      <select
-        id="status"
-        v-model="formData.status"
-        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
-      >
-        <option value="ACTIVE">Ativo</option>
-        <option value="ENDED">Encerrado</option>
-        <option value="DRAWN">Sorteado</option>
-        <option value="CANCELLED">Cancelado</option>
-      </select>
-    </div>
-
-    <!-- Ativo -->
-    <div class="flex items-center">
-      <input
-        id="active"
-        v-model="formData.active"
-        type="checkbox"
-        class="h-4 w-4 text-tyler-pink focus:ring-tyler-pink border-gray-300 rounded"
-      />
-      <label for="active" class="ml-2 text-sm text-gray-700">
-        Rifa ativa e visível publicamente
-      </label>
-    </div>
-
     <!-- Upload de Imagens -->
-    <div v-if="raffle">
+    <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">
         Imagens (até 10)
       </label>
 
       <!-- Preview das Imagens Existentes -->
       <div
-        v-if="raffle.imageUrls && raffle.imageUrls.length > 0"
+        v-if="raffle && raffle.imageUrls && raffle.imageUrls.length > 0"
         class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4"
       >
         <div
@@ -273,19 +120,160 @@
             </button>
           </div>
         </div>
-        <button
-          type="button"
-          @click="uploadNewImages"
-          :disabled="uploading"
-          class="mt-3 px-4 py-2 bg-tyler-pink text-white rounded-lg hover:bg-tyler-pink-dark disabled:opacity-50"
-        >
-          {{
-            uploading
-              ? "Enviando..."
-              : `Enviar ${selectedFiles.length} imagem(ns)`
-          }}
-        </button>
       </div>
+    </div>
+
+    <!-- Título -->
+    <div>
+      <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
+        Título da Rifa *
+      </label>
+      <input
+        id="title"
+        v-model="formData.title"
+        type="text"
+        required
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
+        placeholder="Ex: Rifa do iPhone 15 Pro Max"
+      />
+    </div>
+
+    <!-- Descrição -->
+    <div>
+      <label
+        for="description"
+        class="block text-sm font-medium text-gray-700 mb-1"
+      >
+        Descrição *
+      </label>
+      <textarea
+        id="description"
+        v-model="formData.description"
+        required
+        rows="4"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent resize-none"
+        placeholder="Descreva detalhadamente o prêmio e as condições..."
+      ></textarea>
+    </div>
+
+    <!-- Prêmio -->
+    <div>
+      <label for="prize" class="block text-sm font-medium text-gray-700 mb-1">
+        Prêmio *
+      </label>
+      <input
+        id="prize"
+        v-model="formData.prize"
+        type="text"
+        required
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
+        placeholder="Ex: iPhone 15 Pro Max 256GB"
+      />
+    </div>
+
+    <!-- Preço e Quantidade -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Preço do Bilhete -->
+      <div>
+        <label
+          for="ticketPrice"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Preço do Bilhete (R$) *
+        </label>
+        <PriceInput
+          id="ticketPrice"
+          v-model="formData.ticketPrice"
+          placeholder="0,00"
+          required
+        />
+      </div>
+
+      <!-- Total de Bilhetes -->
+      <div>
+        <label
+          for="totalTickets"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Total de Bilhetes *
+        </label>
+        <NumberInput
+          id="totalTickets"
+          v-model="formData.totalTickets"
+          min="1"
+          placeholder="Ex: 1000"
+          required
+        />
+      </div>
+    </div>
+
+    <!-- Datas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Data do Sorteio -->
+      <div>
+        <label
+          for="drawDate"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Data do Sorteio *
+        </label>
+        <input
+          id="drawDate"
+          v-model="formData.drawDate"
+          type="datetime-local"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
+        />
+      </div>
+
+      <!-- Data de Expiração (Opcional) -->
+      <div>
+        <label
+          for="expiresAt"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Prazo para Compra (Opcional)
+        </label>
+        <input
+          id="expiresAt"
+          v-model="formData.expiresAt"
+          type="datetime-local"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
+        />
+        <p class="text-xs text-gray-500 mt-1">
+          Se não informado, expira automaticamente na data do sorteio
+        </p>
+      </div>
+    </div>
+
+    <!-- Status (apenas em edição) -->
+    <div v-if="raffle">
+      <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
+        Status
+      </label>
+      <select
+        id="status"
+        v-model="formData.status"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
+      >
+        <option value="ACTIVE">Ativo</option>
+        <option value="ENDED">Encerrado</option>
+        <option value="DRAWN">Sorteado</option>
+        <option value="CANCELLED">Cancelado</option>
+      </select>
+    </div>
+
+    <!-- Ativo -->
+    <div class="flex items-center">
+      <input
+        id="active"
+        v-model="formData.active"
+        type="checkbox"
+        class="h-4 w-4 text-tyler-pink focus:ring-tyler-pink border-gray-300 rounded"
+      />
+      <label for="active" class="ml-2 text-sm text-gray-700">
+        Rifa ativa e visível publicamente
+      </label>
     </div>
 
     <!-- Botões -->
@@ -299,8 +287,7 @@
       </button>
       <button
         type="submit"
-        :disabled="!isValid"
-        class="px-6 py-2 bg-tyler-pink text-white rounded-lg hover:bg-tyler-pink-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        class="px-6 py-2.5 bg-pink-600 text-white rounded-lg hover:bg-pink-700 active:bg-pink-800 transition-all font-semibold shadow-md hover:shadow-lg"
       >
         {{ raffle ? "Atualizar Rifa" : "Criar Rifa" }}
       </button>
@@ -324,11 +311,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  submit: [data: RaffleCreateRequest | RaffleUpdateRequest];
+  submit: [data: RaffleCreateRequest | RaffleUpdateRequest, files: File[]];
   cancel: [];
-  uploadImages: [files: File[]];
   deleteImage: [index: number];
-}>();
+}>();
+
 const formData = ref<RaffleCreateRequest & { status?: RaffleStatus }>({
   title: "",
   description: "",
@@ -338,10 +325,11 @@ const formData = ref<RaffleCreateRequest & { status?: RaffleStatus }>({
   drawDate: "",
   expiresAt: "",
   active: true,
-});
+});
+
 const selectedFiles = ref<File[]>([]);
-const uploading = ref(false);
-const fileInput = ref<HTMLInputElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+
 const isValid = computed(() => {
   return (
     formData.value.title.trim() !== "" &&
@@ -351,23 +339,50 @@ const isValid = computed(() => {
     formData.value.totalTickets >= 1 &&
     formData.value.drawDate !== ""
   );
-});
+});
+
 watch(
   () => props.raffle,
   (newRaffle) => {
-    if (newRaffle) {
+    if (newRaffle) {
+      const formatDateForInput = (
+        isoString: string | null | undefined
+      ): string => {
+        if (!isoString) return "";
+        try {
+          const date = new Date(isoString);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch {
+          return "";
+        }
+      };
+
       formData.value = {
-        title: newRaffle.title,
-        description: newRaffle.description,
-        prize: newRaffle.prize,
-        ticketPrice: newRaffle.ticketPrice,
-        totalTickets: newRaffle.totalTickets,
-        drawDate: newRaffle.drawDate ? newRaffle.drawDate.substring(0, 16) : "",
-        expiresAt: newRaffle.expiresAt
-          ? newRaffle.expiresAt.substring(0, 16)
-          : "",
+        title: newRaffle.title || "",
+        description: newRaffle.description || "",
+        prize: newRaffle.prize || "",
+        ticketPrice: newRaffle.ticketPrice || 0,
+        totalTickets: newRaffle.totalTickets || 100,
+        drawDate: formatDateForInput(newRaffle.drawDate),
+        expiresAt: formatDateForInput(newRaffle.expiresAt),
         status: newRaffle.status,
-        active: newRaffle.active,
+        active: newRaffle.active ?? true,
+      };
+    } else {
+      formData.value = {
+        title: "",
+        description: "",
+        prize: "",
+        ticketPrice: 0,
+        totalTickets: 100,
+        drawDate: "",
+        expiresAt: "",
+        active: true,
       };
     }
   },
@@ -383,7 +398,7 @@ function handleSubmit() {
     prize: formData.value.prize.trim(),
     ticketPrice: formData.value.ticketPrice,
     totalTickets: formData.value.totalTickets,
-    drawDate: new Date(formData.value.drawDate).toISOString(),
+    deadline: new Date(formData.value.drawDate).toISOString(),
     expiresAt: formData.value.expiresAt
       ? new Date(formData.value.expiresAt).toISOString()
       : undefined,
@@ -394,7 +409,11 @@ function handleSubmit() {
     (data as RaffleUpdateRequest).status = formData.value.status;
   }
 
-  emit("submit", data);
+  emit("submit", data, selectedFiles.value);
+  selectedFiles.value = [];
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
 }
 
 function handleFileSelect(event: Event) {
@@ -413,18 +432,20 @@ function handleDrop(event: DragEvent) {
 }
 
 function validateAndAddFiles(files: File[]) {
-  const validFiles = files.filter((file) => {
+  const validFiles = files.filter((file) => {
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       alert(`Arquivo ${file.name} não é uma imagem válida (JPG, PNG ou WebP)`);
       return false;
-    }
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       alert(`Arquivo ${file.name} excede o tamanho máximo de 5MB`);
       return false;
     }
 
     return true;
-  });
+  });
+
   const totalImages =
     (props.raffle?.imageUrls?.length || 0) +
     selectedFiles.value.length +
@@ -449,17 +470,6 @@ function getFilePreview(file: File): string {
   return URL.createObjectURL(file);
 }
 
-async function uploadNewImages() {
-  if (selectedFiles.value.length === 0) return;
-
-  uploading.value = true;
-  try {
-    emit("uploadImages", selectedFiles.value);
-    selectedFiles.value = [];
-  } finally {
-    uploading.value = false;
-  }
-}
 defineExpose({
   reset() {
     formData.value = {

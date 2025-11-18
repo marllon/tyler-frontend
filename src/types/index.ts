@@ -243,7 +243,7 @@ export interface RaffleCreateRequest {
   prize: string;
   ticketPrice: number;
   totalTickets: number;
-  drawDate: string;
+  deadline: string;
   expiresAt?: string;
   goalId?: string;
   active?: boolean;
@@ -255,7 +255,7 @@ export interface RaffleUpdateRequest {
   prize?: string;
   ticketPrice?: number;
   totalTickets?: number;
-  drawDate?: string;
+  deadline?: string;
   expiresAt?: string;
   status?: RaffleStatus;
   goalId?: string;
@@ -263,11 +263,13 @@ export interface RaffleUpdateRequest {
 }
 
 export interface RafflePageResponse {
-  content: Raffle[];
+  raffles: Raffle[];
   totalElements: number;
   totalPages: number;
-  currentPage: number;
+  page: number;
   pageSize: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 export interface RaffleTicket {

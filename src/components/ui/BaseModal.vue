@@ -96,13 +96,13 @@ const contentClasses = computed(() => {
   };
 
   const padding = "p-6";
-  const maxHeight = props.scrollable ? "max-h-[90vh]" : "";
+  const structure = props.scrollable ? "max-h-[90vh] flex flex-col" : "";
 
-  return `${base} ${sizes[props.size]} ${padding} ${maxHeight}`;
+  return `${base} ${sizes[props.size]} ${padding} ${structure}`;
 });
 
 const bodyClasses = computed(() => {
-  return props.scrollable ? "overflow-y-auto" : "";
+  return props.scrollable ? "overflow-y-auto flex-1" : "";
 });
 
 const close = () => {
@@ -114,7 +114,8 @@ const handleBackdropClick = () => {
   if (props.closeOnBackdrop) {
     close();
   }
-};
+};
+
 watch(
   () => props.modelValue,
   (isOpen) => {
