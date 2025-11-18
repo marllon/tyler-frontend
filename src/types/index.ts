@@ -212,23 +212,138 @@ export interface PaymentStatusResponse {
   paid_at?: string;
 }
 
+export type RaffleStatus = 'ACTIVE' | 'ENDED' | 'DRAWN' | 'CANCELLED';
+
 export interface Raffle {
   id: string;
   title: string;
   description: string;
   prize: string;
-  imageUrl?: string;
-  images?: string[];
+  imageUrls: string[];  // Array de URLs de imagens (até 10)
   ticketPrice: number;
   totalTickets: number;
   soldTickets: number;
-  deadline: string;
-  status: "ACTIVE" | "ENDED" | "DRAWN" | "CANCELLED";
-  committedEntropy?: string;
+  availableTickets: number;  // Calculado: totalTickets - soldTickets
+  status: RaffleStatus;
+  drawDate: string;  // ISO-8601
+  expiresAt: string | null;
+  committedEntropy?: string;  // Hash SHA-256 público
+  revealEntropy?: string;  // Entropia revelada após sorteio
   winnerTicketNumber?: number;
   goalId?: string;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
+}
+
+export interface RaffleCreateRequest {
+  title: string;
+  description: string;
+  prize: string;
+  ticketPrice: number;
+  totalTickets: number;
+  drawDate: string;
+  expiresAt?: string;
+  goalId?: string;
+  active?: boolean;
+}
+
+export interface RaffleUpdateRequest {
+  title?: string;
+  description?: string;
+  prize?: string;
+  ticketPrice?: number;
+  totalTickets?: number;
+  drawDate?: string;
+  expiresAt?: string;
+  status?: RaffleStatus;
+  goalId?: string;
+  active?: boolean;
+}
+
+export interface RafflePageResponse {
+  content: Raffle[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface RaffleTicket {
+  id: string;
+  raffleId: string;
+  ticketNumber: number;
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  buyerDocument?: string;
+  paymentId: string;
+  status: 'RESERVED' | 'PAID' | 'EXPIRED' | 'REFUNDED';
+  purchasedAt: string;
+}
+
+export interface TicketPurchaseRequest {
+  quantity: number;
+  ticketNumbers?: number[];  // Opcional: usuário escolhe números
+  buyerName: string;
+  buyerEmail: string;
+  buyerPhone: string;
+  buyerDocument: string;  // CPF
+}
+
+export interface TicketPurchaseResponse {
+  success: boolean;
+  tickets: RaffleTicket[];
+  payment: {
+    id: string;
+    qrCode: string;
+    qrCodeImage: string;
+    expiresAt: string;
+    amount: number;
+    status: string;
+  };
+  reservationExpiresAt: string;
+}
+
+export interface AvailableTicketsResponse {
+  raffleId: string;
+  totalTickets: number;
+  availableTickets: number;
+  availableNumbers: number[];
+}
+
+export interface RaffleDrawRequest {
+  revealEntropy: string;
+}
+
+export interface RaffleDrawResponse {
+  raffleId: string;
+  winnerTicketNumber: number;
+  winnerName: string;
+  winnerEmail: string;
+  winnerPhone: string;
+  drawnAt: string;
+  isVerified: boolean;
+}
+
+export interface DrawVerificationResponse {
+  raffleId: string;
+  committedEntropyHash: string;
+  revealedEntropy: string;
+  winnerTicketNumber: number;
+  verificationPassed: boolean;
+  message: string;
+}
+
+export interface RaffleFilters {
+  page?: number;
+  pageSize?: number;
+  status?: RaffleStatus;
+  activeOnly?: boolean;
+  sortBy?: 'createdAt' | 'drawDate' | 'ticketPrice' | 'totalTickets';
+  sortDirection?: 'ASC' | 'DESC';
+  searchTerm?: string;
 }
 
 export interface Event {
@@ -242,14 +357,6 @@ export interface Event {
   status: "UPCOMING" | "PAST" | "CANCELLED";
   createdAt: string;
   updatedAt: string;
-}
-
-export interface RaffleTicket {
-  id: string;
-  raffleId: string;
-  number: number;
-  buyer: Customer;
-  purchasedAt: string;
 }
 
 export interface EventRegistration {
