@@ -35,7 +35,9 @@
           Ou digite um valor personalizado
         </label>
         <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+          <span
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium"
+          >
             R$
           </span>
           <input
@@ -141,7 +143,9 @@
       </div>
 
       <!-- Resumo -->
-      <div class="bg-gradient-to-r from-tyler-pink/10 to-tyler-blue/10 rounded-lg p-4 border border-gray-200">
+      <div
+        class="bg-gradient-to-r from-tyler-pink/10 to-tyler-blue/10 rounded-lg p-4 border border-gray-200"
+      >
         <div class="flex items-center justify-between mb-2">
           <span class="text-gray-600 font-medium">Valor da doação:</span>
           <span class="text-2xl font-bold text-tyler-pink">
@@ -202,7 +206,11 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
-const { createDonation, validateDonationData, loading: processing } = useDonations();
+const {
+  createDonation,
+  validateDonationData,
+  loading: processing,
+} = useDonations();
 const { formatCurrency } = useCurrency();
 const step = ref(1);
 const suggestedAmounts = [10, 25, 50, 100, 200, 500]; // Valores em reais
@@ -257,59 +265,64 @@ function selectAmount(amount: number) {
 function handleCustomAmountInput(event: Event) {
   const input = event.target as HTMLInputElement;
   let value = input.value;
-  
+
   if (!value) {
     customAmount.value = null;
     customAmountDisplay.value = "";
     return;
   }
-  value = value.replace(/\s/g, '');
-  
+  value = value.replace(/\s/g, "");
+
   let numericValue: number;
-  if (value.includes(',')) {
-    const normalized = value.replace(/\./g, '').replace(',', '.');
+  if (value.includes(",")) {
+    const normalized = value.replace(/\./g, "").replace(",", ".");
     numericValue = parseFloat(normalized);
-  } 
-  else if (value.includes('.')) {
-    const parts = value.split('.');
+  }
+  else if (value.includes(".")) {
+    const parts = value.split(".");
     if (parts.length === 2 && parts[1].length <= 2) {
       numericValue = parseFloat(value);
-    } 
+    }
     else {
-      numericValue = parseFloat(value.replace(/\./g, ''));
+      numericValue = parseFloat(value.replace(/\./g, ""));
     }
   }
   else {
     numericValue = parseFloat(value);
   }
-  
+
   if (isNaN(numericValue)) {
     customAmount.value = null;
     customAmountDisplay.value = "";
     return;
   }
   customAmount.value = numericValue;
-  
-  console.log('Valor digitado:', input.value, '→ Valor numérico:', numericValue);
+
+  console.log(
+    "Valor digitado:",
+    input.value,
+    "→ Valor numérico:",
+    numericValue
+  );
   customAmountDisplay.value = input.value;
 }
 
 function formatCPF(event: Event) {
   const input = event.target as HTMLInputElement;
-  let value = input.value.replace(/\D/g, '');
-  
+  let value = input.value.replace(/\D/g, "");
+
   if (value.length > 11) {
     value = value.slice(0, 11);
   }
-  
+
   if (value.length > 9) {
-    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, "$1.$2.$3-$4");
   } else if (value.length > 6) {
-    value = value.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+    value = value.replace(/(\d{3})(\d{3})(\d{0,3})/, "$1.$2.$3");
   } else if (value.length > 3) {
-    value = value.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+    value = value.replace(/(\d{3})(\d{0,3})/, "$1.$2");
   }
-  
+
   formData.value.donor.document = value;
 }
 
@@ -318,15 +331,15 @@ function goToStep2() {
     amountError.value = "Selecione ou digite um valor válido (mínimo R$ 1,00)";
     return;
   }
-  
-  console.log('Valor final antes de salvar:', finalAmount.value);
+
+  console.log("Valor final antes de salvar:", finalAmount.value);
   formData.value.amount = finalAmount.value;
   step.value = 2;
 }
 
 async function processDonation() {
   validationErrors.value = validateDonationData(formData.value);
-  
+
   if (validationErrors.value.length > 0) {
     return;
   }
@@ -337,7 +350,7 @@ async function processDonation() {
       name: "donation-payment",
       params: { id: response.id },
     });
-    
+
     closeModal();
   } catch (error) {
     console.error("Erro ao processar doação:", error);

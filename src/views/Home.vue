@@ -225,7 +225,6 @@ const activeProducts = computed(() =>
 const activeGoals = computed(() => goalsStore.goals.filter((g) => g.active));
 
 const activeRaffles = computed(() => {
-
   console.log("Rifas carregadas na home:", rafflesStore.raffles);
   return rafflesStore.raffles;
 });
