@@ -104,7 +104,9 @@ export type { User };
 export const firebaseService = {
   async getAuthorizedEmails(): Promise<string[]> {
     if (!db) {
-      console.warn("⚠️ Firestore não inicializado. Configure o Firebase para usar autenticação.");
+      console.warn(
+        "⚠️ Firestore não inicializado. Configure o Firebase para usar autenticação."
+      );
       return [];
     }
 
