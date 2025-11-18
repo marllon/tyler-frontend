@@ -15,7 +15,7 @@ async function getAuthorizedEmailsAsync(): Promise<string[]> {
 
   try {
     const firestoreEmails = await firebaseService.getAuthorizedEmails();
-    
+
     if (firestoreEmails.length > 0) {
       cachedAdmins = firestoreEmails
         .map((email) => email.trim().toLowerCase())
@@ -87,7 +87,6 @@ export interface AuthorizedAdmin {
 }
 
 export const authorizationService = {
-  
   async checkEmailAuthorization(email: string): Promise<AuthorizationResult> {
     if (!email) {
       return {
@@ -99,11 +98,9 @@ export const authorizationService = {
     const normalizedEmail = email.toLowerCase().trim();
 
     try {
-
       const authorizedEmails = await getAuthorizedEmailsAsync();
 
       if (authorizedEmails.includes(normalizedEmail)) {
-
         const role =
           normalizedEmail.includes("tyler") ||
           normalizedEmail.includes("admin@tylerlimaeler.org")
@@ -166,7 +163,6 @@ export const authorizationService = {
     const authorizedEmails = await getAuthorizedEmailsAsync();
 
     if (!authorizedEmails.includes(normalizedEmail)) {
-
       cachedAdmins = [];
       console.log(`📧 Email adicionado à autorização: ${normalizedEmail}`);
       return true;

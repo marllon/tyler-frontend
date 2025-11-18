@@ -7,11 +7,10 @@ export interface MockUser {
 }
 
 export const mockAuthService = {
-  
   async signInWithGoogle() {
     console.log("🔧 Usando MOCK Google Auth (Firebase não configurado)");
     const authorizedEmails = await firebaseService.getAuthorizedEmails();
-    
+
     const userEmail =
       authorizedEmails.find((email) => email.includes("marllon.nasser")) ||
       authorizedEmails.find((email) => email.includes("gmail.com")) ||
@@ -38,7 +37,6 @@ export const mockAuthService = {
   },
 
   async signIn(email: string, password: string) {
-
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     if (email.includes("@") && password.length >= 4) {
@@ -79,7 +77,6 @@ export const mockAuthService = {
   },
 
   onAuthStateChanged(callback: (user: MockUser | null) => void) {
-
     const userData = localStorage.getItem("mock_user");
     const user = userData ? JSON.parse(userData) : null;
 
