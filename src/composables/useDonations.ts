@@ -21,7 +21,7 @@ export function useDonations() {
         anonymous: donationData.anonymous,
       };
 
-      console.log('Enviando para API:', request);
+      console.log("Enviando para API:", request);
       if (donationData.message) {
         request.message = donationData.message;
       }
@@ -34,7 +34,10 @@ export function useDonations() {
           request.donor.phone = donationData.donor.phone;
         }
         if (donationData.donor.document) {
-          request.donor.document = donationData.donor.document.replace(/\D/g, '');
+          request.donor.document = donationData.donor.document.replace(
+            /\D/g,
+            ""
+          );
         }
       }
 
@@ -52,7 +55,6 @@ export function useDonations() {
     paymentData: PaymentStatusResponse,
     goalId?: string
   ) {
-
     if (goalId) {
       goalsStore.updateGoalProgress(goalId, paymentData.amount.value);
     }
@@ -73,7 +75,6 @@ export function useDonations() {
     }
 
     if (data.amount && data.amount < 1) {
-
       errors.push("Valor mínimo da doação é R$ 1,00");
     }
 
@@ -102,7 +103,6 @@ export function useDonations() {
   }
 
   function isValidDocument(doc: string): boolean {
-
     const cleanDoc = doc.replace(/\D/g, "");
 
     if (cleanDoc.length !== 11) return false;
