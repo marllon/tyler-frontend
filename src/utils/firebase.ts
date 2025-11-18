@@ -8,11 +8,7 @@ import {
   onAuthStateChanged,
   type User,
 } from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -106,12 +102,14 @@ export {
 export type { User };
 
 export const firebaseService = {
-  
   async getAuthorizedEmails(): Promise<string[]> {
     if (!db) {
       console.warn("⚠️ Firestore não inicializado, usando e-mails do .env");
       const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
-      return envEmails.split(",").map((email: string) => email.trim()).filter(Boolean);
+      return envEmails
+        .split(",")
+        .map((email: string) => email.trim())
+        .filter(Boolean);
     }
 
     try {
@@ -124,17 +122,25 @@ export const firebaseService = {
         console.log("✅ E-mails autorizados carregados do Firestore:", emails);
         return emails;
       } else {
-        console.warn("⚠️ Documento settings/admins não encontrado no Firestore");
+        console.warn(
+          "⚠️ Documento settings/admins não encontrado no Firestore"
+        );
         const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
-        return envEmails.split(",").map((email: string) => email.trim()).filter(Boolean);
+        return envEmails
+          .split(",")
+          .map((email: string) => email.trim())
+          .filter(Boolean);
       }
     } catch (error) {
       console.error("❌ Erro ao buscar e-mails autorizados:", error);
       const envEmails = import.meta.env.VITE_AUTHORIZED_ADMINS || "";
-      return envEmails.split(",").map((email: string) => email.trim()).filter(Boolean);
+      return envEmails
+        .split(",")
+        .map((email: string) => email.trim())
+        .filter(Boolean);
     }
   },
-  
+
   async signInWithGoogle() {
     console.log("🔑 Iniciando login com Google...");
 
@@ -239,7 +245,6 @@ export const firebaseService = {
 
   onAuthStateChanged(callback: (user: User | null) => void) {
     if (!auth) {
-
       callback(null);
       return () => {}; // Retorna função vazia para unsubscribe
     }
