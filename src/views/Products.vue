@@ -31,20 +31,25 @@
           v-for="product in activeProducts"
           :key="product.id"
           :product="product"
-          @buy="handleBuy"
+          @view-cart="openCart"
         />
       </div>
     </div>
+
+    <!-- Cart Drawer -->
+    <CartDrawer :is-open="cartDrawerOpen" @close="cartDrawerOpen = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useProductsStore } from "@/stores/products";
 import CardProduto from "@/components/CardProduto.vue";
-import type { Product } from "@/types";
+import CartDrawer from "@/components/CartDrawer.vue";
 
 const productsStore = useProductsStore();
+
+const cartDrawerOpen = ref(false);
 
 const activeProducts = computed(() =>
   productsStore.products.filter((p) => p.active)
@@ -54,8 +59,7 @@ onMounted(() => {
   productsStore.fetchProducts();
 });
 
-function handleBuy(product: Product) {
-  console.log("Comprar produto:", product);
-  alert("Funcionalidade de checkout será implementada em breve!");
-}
+const openCart = () => {
+  cartDrawerOpen.value = true;
+};
 </script>

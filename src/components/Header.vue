@@ -20,6 +20,19 @@
           <RouterLink to="/events" class="nav-link">Eventos</RouterLink>
           <RouterLink to="/about" class="nav-link">Sobre</RouterLink>
           <RouterLink to="/contact" class="nav-link">Contato</RouterLink>
+
+          <!-- Meus Pedidos (apenas se autenticado) -->
+          <RouterLink
+            v-if="userStore.isAuthenticated"
+            to="/my-orders"
+            class="nav-link"
+          >
+            Meus Pedidos
+          </RouterLink>
+
+          <!-- Carrinho -->
+          <CartIcon @toggle="cartDrawerOpen = true" />
+
           <a
             :href="instagramUrl"
             target="_blank"
@@ -35,32 +48,37 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button
-          @click="mobileMenuOpen = !mobileMenuOpen"
-          class="md:hidden text-gray-700"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div class="md:hidden flex items-center gap-4">
+          <!-- Carrinho Mobile -->
+          <CartIcon @toggle="cartDrawerOpen = true" />
+
+          <button
+            @click="mobileMenuOpen = !mobileMenuOpen"
+            class="text-gray-700"
           >
-            <path
-              v-if="!mobileMenuOpen"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-            <path
-              v-else
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                v-if="!mobileMenuOpen"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Mobile Menu -->
@@ -108,17 +126,32 @@
             @click="mobileMenuOpen = false"
             >Contato</RouterLink
           >
+          <RouterLink
+            v-if="userStore.isAuthenticated"
+            to="/my-orders"
+            class="nav-link-mobile"
+            @click="mobileMenuOpen = false"
+            >Meus Pedidos</RouterLink
+          >
         </div>
       </div>
     </nav>
+
+    <!-- Cart Drawer -->
+    <CartDrawer :is-open="cartDrawerOpen" @close="cartDrawerOpen = false" />
   </header>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import { RouterLink } from "vue-router";
+import { useUserStore } from "@/stores/user";
+import CartIcon from "@/components/ui/CartIcon.vue";
+import CartDrawer from "@/components/CartDrawer.vue";
 
+const userStore = useUserStore();
 const mobileMenuOpen = ref(false);
+const cartDrawerOpen = ref(false);
 const instagramUrl =
   import.meta.env.VITE_INSTAGRAM_URL ||
   "https://www.instagram.com/tylerlimaeler/";

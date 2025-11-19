@@ -60,6 +60,30 @@ const routes: RouteRecordRaw[] = [
         component: () => import("@/views/DonationPayment.vue"),
         meta: { title: "Pagamento da Doação" },
       },
+      {
+        path: "checkout",
+        name: "checkout",
+        component: () => import("@/views/Checkout.vue"),
+        meta: { title: "Finalizar Compra" },
+      },
+      {
+        path: "payment/:orderId",
+        name: "Payment",
+        component: () => import("@/views/Payment.vue"),
+        meta: { title: "Pagamento", requiresAuth: true },
+      },
+      {
+        path: "my-orders",
+        name: "MyOrders",
+        component: () => import("@/views/MyOrders.vue"),
+        meta: { title: "Meus Pedidos", requiresAuth: true },
+      },
+      {
+        path: "order-confirmation/:orderId",
+        name: "OrderConfirmation",
+        component: () => import("@/views/OrderConfirmation.vue"),
+        meta: { title: "Pedido Confirmado" },
+      },
     ],
   },
   {

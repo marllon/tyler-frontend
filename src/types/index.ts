@@ -79,6 +79,130 @@ export interface ProductFilters {
   searchTerm?: string;
   minPrice?: number;
   maxPrice?: number;
+}
+export interface CartItem {
+  product: Product;
+  quantity: number;
+  addedAt: string;
+}
+
+export interface CartSummary {
+  subtotal: number;
+  shipping: number;
+  total: number;
+  itemCount: number;
+}
+export type OrderStatus = 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
+export type PaymentMethod = 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'BOLETO';
+export type ShippingMethod = 'COLLECT_ON_DELIVERY' | 'SEDEX' | 'PAC' | 'CUSTOM';
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  imageUrl?: string;
+}
+
+export interface ShippingAddress {
+  street: string;
+  number: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  userId: string;
+  userEmail: string;
+  status: OrderStatus;
+  items: OrderItem[];
+  subtotal: number;
+  shippingCost: number;
+  total: number;
+  paymentMethod: 'PIX'; // Backend sempre retorna PIX
+  paymentStatus: PaymentStatus;
+  shippingMethod: ShippingMethod;
+  shippingAddress: ShippingAddress;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  paidAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  trackingCode?: string;
+}
+
+export interface CreateOrderRequest {
+  items: {
+    productId: string;
+    quantity: number;
+  }[];
+  shippingAddress: ShippingAddress;
+  shippingMethod: ShippingMethod;
+  notes?: string;
+}
+
+export interface PaymentDetails {
+  qrCode: string;
+  qrCodeImage: string;
+  paymentId: string;
+  expiresAt: string;
+  amount: number;
+  paidAt?: string;
+}
+
+export interface CreateOrderResponse {
+  order: Order;
+  payment: PaymentDetails;
+}
+
+export interface OrderDetailsResponse {
+  order: Order;
+  payment?: PaymentDetails;
+}
+
+export interface ListOrdersResponse {
+  orders: Order[];
+  pagination: {
+    nextCursor?: string;
+    hasMore: boolean;
+  };
+}
+export interface PublicUser {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  phoneNumber?: string;
+  emailVerified: boolean;
+  savedAddresses?: ShippingAddress[];
+  createdAt: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  displayName: string;
+  phoneNumber?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  user?: PublicUser;
+  token?: string;
+  error?: string;
 }
 
 export interface ImageUploadResponse {
@@ -198,7 +322,8 @@ export interface PixPaymentResponse {
   qrCodeImage?: string;
   status: string;
   amount?: number;
-  expiresAt?: string;
+  expiresAt?: string;
+
   qr_codes?: PixQrCode[];
   created_at?: string;
 }

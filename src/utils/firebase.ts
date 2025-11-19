@@ -6,6 +6,9 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
   type User,
 } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -98,10 +101,14 @@ export {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
 };
 export type { User };
 
 export const firebaseService = {
+  auth,
   async getAuthorizedEmails(): Promise<string[]> {
     if (!db) {
       console.warn(
