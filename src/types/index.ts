@@ -79,7 +79,8 @@ export interface ProductFilters {
   searchTerm?: string;
   minPrice?: number;
   maxPrice?: number;
-}
+}
+
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -91,7 +92,8 @@ export interface CartSummary {
   shipping: number;
   total: number;
   itemCount: number;
-}
+}
+
 export type OrderStatus = 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
 export type PaymentMethod = 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'BOLETO';
 export type ShippingMethod = 'COLLECT_ON_DELIVERY' | 'SEDEX' | 'PAC' | 'CUSTOM';
@@ -174,7 +176,8 @@ export interface ListOrdersResponse {
     nextCursor?: string;
     hasMore: boolean;
   };
-}
+}
+
 export interface PublicUser {
   uid: string;
   email: string;
@@ -355,8 +358,7 @@ export interface Raffle {
   soldTickets: number;
   availableTickets: number;  // Calculado: totalTickets - soldTickets
   status: RaffleStatus;
-  drawDate: string;  // ISO-8601
-  expiresAt: string | null;
+  drawDate: string;  // ISO-8601 (mapeado de deadline da API)
   committedEntropy?: string;  // Hash SHA-256 público
   revealEntropy?: string;  // Entropia revelada após sorteio
   winnerTicketNumber?: number;
@@ -374,7 +376,6 @@ export interface RaffleCreateRequest {
   ticketPrice: number;
   totalTickets: number;
   deadline: string;
-  expiresAt?: string;
   goalId?: string;
   active?: boolean;
 }
@@ -386,7 +387,6 @@ export interface RaffleUpdateRequest {
   ticketPrice?: number;
   totalTickets?: number;
   deadline?: string;
-  expiresAt?: string;
   status?: RaffleStatus;
   goalId?: string;
   active?: boolean;

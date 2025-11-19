@@ -21,20 +21,21 @@ export function useDonations() {
         anonymous: donationData.anonymous,
       };
 
-      console.log("Enviando para API:", request);
+      console.log("Enviando para API:", request);
+
       if (donationData.message) {
         request.message = donationData.message;
-      }
-      if (!donationData.anonymous && donationData.donor) {
-        request.donor = {
-          name: donationData.donor.name,
-          email: donationData.donor.email,
-        };
+      }
+
+      if (!donationData.anonymous && donationData.donor) {
+        request.donorName = donationData.donor.name;
+        request.donorEmail = donationData.donor.email;
+
         if (donationData.donor.phone) {
-          request.donor.phone = donationData.donor.phone;
+          request.donorPhone = donationData.donor.phone;
         }
         if (donationData.donor.document) {
-          request.donor.document = donationData.donor.document.replace(
+          request.donorDocument = donationData.donor.document.replace(
             /\D/g,
             ""
           );

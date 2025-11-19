@@ -103,7 +103,11 @@
             Escaneie o QR Code para pagar
           </h2>
 
-          <div class="flex flex-col items-center">
+          <!-- QR Code disponível -->
+          <div
+            v-if="payment?.qrCodeImage || payment?.qrCode"
+            class="flex flex-col items-center"
+          >
             <div class="bg-white p-4 rounded-lg border-2 border-gray-200 mb-6">
               <img
                 v-if="payment.qrCodeImage"
@@ -115,7 +119,7 @@
                 v-else
                 class="w-64 h-64 bg-gray-100 flex items-center justify-center"
               >
-                <p class="text-gray-500">QR Code não disponível</p>
+                <p class="text-gray-500">Gerando QR Code...</p>
               </div>
             </div>
 
@@ -124,7 +128,7 @@
             </p>
 
             <!-- PIX Copia e Cola -->
-            <div class="w-full max-w-md">
+            <div v-if="payment?.qrCode" class="w-full max-w-md">
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 Ou copie o código PIX:
               </label>
@@ -145,6 +149,63 @@
               </div>
             </div>
           </div>
+
+          <!-- QR Code não disponível -->
+          <div v-else class="flex flex-col items-center">
+            <div
+              class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-8 mb-6 max-w-md"
+            >
+              <div class="flex items-start gap-4">
+                <svg
+                  class="w-8 h-8 text-yellow-600 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div>
+                  <h3 class="font-semibold text-yellow-900 mb-2">
+                    QR Code em processamento
+                  </h3>
+                  <p class="text-sm text-yellow-800 mb-3">
+                    O código PIX está sendo gerado. Isso pode levar alguns
+                    instantes.
+                  </p>
+                  <p class="text-sm text-yellow-800">
+                    Esta página será atualizada automaticamente quando o QR Code
+                    estiver disponível.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <BaseButton
+              @click="loadOrderDetails(false)"
+              variant="primary"
+              class="mt-4"
+            >
+              <svg
+                class="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              Atualizar Agora
+            </BaseButton>
+          </div>
         </div>
 
         <!-- Payment Info -->
@@ -157,12 +218,12 @@
             <div class="flex justify-between">
               <span class="text-gray-600">Valor:</span>
               <span class="font-semibold text-gray-900">{{
-                formatCurrency(payment.amount)
+                formatCurrency(order.total)
               }}</span>
             </div>
 
             <div
-              v-if="order.paymentStatus === 'PENDING'"
+              v-if="order.paymentStatus === 'PENDING' && payment?.expiresAt"
               class="flex justify-between"
             >
               <span class="text-gray-600">Expira em:</span>
@@ -259,7 +320,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useCurrency, useDate } from "@/composables";
@@ -276,20 +337,55 @@ const error = ref("");
 const order = ref<any>(null);
 const payment = ref<any>(null);
 const copied = ref(false);
+const isPolling = ref(false);
 let checkInterval: NodeJS.Timeout | null = null;
 
 onMounted(async () => {
-  await loadOrderDetails();
-  startPaymentCheck();
+  console.log("[Payment] Component mounted, orderId:", route.params.orderId);
+  await loadOrderDetails(true);
+
+  console.log("[Payment] Order loaded, status:", order.value?.paymentStatus);
+  if (order.value?.paymentStatus === "PENDING") {
+    console.log("[Payment] Starting payment check polling");
+    startPaymentCheck();
+  } else {
+    console.log("[Payment] Payment not pending, skipping polling");
+  }
 });
 
 onUnmounted(() => {
-  if (checkInterval) clearInterval(checkInterval);
-});
+  console.log("[Payment] Component unmounting, cleaning up");
+  if (checkInterval) {
+    clearInterval(checkInterval);
+    checkInterval = null;
+  }
+  isPolling.value = false;
+});
+watch(
+  () => route.params.orderId,
+  (newId, oldId) => {
+    console.log("[Payment] Route changed from", oldId, "to", newId);
+    if (newId !== oldId && oldId !== undefined) {
+      console.log("[Payment] OrderId changed, reloading");
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+      }
+      isPolling.value = false;
+      loadOrderDetails(true).then(() => {
+        if (order.value?.paymentStatus === "PENDING") {
+          startPaymentCheck();
+        }
+      });
+    }
+  }
+);
 
-const loadOrderDetails = async () => {
-  try {
-    loading.value = true;
+const loadOrderDetails = async (isInitialLoad = false) => {
+  try {
+    if (isInitialLoad) {
+      loading.value = true;
+    }
     error.value = "";
 
     const authToken = userStore.token;
@@ -312,12 +408,16 @@ const loadOrderDetails = async () => {
 
     const data = await response.json();
     order.value = data.order;
-    payment.value = data.payment;
+    payment.value = data.paymentDetails || data.payment;
+
+    console.log("[Payment] Order status:", order.value?.paymentStatus);
   } catch (err: any) {
     error.value = err.message || "Erro ao carregar dados do pagamento";
     console.error("Erro ao carregar pedido:", err);
   } finally {
-    loading.value = false;
+    if (isInitialLoad) {
+      loading.value = false;
+    }
   }
 };
 
@@ -344,19 +444,38 @@ const formatExpiration = (dateStr: string) => {
   return `${hours}h ${minutes % 60}min`;
 };
 
-const startPaymentCheck = () => {
+const startPaymentCheck = () => {
+  if (isPolling.value) {
+    console.log("[Payment] Already polling, skipping");
+    return;
+  }
+
+  isPolling.value = true;
+  console.log("[Payment] Starting polling interval");
+
   checkInterval = setInterval(async () => {
+    console.log("[Payment] Checking payment status...");
     if (order.value?.paymentStatus === "PAID") {
-      if (checkInterval) clearInterval(checkInterval);
+      console.log("[Payment] Payment already confirmed, stopping polling");
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+      }
+      isPolling.value = false;
       return;
-    }
-
-    await loadOrderDetails();
-
+    }
+    await loadOrderDetails(false);
     if (order.value?.paymentStatus === "PAID") {
-      if (checkInterval) clearInterval(checkInterval);
+      console.log("[Payment] Payment confirmed! Redirecting...");
+      if (checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+      }
+      isPolling.value = false;
       router.push(`/order-confirmation/${order.value.orderNumber}`);
+    } else {
+      console.log("[Payment] Payment still pending");
     }
-  }, 5000); // Verifica a cada 5 segundos
+  }, 300000); // Verifica a cada 5 minutos
 };
 </script>

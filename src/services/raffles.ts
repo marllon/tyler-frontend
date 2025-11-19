@@ -12,7 +12,8 @@ import type {
   RaffleDrawResponse,
   DrawVerificationResponse,
   RaffleFilters,
-} from "@/types";
+} from "@/types";
+
 interface RaffleApiResponse {
   id: string;
   title: string;
@@ -26,7 +27,6 @@ interface RaffleApiResponse {
   progressPercentage: number;
   status: string;
   deadline: string; // API usa 'deadline'
-  expiresAt?: string | null;
   committedEntropy?: string;
   revealEntropy?: string | null;
   winnerTicketNumber?: number | null;
@@ -45,7 +45,8 @@ interface RafflePageApiResponse {
   totalPages: number;
   hasNext: boolean;
   hasPrevious: boolean;
-}
+}
+
 function adaptRaffleFromApi(apiRaffle: RaffleApiResponse): Raffle {
   return {
     id: apiRaffle.id,
@@ -59,7 +60,6 @@ function adaptRaffleFromApi(apiRaffle: RaffleApiResponse): Raffle {
     availableTickets: apiRaffle.remainingTickets, // remainingTickets -> availableTickets
     status: apiRaffle.status as any,
     drawDate: apiRaffle.deadline, // deadline -> drawDate
-    expiresAt: apiRaffle.expiresAt || null,
     committedEntropy: apiRaffle.committedEntropy,
     revealEntropy: apiRaffle.revealEntropy || undefined,
     winnerTicketNumber: apiRaffle.winnerTicketNumber || undefined,
@@ -85,7 +85,8 @@ export async function getRaffles(
   if (filters?.sortDirection) params.sortDirection = filters.sortDirection;
   if (filters?.searchTerm) params.searchTerm = filters.searchTerm;
 
-  const response = await api.get<RafflePageApiResponse>("/raffles", params);
+  const response = await api.get<RafflePageApiResponse>("/raffles", params);
+
   return {
     raffles: response.raffles.map(adaptRaffleFromApi),
     page: response.page,

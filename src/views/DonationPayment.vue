@@ -283,7 +283,7 @@ const copied = ref(false);
 const countdown = ref(10);
 const refreshAttempts = ref(0);
 const maxRefreshAttempts = 10; // Máximo de 10 tentativas
-const baseInterval = 10000; // 10 segundos inicial
+const baseInterval = 60000*5; // 10 segundos inicial
 let intervalId: ReturnType<typeof setInterval> | null = null;
 let countdownIntervalId: ReturnType<typeof setInterval> | null = null;
 
@@ -342,7 +342,8 @@ const statusConfig = computed(() => {
 });
 
 onMounted(async () => {
-  await loadPaymentStatus();
+  await loadPaymentStatus();
+
   if (
     paymentStatus.value?.status === "WAITING" ||
     paymentStatus.value?.status === "PENDING"
@@ -361,12 +362,14 @@ async function loadPaymentStatus() {
     const paymentId = route.params.id as string;
     paymentStatus.value = await paymentService.getPaymentStatus(paymentId);
 
-    console.log("Status do pagamento:", paymentStatus.value);
+    console.log("Status do pagamento:", paymentStatus.value);
+
     if (
       paymentStatus.value.status !== "WAITING" &&
       paymentStatus.value.status !== "PENDING"
     ) {
-      stopAutoRefresh();
+      stopAutoRefresh();
+
       if (paymentStatus.value.status === "PAID") {
         success("Pagamento confirmado! Obrigado pela sua doação! ❤️");
       }
@@ -395,13 +398,15 @@ function startAutoRefresh() {
   if (refreshAttempts.value >= maxRefreshAttempts) {
     console.log("Limite de tentativas de auto-refresh atingido");
     return;
-  }
+  }
+
   const currentInterval =
     refreshAttempts.value === 0
       ? baseInterval
       : baseInterval + refreshAttempts.value * 5000;
 
-  countdown.value = Math.floor(currentInterval / 1000);
+  countdown.value = Math.floor(currentInterval / 1000);
+
   intervalId = setInterval(async () => {
     refreshAttempts.value++;
     await loadPaymentStatus();
@@ -409,12 +414,15 @@ function startAutoRefresh() {
     if (refreshAttempts.value >= maxRefreshAttempts) {
       stopAutoRefresh();
       return;
-    }
+    }
+
     const nextInterval = baseInterval + refreshAttempts.value * 5000;
-    countdown.value = Math.floor(nextInterval / 1000);
+    countdown.value = Math.floor(nextInterval / 1000);
+
     stopAutoRefresh();
     startAutoRefresh();
-  }, currentInterval);
+  }, currentInterval);
+
   countdownIntervalId = setInterval(() => {
     if (countdown.value > 0) {
       countdown.value--;

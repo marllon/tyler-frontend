@@ -29,9 +29,10 @@
       </div>
 
       <h3 class="text-xl font-semibold mb-2">{{ product.name }}</h3>
-      <p class="text-gray-600 text-sm mb-4 line-clamp-2">
-        {{ product.description }}
-      </p>
+      <div
+        class="text-gray-600 text-sm mb-4 line-clamp-2 prose prose-sm max-w-none"
+        v-html="processDescription(product.description)"
+      ></div>
 
       <div class="flex items-center justify-between">
         <span class="text-2xl font-bold text-tyler-blue">
@@ -80,7 +81,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import type { Product } from "@/types";
-import { useCurrency } from "@/composables/useCurrency";
+import { useCurrency, useSafeHtml } from "@/composables";
 import { useCartStore } from "@/stores/cart";
 import { useToast } from "@/composables/useToast";
 import BaseCard from "@/components/ui/BaseCard.vue";
@@ -96,6 +97,8 @@ defineEmits<{
 }>();
 
 const { formatCurrency } = useCurrency();
+
+const { processDescription } = useSafeHtml();
 const cartStore = useCartStore();
 const toast = useToast();
 
@@ -110,7 +113,8 @@ const getPrimaryImage = () => {
   if (props.product.images && props.product.images.length > 0) {
     const primary = props.product.images.find((img) => img.isPrimary);
     return primary?.url || props.product.images[0].url;
-  }
+  }
+
   return `https://placehold.co/400x300/e5e7eb/6b7280?text=${encodeURIComponent(
     props.product.name
   )}`;
@@ -128,3 +132,46 @@ const addToCart = async () => {
   }
 };
 </script>
+
+<style scoped>
+
+:deep(.prose) {
+  @apply text-gray-600;
+}
+
+:deep(.prose img) {
+  @apply inline-block max-w-full h-auto max-h-16 rounded;
+  margin: 0.25rem 0;
+}
+
+:deep(.prose p) {
+  @apply my-1;
+}
+
+:deep(.prose br) {
+  @apply block my-1;
+}
+
+:deep(.prose strong),
+:deep(.prose b) {
+  @apply font-semibold text-gray-700;
+}
+
+:deep(.prose em),
+:deep(.prose i) {
+  @apply italic;
+}
+
+:deep(.prose a) {
+  @apply text-tyler-blue hover:underline;
+}
+
+:deep(.prose ul),
+:deep(.prose ol) {
+  @apply pl-4 my-1;
+}
+
+:deep(.prose li) {
+  @apply my-0.5;
+}
+</style>

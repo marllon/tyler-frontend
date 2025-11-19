@@ -120,17 +120,26 @@
                   label="Telefone/WhatsApp"
                   placeholder="(00) 00000-0000"
                   required
+                  @input="formatPhoneNumber"
+                  maxlength="15"
                 />
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <BaseInput
-                  v-model="shippingAddress.zipCode"
-                  label="CEP"
-                  placeholder="00000-000"
-                  required
-                  @blur="searchZipCode"
-                />
+                <div class="relative">
+                  <BaseInput
+                    v-model="shippingAddress.zipCode"
+                    label="CEP"
+                    placeholder="00000-000"
+                    required
+                    @blur="searchZipCode"
+                    @input="formatZipCode"
+                    maxlength="9"
+                  />
+                  <div v-if="loadingZipCode" class="absolute right-3 top-9">
+                    <Spinner class="w-4 h-4 text-tyler-blue" />
+                  </div>
+                </div>
                 <div class="md:col-span-2">
                   <BaseInput
                     v-model="shippingAddress.street"
@@ -170,13 +179,45 @@
                   placeholder="São Paulo"
                   required
                 />
-                <BaseInput
-                  v-model="shippingAddress.state"
-                  label="Estado"
-                  placeholder="SP"
-                  maxlength="2"
-                  required
-                />
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Estado *
+                  </label>
+                  <select
+                    v-model="shippingAddress.state"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="" disabled>Selecione</option>
+                    <option value="AC">Acre</option>
+                    <option value="AL">Alagoas</option>
+                    <option value="AP">Amapá</option>
+                    <option value="AM">Amazonas</option>
+                    <option value="BA">Bahia</option>
+                    <option value="CE">Ceará</option>
+                    <option value="DF">Distrito Federal</option>
+                    <option value="ES">Espírito Santo</option>
+                    <option value="GO">Goiás</option>
+                    <option value="MA">Maranhão</option>
+                    <option value="MT">Mato Grosso</option>
+                    <option value="MS">Mato Grosso do Sul</option>
+                    <option value="MG">Minas Gerais</option>
+                    <option value="PA">Pará</option>
+                    <option value="PB">Paraíba</option>
+                    <option value="PR">Paraná</option>
+                    <option value="PE">Pernambuco</option>
+                    <option value="PI">Piauí</option>
+                    <option value="RJ">Rio de Janeiro</option>
+                    <option value="RN">Rio Grande do Norte</option>
+                    <option value="RS">Rio Grande do Sul</option>
+                    <option value="RO">Rondônia</option>
+                    <option value="RR">Roraima</option>
+                    <option value="SC">Santa Catarina</option>
+                    <option value="SP">São Paulo</option>
+                    <option value="SE">Sergipe</option>
+                    <option value="TO">Tocantins</option>
+                  </select>
+                </div>
               </div>
 
               <BaseInput
@@ -401,6 +442,7 @@ const { formatCurrency } = useCurrency();
 const toast = useToast();
 
 const showLoginModal = ref(false);
+const loadingZipCode = ref(false);
 const submitting = ref(false);
 const notes = ref("");
 
@@ -453,16 +495,38 @@ const getPrimaryImage = (product: Product) => {
   if (product.images && product.images.length > 0) {
     const primary = product.images.find((img) => img.isPrimary);
     return primary?.url || product.images[0].url;
-  }
+  }
+
   return `https://placehold.co/100x100/e5e7eb/6b7280?text=${encodeURIComponent(
     product.name.substring(0, 20)
   )}`;
+};
+
+const formatPhoneNumber = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  let value = input.value.replace(/\D/g, "");
+
+  if (value.length <= 10) {
+    value = value.replace(/(\d{2})(\d{0,4})(\d{0,4})/, "($1) $2-$3");
+  } else {
+    value = value.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+  }
+
+  shippingAddress.value.phone = value.trim();
+};
+
+const formatZipCode = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  let value = input.value.replace(/\D/g, "");
+  value = value.replace(/(\d{5})(\d{0,3})/, "$1-$2");
+  shippingAddress.value.zipCode = value;
 };
 
 const searchZipCode = async () => {
   const zipCode = shippingAddress.value.zipCode.replace(/\D/g, "");
   if (zipCode.length !== 8) return;
 
+  loadingZipCode.value = true;
   try {
     const response = await fetch(`https://viacep.com.br/ws/${zipCode}/json/`);
     const data = await response.json();
@@ -475,10 +539,13 @@ const searchZipCode = async () => {
     }
   } catch (error) {
     console.error("Erro ao buscar CEP:", error);
+  } finally {
+    loadingZipCode.value = false;
   }
 };
 
 const handleLoginSuccess = () => {
+  showLoginModal.value = false;
   toast.success("Login realizado com sucesso!");
 };
 
@@ -544,8 +611,10 @@ const handleSubmit = async () => {
       throw new Error(errorData.message || "Erro ao criar pedido");
     }
 
-    const data = await response.json();
-    cartStore.clearCart();
+    const data = await response.json();
+
+    cartStore.clearCart();
+
     router.push({
       name: "Payment",
       params: { orderId: data.order.id },
@@ -560,7 +629,7 @@ const handleSubmit = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(() => {
   if (!userStore.authInitialized) {
     userStore.initAuth();
   }
