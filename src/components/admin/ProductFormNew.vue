@@ -118,14 +118,17 @@
           class="block text-sm font-medium text-gray-700 mb-2"
         >
           Descrição *
+          <span class="text-xs text-gray-500 font-normal ml-2">
+            (Aceita HTML ou texto simples - quebras de linha são preservadas)
+          </span>
         </label>
         <textarea
           id="description"
           v-model="form.description"
           required
-          rows="4"
-          placeholder="Descreva o produto detalhadamente..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          rows="6"
+          placeholder="Digite a descrição do produto...&#10;&#10;Use HTML para formatação avançada: &lt;strong&gt;negrito&lt;/strong&gt;, &lt;em&gt;itálico&lt;/em&gt;, &lt;br&gt;, etc.&#10;Ou simplesmente digite texto - as quebras de linha serão preservadas automaticamente."
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
         />
       </div>
 
@@ -323,6 +326,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import type { ProductCreateRequest, Product, ProductImage } from "@/types";
+import { useSafeHtml } from "@/composables";
 import {
   BaseInput,
   BaseButton,
@@ -332,6 +336,8 @@ import {
   PriceInput,
   NumberInput,
 } from "@/components/ui";
+
+const { sanitizeHtml, processDescription, isHtml } = useSafeHtml();
 
 interface Props {
   initialData?: Product | null;
@@ -673,7 +679,8 @@ function handleSubmit() {
 
   processTags();
 
-  const cleanData = { ...form.value };
+  const cleanData = { ...form.value };
+
   cleanData.price = parseFloat(cleanData.price.toFixed(2));
 
   if (!cleanData.brand?.trim()) delete cleanData.brand;
@@ -751,3 +758,60 @@ onMounted(() => {
   allImages.value = [...existingImages.value];
 });
 </script>
+
+<style scoped>
+:deep(.prose img) {
+  @apply inline-block max-w-full h-auto max-h-24 rounded border border-gray-200;
+  margin: 0.25rem;
+}
+
+:deep(.prose p) {
+  @apply my-1;
+}
+
+:deep(.prose br) {
+  @apply block my-1;
+}
+
+:deep(.prose strong),
+:deep(.prose b) {
+  @apply font-semibold text-gray-900;
+}
+
+:deep(.prose em),
+:deep(.prose i) {
+  @apply italic;
+}
+
+:deep(.prose a) {
+  @apply text-blue-600 hover:underline;
+}
+
+:deep(.prose ul),
+:deep(.prose ol) {
+  @apply pl-5 my-2 list-disc;
+}
+
+:deep(.prose li) {
+  @apply my-1;
+}
+
+:deep(.prose h1),
+:deep(.prose h2),
+:deep(.prose h3),
+:deep(.prose h4) {
+  @apply font-bold mt-3 mb-2;
+}
+
+:deep(.prose h1) {
+  @apply text-xl;
+}
+
+:deep(.prose h2) {
+  @apply text-lg;
+}
+
+:deep(.prose h3) {
+  @apply text-base;
+}
+</style>

@@ -279,11 +279,22 @@
 
                   <!-- Info do Produto -->
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-gray-900">
+                    <div class="text-sm font-medium text-gray-900 truncate">
                       {{ product.name }}
                     </div>
-                    <div class="text-sm text-gray-500 truncate">
-                      {{ product.description }}
+                    <div
+                      class="text-sm text-gray-500 max-w-md overflow-hidden"
+                      style="
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        max-height: 2.5rem;
+                      "
+                    >
+                      <div
+                        class="product-description-html"
+                        v-html="processDescription(product.description)"
+                      ></div>
                     </div>
 
                     <!-- Miniaturas adicionais -->
@@ -570,7 +581,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
 import { useProductsStore } from "@/stores/products";
-import { useCurrency } from "@/composables";
+import { useCurrency, useSafeHtml } from "@/composables";
 import {
   BaseButton,
   BaseCard,
@@ -588,6 +599,7 @@ import type {
 
 const productsStore = useProductsStore();
 const { formatCurrency } = useCurrency();
+const { processDescription } = useSafeHtml();
 
 const showModal = ref(false);
 const saving = ref(false);
@@ -849,3 +861,59 @@ onMounted(() => {
   productsStore.fetchProductsPaginated(filters);
 });
 </script>
+
+<style scoped>
+:deep(.product-description-html) {
+  @apply text-sm text-gray-500;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+:deep(.product-description-html img) {
+  @apply inline-block max-h-8 w-auto rounded;
+  vertical-align: middle;
+  margin: 0 0.25rem;
+}
+
+:deep(.product-description-html p) {
+  @apply inline;
+  margin: 0;
+}
+
+:deep(.product-description-html br) {
+  display: none; /* Ocultar quebras de linha na visualização compacta */
+}
+
+:deep(.product-description-html strong),
+:deep(.product-description-html b) {
+  @apply font-medium;
+}
+
+:deep(.product-description-html em),
+:deep(.product-description-html i) {
+  @apply italic;
+}
+
+:deep(.product-description-html a) {
+  @apply text-tyler-blue hover:underline;
+}
+
+:deep(.product-description-html ul),
+:deep(.product-description-html ol) {
+  display: inline;
+  list-style: none;
+  padding: 0;
+}
+
+:deep(.product-description-html li) {
+  display: inline;
+}
+
+:deep(.product-description-html li::after) {
+  content: ", ";
+}
+
+:deep(.product-description-html li:last-child::after) {
+  content: "";
+}
+</style>
