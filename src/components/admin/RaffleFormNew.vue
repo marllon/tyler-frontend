@@ -225,25 +225,6 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
         />
       </div>
-
-      <!-- Data de Expiração (Opcional) -->
-      <div>
-        <label
-          for="expiresAt"
-          class="block text-sm font-medium text-gray-700 mb-1"
-        >
-          Prazo para Compra (Opcional)
-        </label>
-        <input
-          id="expiresAt"
-          v-model="formData.expiresAt"
-          type="datetime-local"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tyler-pink focus:border-transparent"
-        />
-        <p class="text-xs text-gray-500 mt-1">
-          Se não informado, expira automaticamente na data do sorteio
-        </p>
-      </div>
     </div>
 
     <!-- Status (apenas em edição) -->
@@ -323,7 +304,6 @@ const formData = ref<RaffleCreateRequest & { status?: RaffleStatus }>({
   ticketPrice: 0,
   totalTickets: 100,
   drawDate: "",
-  expiresAt: "",
   active: true,
 });
 
@@ -344,7 +324,8 @@ const isValid = computed(() => {
 watch(
   () => props.raffle,
   (newRaffle) => {
-    if (newRaffle) {
+    if (newRaffle) {
+
       const formatDateForInput = (
         isoString: string | null | undefined
       ): string => {
@@ -369,7 +350,6 @@ watch(
         ticketPrice: newRaffle.ticketPrice || 0,
         totalTickets: newRaffle.totalTickets || 100,
         drawDate: formatDateForInput(newRaffle.drawDate),
-        expiresAt: formatDateForInput(newRaffle.expiresAt),
         status: newRaffle.status,
         active: newRaffle.active ?? true,
       };
@@ -381,7 +361,6 @@ watch(
         ticketPrice: 0,
         totalTickets: 100,
         drawDate: "",
-        expiresAt: "",
         active: true,
       };
     }
@@ -399,9 +378,6 @@ function handleSubmit() {
     ticketPrice: formData.value.ticketPrice,
     totalTickets: formData.value.totalTickets,
     deadline: new Date(formData.value.drawDate).toISOString(),
-    expiresAt: formData.value.expiresAt
-      ? new Date(formData.value.expiresAt).toISOString()
-      : undefined,
     active: formData.value.active,
   };
 
@@ -409,7 +385,8 @@ function handleSubmit() {
     (data as RaffleUpdateRequest).status = formData.value.status;
   }
 
-  emit("submit", data, selectedFiles.value);
+  emit("submit", data, selectedFiles.value);
+
   selectedFiles.value = [];
   if (fileInput.value) {
     fileInput.value.value = "";
@@ -479,7 +456,6 @@ defineExpose({
       ticketPrice: 0,
       totalTickets: 100,
       drawDate: "",
-      expiresAt: "",
       active: true,
     };
     selectedFiles.value = [];
